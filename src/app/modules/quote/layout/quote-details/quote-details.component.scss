@@ -1,0 +1,83 @@
+.price-summary {
+  div.col-6 {
+    height: 2rem;
+  }
+}
+
+.file-section {
+  border-style: dashed;
+  border-width: 1px;
+}
+
+.note-container,
+.attachment-container {
+  height: auto;
+  max-height: 56vh;
+}
+
+.file-upload {
+  input[type='file'] {
+    opacity: 0;
+    z-index: -1;
+  }
+}
+
+.upload-icon-position {
+  left: 0;
+  top: 2rem;
+}
+
+app-quote-details {
+  app-detail {
+    div.btn-group.global-actions {
+      right: -30px;
+      margin: 0 0 0 -30px;
+    }
+
+    app-detail-section {
+      apt-output-field {
+        span {
+          margin-bottom: 0.5rem;
+
+          dt,
+          dd {
+            flex-basis: 50%;
+          }
+        }
+
+        &:last-child {
+          span {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
+    .note-container,
+    .attachment-container {
+      height: auto;
+      max-height: 56vh;
+    }
+  }
+}
+
+@media all and (-ms-high-contrast: none),
+(-ms-high-contrast: active) {
+
+  /* IE10+ CSS styles go here */
+  app-detail-section table {
+    display: table;
+  }
+}
+
+.table-container {
+  max-height: 18em;
+  overflow: auto;
+}
+
+.table-container table thead {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 1;
+}

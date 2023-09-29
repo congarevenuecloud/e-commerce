@@ -1,0 +1,27 @@
+app-favorite-details {
+    app-detail {
+        app-detail-section {
+            apt-output-field {
+                span {
+                    margin-bottom: 0.5rem;
+                    dt {
+                        flex-basis: 30%;
+                    }
+                    dd {
+                        flex-basis: 70%;
+                    }
+                }
+                &:last-child {
+                    span {
+                      margin-bottom: 0;
+                    }
+                  }
+            }
+            .custom-field {
+                span {
+                    flex-basis: 30%;
+                }
+            }
+        }
+    }
+}

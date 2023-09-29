@@ -1,0 +1,123 @@
+@use "sass:math";
+@import "variables";
+.navbar-brand {
+  width: 3rem;
+  img {
+    max-height: 2rem;
+  }
+}
+
+.navbar {
+  transition: margin 300ms;
+  transition: height 300ms;
+  z-index: 1031;
+  &.top {
+    margin-top: 0px;
+    box-shadow: 0 1px 3px rgba(50, 50, 50, 0.4);
+    height: $navbar-brand-height * 0.6;
+  }
+}
+.subnav {
+  transition: margin 300ms;
+  margin: 0px;
+  &.top {
+    margin-top: -40px;
+  }
+}
+.actions > * {
+  margin: 0;
+}
+
+.actions > *:nth-child(2) {
+  margin-right: 0.5rem;
+}
+
+.navbar-brand > img {
+  transition: 0.45s;
+  &.scale {
+    transform: scale(0.725);
+  }
+}
+
+.modal.show .modal-dialog.menu {
+  left: 0;
+}
+.modal-dialog.menu {
+  transition: left 300ms;
+  margin: -1px 0 0 0;
+  left: -20rem;
+  top: 0rem;
+  width: 20rem;
+  .modal-content {
+    height: 100vh;
+  }
+  .list-group-flush .list-group-item {
+    border: 0;
+  }
+}
+.store-list > div:not(:last-child) {
+  border-right: 1px solid $gray-300;
+}
+app-category-carousel {
+  width: 100%;
+}
+
+.user-avatar {
+  height: 3rem;
+  flex-basis: 3rem;
+}
+
+.edit-icon {
+  cursor: pointer;
+  opacity: 0.5;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.account-info.show {
+  min-width: 20rem;
+  left: inherit;
+}
+
+.scrollable {
+  max-height: 22rem;
+  overflow: auto;
+  height: auto;
+}
+
+.dropdown-menu {
+  .dropdown-body {
+    apt-input-field {
+      width: 100%;
+    }
+  }
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+div.fixed-top {
+  padding-bottom: 0.5rem;
+}
+
+.navbar-toggler {
+  border: none;
+}
+
+span {
+  img {
+    height: 1.5rem;
+  }
+}
+
+.category-list {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.logout-section {
+  display: flex;
+  border-radius: 0 !important;
+}
