@@ -1,0 +1,14 @@
+<div class="d-block border-bottom table-responsive">
+  <h4>
+    <span *ngIf="cart?.Proposald?.Id; else manageCart">{{cart?.Proposald?.Name}} / {{'COMMON.EDIT_LINE_ITEMS' | translate }}</span>
+    <ng-template #manageCart>
+      <span>{{'MANAGE_CART.CART_TABLE.ITEMS_IN_YOURCART' | translate }}</span>
+    </ng-template>
+  </h4>
+  <table class="table animated fadeIn">
+    <tbody>
+      <apt-line-item-table-row *ngFor="let item of tableItems; let i = index; trackBy: trackById" [index]="i" [cart]="cart"
+        [parent]="item.parent" [children]="item.children" [editableFields]="false"></apt-line-item-table-row>
+    </tbody>
+  </table>
+</div>

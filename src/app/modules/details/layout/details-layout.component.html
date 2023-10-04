@@ -1,0 +1,56 @@
+  <apt-breadcrumb [sobject]="context" [label]="title" [route]="route"></apt-breadcrumb>
+<ng-content select=".constraintAlerts"></ng-content>
+<div class="pb-5">
+  <div class="headerContainer">
+    <nav class="navbar d-block p-0 nav-tabs bg-white" [ngClass]="headerClass" #headerNav>
+      <div class="d-flex border-bottom">
+        <div class="flex-grow-1 px-3 justify-content-center d-flex flex-column w-100">
+          <h3 [innerHTML]="title" *ngIf="title"></h3>
+          <span [innerHTML]="subtitle" *ngIf="subtitle"></span>
+          <ng-content select=".detail-header"></ng-content>
+        </div>
+        <div class="ml-auto p-2 actions primary-actions">
+          <div class="pl-4 h-100" #primaryActions [hidden]="hidePrimaryActions">
+            <ng-content select=".primary-actions"></ng-content>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-end">
+        <div *ngFor="let tab of sections; let i = index;" (click)="scrollTo(tab)">
+          <a class="nav-link text-capitalize"
+            [class.active]="tab.active"
+            href="javascript:void(0)"
+            *ngIf="tab?.element?.nativeElement?.offsetTop > 0"
+            [class.d-none]="i > 2"
+            [class.d-md-block]="i === 2"
+            [class.d-lg-block]="i === 3"
+            [class.d-xl-block]="i === 4">
+            {{tab.title}}
+          </a>
+        </div>
+        <div dropdown class="position-relative d-block" [class.d-xl-none]="sections?.length < 6"
+          [class.d-lg-none]="sections?.length < 5" [class.d-md-none]="sections?.length < 4">
+          <a class="nav-link dropdown-toggle" dropdownToggle href="javascript:void(0)"><i
+              class="fa fa-ellipsis-v"></i></a>
+          <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu" role="menu" aria-labelledby="button-basic">
+            <li role="menuitem" *ngFor="let tab of sections; let i = index" class="d-none" [class.d-block]="i > 2"
+              [class.d-xl-none]="i < 5" [class.d-lg-none]="i < 4" [class.d-md-none]="i < 3">
+              <a class="dropdown-item" [class.active]="tab.active" href="javascript:void(0)" (click)="scrollTo(tab)">{{
+                tab.title }}</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="ml-auto p-2 actions secondary-actions">
+          <div class="pl-4 h-100" #secondaryActions [hidden]="hideSecondaryActions">
+            <ng-content select=".secondary-actions"></ng-content>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <div class="container-fluid">
+    <ng-content #content></ng-content>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+<div>
+
+  <apt-alert [record]="cart$ | async" [autoRun]="false"></apt-alert>
+  <apt-jumbotron></apt-jumbotron>
+  <div class="container pb-5">
+    <div>
+      <apt-product-carousel *ngIf="productListA$ | async as productListA; else loading" [productList]="productListA"
+        slides="4" [title]="categories[0]?.Name" subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tincidunt quam massa, a commodo orci finibus
+                    rhoncus. Nullam tempor, libero vel auctor efficitur, nibh lacus luctus orci, vitae fringilla lorem magna
+                    at metus."></apt-product-carousel>
+
+      <apt-product-carousel *ngIf="productListB$ | async as productListB; else loading" [productList]="productListB"
+        slides="4" [title]="categories[1]?.Name" subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tincidunt quam massa, a commodo orci finibus
+                rhoncus. Nullam tempor, libero vel auctor efficitur, nibh lacus luctus orci, vitae fringilla lorem magna
+                at metus."></apt-product-carousel>
+    </div>
+  </div>
+  <app-footer></app-footer>
+</div>
+
+<ng-template #loading>
+  <div class="d-flex justify-content-center pt-5">
+    <apt-dots></apt-dots>
+  </div>
+</ng-template>
