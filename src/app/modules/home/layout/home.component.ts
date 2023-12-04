@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { first, get, slice, reverse, sortBy, last } from 'lodash';
-import { Observable, of, Subscription } from 'rxjs';
+import { first, get, slice, reverse, sortBy, last, forEach } from 'lodash';
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Product, Storefront, StorefrontService, CategoryService, ProductService, Category, CartService, Cart, UserService } from '@congarevenuecloud/ecommerce';
+import { Product, CategoryService, ProductService, Category, CartService, Cart, UserService, ItemRequest, GuestUserService } from '@congarevenuecloud/ecommerce';
 
 @Component({
   selector: 'app-home',
@@ -11,29 +11,55 @@ import { Product, Storefront, StorefrontService, CategoryService, ProductService
 })
 export class HomeComponent implements OnInit, OnDestroy {
 
-  storefront$: Observable<Storefront>;
+  productListA$: Observable<Array<ItemRequest>>;
 
-  productListA$: Observable<Array<Product>>;
-
-  productListB$: Observable<Array<Product>>;
+  productListB$: Observable<Array<ItemRequest>>;
 
   categories: Array<Category>;
   cart$: Observable<Cart>;
   subscriptions: Array<Subscription> = new Array();
+  listItem: Array<ItemRequest> = [];
+  counter: number = 3;
+  isInvalidGuest: boolean = false;
+  loadData$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
-  constructor(private storefrontService: StorefrontService, private userService: UserService,
+  constructor(private userService: UserService, private guestUserService: GuestUserService,
     private cartService: CartService, private categoryService: CategoryService, private productService: ProductService) {
   }
 
   ngOnInit() {
-    this.storefront$ = this.storefrontService.getStorefront();
+    this.subscriptions.push(this.guestUserService.isValidUser().subscribe(isValid => {
+      this.loadData$.next(true);
+      if (!isValid) {
+        this.isInvalidGuest = true;
+        const interval = setInterval(() => {
+          this.counter--;
+          if (this.counter <= 1) {
+            clearInterval(interval);
+            this.userService.login();
+          }
+        }, 1000);
+      }
+    }));
     this.cart$ = this.cartService.getMyCart();
     this.subscriptions.push(this.categoryService.getCategories()
       .subscribe(categoryList => {
         this.categories = slice(reverse(sortBy(categoryList, 'ProductCount')), 0, 2);
-        this.productListA$ = this.categories.length > 0 ? this.productService.getProducts([get(first(this.categories), 'Id')], 5, 1).pipe(map(results => get(results, 'Products'))) : of([]);
-        this.productListB$ = this.categories.length > 0 ? this.productService.getProducts([get(last(this.categories), 'Id')], 5, 1).pipe(map(results => get(results, 'Products'))) : of([]);
+        this.productListA$ = this.categories.length > 0 ? this.productService.getProducts([get(first(this.categories), 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
+        this.productListB$ = this.categories.length > 0 ? this.productService.getProducts([get(last(this.categories), 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
       }));
+  }
+
+  createItemRequest(products: Array<Product>): Array<ItemRequest> {
+    forEach(products, product => {
+      const itemReq = {
+        Product: product,
+        Quantity: 1,
+        Id: get(product, 'Id')
+      } as ItemRequest
+      this.listItem.push(itemReq)
+    })
+    return this.listItem
   }
 
   ngOnDestroy() {

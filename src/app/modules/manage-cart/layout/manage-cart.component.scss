@@ -1,41 +1,81 @@
 @import "../../../../variables.scss";
 
-dt, dd{
+dt,
+dd {
     display: block;
     width: 100%;
 }
-dl, dd, dt{
+
+dl,
+dd,
+dt {
     margin-bottom: 0;
 }
-dt{
+
+dt {
     margin-top: $btn-block-spacing-y;
 }
-table{
+
+table {
 
     height: 100px;
-    tr:first-child td{
+
+    tr:first-child td {
         border-top: none;
     }
 }
+
 .cart-total {
-    width: 100px; 
-    overflow: hidden; 
+    width: 100px;
+    overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.fixed-height{
+
+.fixed-height {
     height: 30px;
 }
-p.description{
+
+p.description {
     max-height: 55px;
     overflow-y: hidden;
 }
 
-apt-price-summary{
-    button.active-color{
-        background-color: $white;    
+apt-price-summary {
+    button.active-color {
+        background-color: $white;
     }
-    button.active-color:hover{
-        background-color: $white;    
+
+    button.active-color:hover {
+        background-color: $white;
     }
+}
+
+.cart-title {
+    font-size: 1rem;
+    font-weight: $font-weight-normal;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+    /* Adjust the width as needed */
+}
+
+.input-group {
+    input {
+        border-radius: 0.3rem;
+        padding-left: 2rem !important;
+        z-index: 0 !important;
+        border-top-left-radius: 0.25rem !important;
+        border-bottom-left-radius: 0.25rem !important;
+    }
+}
+
+.input-group-append {
+    position: absolute;
+    z-index: 1 !important;
 }

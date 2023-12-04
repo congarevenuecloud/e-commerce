@@ -7,7 +7,8 @@ import { PaginationModule } from 'ngx-bootstrap/pagination';
 
 import { CongaModule } from '@congarevenuecloud/core';
 import { PricingModule } from '@congarevenuecloud/ecommerce';
-import { IconModule, AddressModule, PriceModule, ConfigurationSummaryModule, BreadcrumbModule, InputFieldModule, OutputFieldModule, ChartModule, DataFilterModule, ConstraintRuleModule, AlertModule, TableModule } from '@congarevenuecloud/elements';
+import { IconModule, AddressModule, PriceModule, ConfigurationSummaryModule, BreadcrumbModule, InputFieldModule, OutputFieldModule, ChartModule, DataFilterModule, ConstraintRuleModule, AlertModule, TableModule,
+QuickAddModule } from '@congarevenuecloud/elements';
 
 import { MyAccountRoutingModule } from './my-account-routing.module';
 import { MyAccountLayoutComponent } from './layout/my-account-layout.component';
@@ -40,6 +41,7 @@ import { FavoriteListComponent } from './component/favorite-list/favorite-list.c
     BreadcrumbModule,
     InputFieldModule,
     OutputFieldModule,
+    QuickAddModule,
     ChartModule,
     TableModule,
     ConstraintRuleModule,

@@ -152,6 +152,7 @@
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
                           field="CreatedDate" [labelOnly]="true">
                         </apt-output-field></th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -166,6 +167,11 @@
                       <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
                         {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
                       <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
+                      <td><button class="btn btn-link p-0 m-0"
+                        (click)="deleteAttachment(attachment)" [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
+                        data-spinner-color="black">
+                        <span class="fa fa-trash"></span>
+                      </button></td>
                     </tr>
                   </tbody>
                 </table>

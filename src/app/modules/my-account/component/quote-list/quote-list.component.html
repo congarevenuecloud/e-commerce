@@ -2,7 +2,7 @@
 
 <ng-template #quoteList let-view="view">
     <div class="row">
-        <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
+        <div class="col-10 d-flex summary align-items-baseline pl-2 mt-2">
             <div class="d-flex align-items-end mr-2">
                 <apt-data-filter [type]="type" *ngIf="filterList$ | async as filterList" [filterOptions]="filterOptions"
                     [filterList]="filterList" [customfilter]="customfilter"
@@ -18,6 +18,12 @@
                 <h4 class="my-0 ml-2">{{(totalAmount$ | async) | localCurrency | async}}</h4>
             </div>
         </div>
+        <div class="col-2 mt-2">
+            <div class="d-flex float-right">
+                <app-quick-add [layout]="'modal'" [btnClass]="'btn-raised'" [actionType]="'quick-quote'"
+                    [businessObjectFields]="businessObjectFields"></app-quick-add>
+            </div>
+        </div>
     </div>
     <div class="row mt-3">
         <div class="col-6">
@@ -27,9 +33,11 @@
                         translate}}</strong>
                 </div>
                 <div class="card-body">
-                    <apt-chart *ngIf="quotesByStatus$ | async as quotesByStatus; else loading" [data]="quotesByStatus"
-                        [amountsByStatus]="amountsByStatus$ | async" [type]="'bar'" [showLegend]="false">
-                    </apt-chart>
+                    <ng-container *ngIf="quotesByStatus$ | async as quotesByStatus; else loading">
+                        <apt-chart *ngIf="(quotesByStatus | json) != '{}'; else noData" [data]="quotesByStatus"
+                            [amountsByStatus]="amountsByStatus$ | async" [type]="'bar'" [showLegend]="false">
+                        </apt-chart>
+                    </ng-container>
                 </div>
             </div>
         </div>
@@ -40,11 +48,12 @@
                         translate}}</strong>
                 </div>
                 <div class="card-body">
-                    <apt-chart *ngIf="quotesByDueDate$ | async as quotesByDueDate; else loading"
-                        [data]="quotesByDueDate" [type]="'doughnut'" [legendPosition]="'right'"
-                        [amountsByStatus]="amountsByStatus$ | async" [colorPalette]="colorPalette"
-                        [centerText]="totalRecords$ | async">
-                    </apt-chart>
+                    <ng-container *ngIf="quotesByDueDate$ | async as quotesByDueDate; else loading">
+                        <apt-chart *ngIf="(quotesByDueDate | json) != '{}'; else noData" [data]="quotesByDueDate"
+                            [type]="'doughnut'" [legendPosition]="'right'" [amountsByStatus]="amountsByStatus$ | async"
+                            [colorPalette]="colorPalette" [centerText]="totalRecords$ | async">
+                        </apt-chart>
+                    </ng-container>
                 </div>
             </div>
         </div>
@@ -63,6 +72,12 @@
     <ng-template #loading>
         <div class="d-flex justify-content-center pt-5">
             <apt-dots></apt-dots>
+        </div>
+    </ng-template>
+    <ng-template #noData>
+        <div class="d-flex justify-content-center align-items-baseline">
+            <i class="fas fa-exclamation-triangle"> </i>
+            <p class="pl-1">{{'COMMON.NO_MATCHING_QUOTES_FOUND' | translate}}</p>
         </div>
     </ng-template>
 </ng-template>

@@ -31,7 +31,7 @@
                     {{quoteConfirmation?.CreatedBy?.FirstName}}!</strong>
             </p>
             <small class="text-center" *ngIf="!cart?.Proposald?.Id"
-                [translate]="'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRMATION_MSG'"
+                [translate]="'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRM_MSG'"
                 [translateParams]="{Sellername: quoteConfirmation?.CreatedBy?.Name}"></small>
             <small class="text-center" *ngIf="quoteConfirmation?.RFPResponseDueDate"
                 [translate]="'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRMATION_MSG_WITH_RFP'"

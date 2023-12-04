@@ -4,7 +4,7 @@ import { map as rmap, switchMap, take, catchError } from 'rxjs/operators';
 import moment from 'moment';
 import { get, sumBy, map as _map, mapValues, groupBy, omit, mapKeys, bind, includes } from 'lodash';
 import { Operator, ApiService, FilterOperator } from '@congarevenuecloud/core';
-import { Quote, QuoteService, LocalCurrencyPipe, AccountService, FieldFilter, QuoteResult, DateFormatPipe, GroupByAggregateResponse, AggregateFields  } from '@congarevenuecloud/ecommerce';
+import { Quote, QuoteService, LocalCurrencyPipe, AccountService, FieldFilter, QuoteResult, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
 import { TableOptions, CustomFilterView, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
 
 @Component({
@@ -18,7 +18,7 @@ export class QuoteListComponent implements OnInit {
   totalAmount$: Observable<number>;
   totalRecords$: Observable<number>;
   view$: Observable<QuoteListView>;
-  amountsByStatus$:Observable<GroupByAggregateResponse>;
+  amountsByStatus$: Observable<GroupByAggregateResponse>;
   quotesByStatus$: Observable<GroupByAggregateResponse>;
   quotesByDueDate$: Observable<GroupByAggregateResponse>;
   colorPalette: Array<String> = [];
@@ -27,19 +27,19 @@ export class QuoteListComponent implements OnInit {
 
   filterList$: BehaviorSubject<Array<FieldFilter>> = new BehaviorSubject<Array<FieldFilter>>([]);
 
-  aggregateFields :Array<AggregateFields> = [
-      {
-        AggregateFunction: 'count',
-        AggregateField: 'ApprovalStage'
-      },
-      {
-        AggregateFunction: 'count',
-        AggregateField: 'RFPResponseDueDate'
-      },
-      {
-        AggregateFunction: 'sum',
-        AggregateField: 'Amount'
-      }
+  aggregateFields: Array<AggregateFields> = [
+    {
+      AggregateFunction: 'count',
+      AggregateField: 'ApprovalStage'
+    },
+    {
+      AggregateFunction: 'count',
+      AggregateField: 'RFPResponseDueDate'
+    },
+    {
+      AggregateFunction: 'sum',
+      AggregateField: 'Amount'
+    }
   ]
 
   filterOptions: FilterOptions = {
@@ -55,7 +55,6 @@ export class QuoteListComponent implements OnInit {
       Operator.EQUAL,
       Operator.NOT_EQUAL,
       Operator.IN,
-      Operator.NOT_IN,
       Operator.LESS_THAN,
       Operator.LESS_EQUAL,
       Operator.GREATER_THAN,
@@ -74,12 +73,12 @@ export class QuoteListComponent implements OnInit {
       }
     }
   ];
-
+  businessObjectFields: string[];
   constructor(private quoteService: QuoteService, private currencyPipe: LocalCurrencyPipe, private dateFormatPipe: DateFormatPipe, private accountService: AccountService, private apiService: ApiService, private exceptionService: ExceptionService) { }
 
   ngOnInit() {
     this.loadView();
-    this.getChartData();
+    this.businessObjectFields = ['Description', 'BillToAccount', 'ShipToAccount'];
   }
 
   loadView() {
@@ -129,17 +128,18 @@ export class QuoteListComponent implements OnInit {
           return of(tableOptions);
         })
       );
+    this.getChartData();
   }
 
-  getChartData(){
+  getChartData() {
     const queryFields = ['ApprovalStage', 'RFPResponseDueDate'];
     const groupByFields = ['ApprovalStage', 'RFPResponseDueDate'];
-    return this.quoteService.getQuoteAggregatesByApprovalStage(null, this.aggregateFields, queryFields, groupByFields).pipe(take(1)).subscribe((data) => {
-       this.amountsByStatus$ = of(omit(mapValues(groupBy(data, 'ApprovalStage'), (s) => sumBy(s, 'sum(Amount)')),'null'));
-       this.quotesByStatus$ = of(omit(mapValues(groupBy(data, 'ApprovalStage'), (s) => sumBy(s, 'count(ApprovalStage)')),'null') );
-       this.quotesByDueDate$ = of(omit(mapKeys(mapValues(groupBy(data, 'RFPResponseDueDate'), s => sumBy(s, 'count(RFPResponseDueDate)')), bind(this.generateLabel, this)), 'null'));
+    return this.quoteService.getQuoteAggregatesByApprovalStage(null, this.aggregateFields, queryFields, groupByFields, this.filterList$.value).pipe(take(1)).subscribe((data) => {
+      this.amountsByStatus$ = of(omit(mapValues(groupBy(data, 'ApprovalStage'), (s) => sumBy(s, 'sum(Amount)')), 'null'));
+      this.quotesByStatus$ = of(omit(mapValues(groupBy(data, 'ApprovalStage'), (s) => sumBy(s, 'count(ApprovalStage)')), 'null'));
+      this.quotesByDueDate$ = of(omit(mapKeys(mapValues(groupBy(data, 'RFPResponseDueDate'), s => sumBy(s, 'count(RFPResponseDueDate)')), bind(this.generateLabel, this)), 'null'));
     });
-}
+  }
 
   private generateLabel(date): string {
     const today = moment(new Date());
@@ -174,7 +174,7 @@ export class QuoteListComponent implements OnInit {
   }
 
   getDateFormat(record: Quote) {
-    return this.dateFormatPipe.transform(get(record,'CreatedDate'));
+    return this.dateFormatPipe.transform(get(record, 'CreatedDate'));
   }
 
   getFilters(): Array<FieldFilter> {

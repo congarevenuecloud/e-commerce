@@ -1,21 +1,33 @@
 <app-detail *ngIf="quote; else loading" [context]="quote" [route]="'proposals'">
   <div class="detail-header">
-    <div class="d-flex align-items-center mb-2">
+    <div class="d-flex align-items-center mb-3">
       <span class="page-header ">{{quote?.Name}}</span>
-      <span class="badge badge-primary ml-3 px-3 py-1 border" *ngIf="quote?.ApprovalStage">{{quote?.ApprovalStage}}</span>
-      <div *ngIf="quote?.ApprovalStage === 'Accepted' && order$ | async as order" class="ml-auto">
+      <span class="badge badge-primary mt-1 ml-3 px-3 py-2 border text-uppercase"
+        *ngIf="quote?.ApprovalStage">{{quote?.ApprovalStage}}</span>
+      <div *ngIf="quote?.Items?.length > 0" class="pr-3">
+        <button type="button"
+          [ngClass]="quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' ?  'btn btn-outline-primary btn-link text-primary text-primary' :'btn btn-primary btn-raised'"
+          [ladda]="acceptLoader"
+          *ngIf="quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented'"
+          (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">{{'COMMON.ACCEPT_QUOTE'
+          |translate}}</button>
+      </div>
+      <!-- TO do : remove comment add back the changes when we integrate the functionality -->
+      <!-- <button type="button" class="btn btn-primary btn-raised py-2" [ladda]="finalizeLoader"
+        *ngIf="quote?.ApprovalStage === 'Draft'" (click)="finalizeQuote(quote?.Id)"
+        [disabled]="true">{{'MY_ACCOUNT.QUOTE_DETAIL.FINALIZE'
+        |translate}}</button>
+      <div class="align-items-stretch d-flex" *ngIf="quote?.ApprovalStage === 'Generated'">
+        <apt-present-document [record]="quote"></apt-present-document>
+      </div> -->
+      <div *ngIf="quote?.ApprovalStage === 'Accepted' && order$ | async as order">
         <span class="pr-4 d-flex align-items-center">
           <apt-output-field [record]="order" field="Name" [label]="'MY_ACCOUNT.ORDER_DETAIL.ORDER_ID' | translate"
             layout="inline" [editable]="false" [showQuickView]="true"></apt-output-field>
           <span class="badge badge-primary ml-1">{{order?.Status}}</span>
         </span>
       </div>
-      <button type="button" class="btn btn-primary btn-raised ml-auto" [ladda]="acceptLoader"
-        *ngIf="quote?.ApprovalStage === 'Presented' && isLoggedIn"
-        (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">{{'COMMON.ACCEPT_QUOTE'
-        |translate}}</button>
     </div>
-    <span>{{quote?.Id}}</span>
   </div>
 
   <app-detail-section [title]="'DETAILS.QUOTE_SUMMARY' | translate">
@@ -51,7 +63,7 @@
                 </apt-output-field>
               </div>
               <div class="flex-shrink-1 col-md-4 mb-2">
-                <apt-output-field [record]="quote" [field]="'PrimaryContact'"                   
+                <apt-output-field [record]="quote" [field]="'PrimaryContact'"
                   [label]="'MY_ACCOUNT.QUOTE_DETAIL.PRIMARY_CONTACT' | translate" [displayValue]="'PrimaryContact'"
                   [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
                   [showQuickView]="true" [lookupOptions]="lookupOptions"
@@ -66,8 +78,7 @@
             </div>
             <div class="row">
               <div class="flex-shrink-1 col-md-4 mb-2">
-                <apt-output-field [record]="quote" field="ShipToAccount"
-                  [displayValue]="'ShipToAccount'"
+                <apt-output-field [record]="quote" field="ShipToAccount" [displayValue]="'ShipToAccount'"
                   [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
                   [label]="'MY_ACCOUNT.ORDER_DETAIL.SHIP_TO_ACCOUNT' | translate" [showQuickView]="true"
                   (onChange)="refreshQuote($event, quote, 'ShipToAccount')"></apt-output-field>
@@ -76,8 +87,7 @@
                 </apt-address>
               </div>
               <div class="flex-shrink-1 col-md-4 mb-2">
-                <apt-output-field [record]="quote" field="BillToAccount"
-                  [displayValue]="'BillToAccount'"
+                <apt-output-field [record]="quote" field="BillToAccount" [displayValue]="'BillToAccount'"
                   [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
                   [label]="'MY_ACCOUNT.ORDER_DETAIL.BILL_TO_ACCOUNT' | translate" [showQuickView]="true"
                   (onChange)="refreshQuote($event, quote, 'BillToAccount')"></apt-output-field>
@@ -101,15 +111,15 @@
         <div class="card-header">
           <h5>
             {{'DETAILS.LINE_ITEMS' | translate}}
-            <button class="btn text-primary px-4 ml-1"
-              *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented') && quoteLineItems.length > 0"
-              [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black"
-              (click)="editQuoteItems(quote)">{{'COMMON.EDIT' | translate}}</button>
+            <button class="btn text-primary px-2 ml-1"
+              *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented')"
+              [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black" (click)="editQuoteItems(quote)">{{
+              (quoteLineItems?.length > 0 ? 'COMMON.EDIT' : 'COMMON.ADD' ) | translate }}</button>
           </h5>
         </div>
         <div class="card-body">
-          <div *ngIf="quoteLineItems?.length >0; else noProducts">
-            <table class="table table-responsive border-bottom">
+          <ng-container *ngIf="quoteLineItems?.length >0; else showMessage">
+            <table class="table border-bottom">
               <tbody>
                 <ng-container *ngFor="let item of quoteLineItems; let i = index">
                   <apt-line-item-table-row [index]="i" [parent]="item.MainLine" [options]="item.Flat"
@@ -118,7 +128,18 @@
                 </ng-container>
               </tbody>
             </table>
-          </div>
+          </ng-container>
+          <ng-template #showMessage>
+            <div class="d-flex align-items-center justify-content-center">
+              <h6 class="text-muted mr-2 mb-0">
+                {{ 'COMMON.NO_LINE_ITEMS_MESSAGE' | translate: { record: 'quote' } }}
+              </h6>
+              <button class="btn text-primary p-0" [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black"
+                (click)="editQuoteItems(quote)">
+                {{ 'COMMON.ADD' | translate }}
+              </button>
+            </div>
+          </ng-template>
         </div>
       </div>
     </div>
@@ -126,8 +147,8 @@
 
   <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-4">
     <div class="card" #attachmentSection *ngIf="attachmentList$ | async as attachmentList; else loading">
-      <div class="card-header border-0">
-        <h5 class="py-2 text-uppercase">
+      <div class="card-header">
+        <h5>
           {{'DETAILS.ATTACHMENTS' | translate}}
           <span *ngIf="attachmentList?.length > 0">({{attachmentList?.length}})</span>
         </h5>
@@ -156,6 +177,7 @@
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
                           field="CreatedDate" [labelOnly]="true">
                         </apt-output-field></th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -163,13 +185,18 @@
                       <th scope="row">{{i + 1}}</th>
                       <td>
                         <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
-                          target="_blank">{{attachment?.DocumentMetadata?.Name}}</a>
+                          target="_self">{{attachment?.DocumentMetadata?.Name}}</a>
                       </td>
                       <td>{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
-                      <td>{{attachment?.DocumentMetadata?.FileType}}</td>
+                      <td>{{getFileType(attachment?.DocumentMetadata?.FileType)}}</td>
                       <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
                         {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
                       <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
+                      <td><button class="btn btn-link p-0 m-0" (click)="deleteAttachment(attachment)"
+                          [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
+                          data-spinner-color="black">
+                          <span class="fa fa-trash"></span>
+                        </button></td>
                     </tr>
                   </tbody>
                 </table>
@@ -185,8 +212,7 @@
           <div class="col-12 col-md-5">
             <form (ngSubmit)="uploadAttachment(quote.Id)">
               <label class="font-weight-bold">{{'COMMON.ATTACHMENT_DETAILS.TITLE' | translate}}</label>
-              <div
-                class="file-section bg-light d-flex align-items-center justify-content-center border-secondary file-upload"
+              <div class="file-section d-flex align-items-center justify-content-center border-secondary file-upload"
                 (dragover)="onDragFile($event)" (drop)="onDropFile($event)" data-max-size="26214400">
                 <label class="p-5 position-relative" for="browse"><span
                     class="position-absolute upload-icon-position"><i
@@ -229,15 +255,15 @@
     </div>
   </app-detail-section>
   <ng-template #intimationTemplate>
-    <div class="modal-header align-items-center d-flex flex-row-reverse p-0 mx-4 mt-3 border-bottom border-secondary">
-      <h6 class="modal-title pull-left font-weight-bold">
-        {{'COMMON.ACCEPT_QUOTE' | translate}}
-      </h6>
+    <div class="modal-header align-items-center d-flex flex-row-reverse p-0 border-bottom border-secondary">
       <button type="button" class="close pull-right" aria-label="Close" (click)="closeModal()">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     <div class="modal-body d-flex flex-column justify-content-center py-4">
+      <h6 class="modal-title pull-left font-weight-bold pb-2">
+        {{'COMMON.ACCEPT_QUOTE' | translate}}
+      </h6>
       <p class="text-center"><strong>{{ 'MODAL.THANK_YOU' | translate }}!</strong></p>
       <span class="text-center" [translate]="'DETAILS.SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE'"
         [translateParams]="{quoteName: quote?.Name}"></span>
@@ -248,11 +274,5 @@
 <ng-template #loading>
   <div class="d-flex justify-content-center pt-5">
     <apt-dots></apt-dots>
-  </div>
-</ng-template>
-
-<ng-template #noProducts>
-  <div class="d-flex align-items-center justify-content-center flex-column h-100 text-muted">
-    {{'COMMON.NO_ITEMS_FOUND' | translate}}
   </div>
 </ng-template>

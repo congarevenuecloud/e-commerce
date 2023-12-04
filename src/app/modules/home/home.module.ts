@@ -6,7 +6,7 @@
 */
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
+import { TranslateModule } from '@ngx-translate/core';
 import { HomeRoutingModule } from './home-routing.module';
 import { HomeComponent } from './layout/home.component';
 import { ComponentModule } from '../../components/component.module';
@@ -21,7 +21,8 @@ import { ProductCarouselModule, JumbotronModule, IconModule, AlertModule } from 
     JumbotronModule,
     ProductCarouselModule,
     IconModule,
-    AlertModule
+    AlertModule,
+    TranslateModule.forChild()
   ],
   declarations: [HomeComponent]
 })

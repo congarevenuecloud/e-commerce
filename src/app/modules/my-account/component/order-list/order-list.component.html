@@ -25,9 +25,11 @@
                         translate}}</strong>
                 </div>
                 <div class="card-body">
-                    <apt-chart *ngIf="ordersByStatus$ | async as ordersByStatus; else loading" [data]="ordersByStatus"
-                        [amountsByStatus]="orderAmountByStatus$ | async" [type]="'bar'" [showLegend]="false">
-                    </apt-chart>
+                    <ng-container *ngIf="ordersByStatus$ | async as ordersByStatus; else loading">
+                        <apt-chart *ngIf="(ordersByStatus | json) != '{}'; else noData" [data]="ordersByStatus"
+                            [amountsByStatus]="orderAmountByStatus$ | async" [type]="'bar'" [showLegend]="false">
+                        </apt-chart>
+                    </ng-container>
                 </div>
             </div>
         </div>
@@ -37,10 +39,12 @@
                     <strong class="text-uppercase d-block">{{'COMMON.ORDER_AMOUNT_BY_STATUS' | translate}}</strong>
                 </div>
                 <div class="card-body">
-                    <apt-chart *ngIf="orderAmountByStatus$ | async as orderAmountByStatus; else loading"
-                        [data]="orderAmountByStatus" [type]="'doughnut'" [legendPosition]="'right'"
-                        [colorPalette]="colorPalette" [labelDataTransform]="'currency'">
-                    </apt-chart>
+                    <ng-container *ngIf="orderAmountByStatus$ | async as orderAmountByStatus; else loading">
+                        <apt-chart *ngIf="(orderAmountByStatus | json) != '{}'; else noData"
+                            [data]="orderAmountByStatus" [type]="'doughnut'" [legendPosition]="'right'"
+                            [colorPalette]="colorPalette" [labelDataTransform]="'currency'">
+                        </apt-chart>
+                    </ng-container>
                 </div>
             </div>
         </div>
@@ -59,6 +63,13 @@
     <ng-template #loading>
         <div class="d-flex justify-content-center">
             <apt-dots></apt-dots>
+        </div>
+    </ng-template>
+
+    <ng-template #noData>
+        <div class="d-flex justify-content-center align-items-baseline">
+            <i class="fas fa-exclamation-triangle"> </i>
+            <p class="pl-1">{{'COMMON.NO_MATCHING_ORDERS_FOUND' | translate}}</p>
         </div>
     </ng-template>
 </ng-template>

@@ -5,7 +5,7 @@ import { CreateQuoteComponent } from './layout/quote-create/create-quote.compone
 import { RequestQuoteFormComponent } from './component/request-quote-form/request-quote-form.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { PricingModule } from '@congarevenuecloud/ecommerce';
-import { PriceModule, BreadcrumbModule, InputFieldModule, AddressModule, IconModule, LineItemTableRowModule, PriceSummaryModule } from '@congarevenuecloud/elements';
+import { PriceModule, BreadcrumbModule, InputFieldModule, AddressModule, IconModule, LineItemTableRowModule, PriceSummaryModule, ButtonModule } from '@congarevenuecloud/elements';
 import { DatepickerModule, BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { FormsModule } from '@angular/forms';
 import { DetailsModule } from '../details/details.module';
@@ -37,7 +37,8 @@ import { CartModule } from '../cart/cart.module';
     LaddaModule,
     NgScrollbarModule,
     PriceSummaryModule,
-    CartModule
+    CartModule,
+    ButtonModule
   ],
   declarations: [CreateQuoteComponent, RequestQuoteFormComponent, QuoteDetailsComponent]
 })

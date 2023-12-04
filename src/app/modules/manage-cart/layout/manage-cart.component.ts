@@ -1,12 +1,13 @@
-import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy, NgZone, ViewEncapsulation } from '@angular/core';
-import { Cart, CartItem, CartService, Product, ConstraintRuleService, CartItemService, ItemGroup, LineItemService, OrderLineItem, QuoteLineItem, QuoteService, Quote, Order, OrderService } from '@congarevenuecloud/ecommerce';
-import { Observable, combineLatest, of, Subscription } from 'rxjs';
+import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy, NgZone, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import { Cart, CartItem, CartService, Product, ConstraintRuleService, CartItemService, ItemGroup, LineItemService, OrderLineItem, QuoteLineItem, QuoteService, Quote, Order, OrderService, ItemRequest } from '@congarevenuecloud/ecommerce';
+import { Observable, combineLatest, of, Subscription, BehaviorSubject } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
-import { get, filter, isNil, isEqual, set, isNull } from 'lodash';
+import { get, filter, isNil, isEqual, set, isNull, forEach, lowerCase } from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import { BatchActionService, RevalidateCartService } from '@congarevenuecloud/elements';
+import { BatchActionService, RevalidateCartService, ExceptionService, ButtonAction } from '@congarevenuecloud/elements';
 import { plainToClass } from 'class-transformer';
+import { BsModalService } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-manage-cart',
@@ -18,12 +19,12 @@ import { plainToClass } from 'class-transformer';
 export class ManageCartComponent implements OnInit {
 
   @ViewChild('discardChangesTemplate') discardChangesTemplate: TemplateRef<any>;
-
+  @ViewChild('cloneCartTemplate') cloneCartTemplate: TemplateRef<any>;
   /**
    * Observable of the information for rendering this view.
    */
-  discardChangesModal: BsModalRef;
-  view$: Observable<ManageCartState>;
+  modalRef: BsModalRef;
+  view$: BehaviorSubject<ManageCartState> = new BehaviorSubject<ManageCartState>(null);
   businessObject$: Observable<Order | Quote> = of(null);
   quoteConfirmation: Quote;
   confirmationModal: BsModalRef;
@@ -32,8 +33,17 @@ export class ManageCartComponent implements OnInit {
   readonly: boolean = false;
   cart: Cart;
   disabled: boolean;
-  subscription: Subscription;
+  subscriptions: Array<Subscription> = new Array();
 
+  searchText: string;
+  cartName: string;
+  customButtonActions: Array<ButtonAction> = [
+    {
+      label: 'MY_ACCOUNT.CART_LIST.CLONE_CART',
+      enabled: true,
+      onClick: () => this.openCloneCartModal(),
+    },
+  ]
   constructor(private cartService: CartService,
     private cartItemService: CartItemService,
     private orderService: OrderService,
@@ -43,10 +53,13 @@ export class ManageCartComponent implements OnInit {
     public batchActionService: BatchActionService,
     private revalidateCartService: RevalidateCartService,
     private router: Router,
-    private ngZone: NgZone) { }
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef,
+    private modalService: BsModalService,
+    private exceptionService: ExceptionService) { }
 
   ngOnInit() {
-    this.view$ = combineLatest([
+    this.subscriptions.push(combineLatest([
       this.cartService.getMyCart(),
       this.crService.getRecommendationsForCart(), get(this.activatedRoute.params, "_value.id") ? this.cartService.getCartWithId(get(this.activatedRoute.params, "_value.id")) : of(null), this.revalidateCartService.revalidateFlag]).pipe(
         switchMap(([cart, products, nonactive, revalidateFlag]) => {
@@ -63,6 +76,8 @@ export class ManageCartComponent implements OnInit {
           if (!isNil(get(cart, 'BusinessObjectId'))) {
             this.businessObject$ = isEqual(get(cart, 'BusinessObjectType'), 'Proposal') ?
               this.quoteService.getQuoteById(get(cart, 'BusinessObjectId'), false) : this.orderService.getOrder(get(cart, 'BusinessObjectId'));
+          } else {
+            this.businessObject$ = of(null);
           }
           return combineLatest([of(cart), this.businessObject$, of(products)]);
         }),
@@ -76,7 +91,7 @@ export class ManageCartComponent implements OnInit {
             productList: productsInfo
           } as ManageCartState);
         })
-      );
+      ).subscribe(cartState => this.view$.next(cartState)))
   }
 
   trackById(index, record): string {
@@ -89,10 +104,9 @@ export class ManageCartComponent implements OnInit {
       "Name": fieldValue
     }
 
-    this.subscription = this.cartService.updateCartById(cart.Id, payload).subscribe(r => {
+    this.subscriptions.push(this.cartService.updateCartById(cart.Id, payload).subscribe(r => {
       this.cart = r;
-
-    })
+    }));
   }
   createQuote(cart: Cart) {
     this.quoteService.convertCartToQuote(cart.Proposald).pipe(take(1)).subscribe(
@@ -104,10 +118,58 @@ export class ManageCartComponent implements OnInit {
       }
     );
   }
+  searchChange() {
+    if (this.searchText.length > 2) {
+      forEach(this.view$.value.lineItems, (lineItem) => {
+        let lowercaseSearchTerm = lowerCase(get(lineItem, 'MainLine.Name'));
+        if (lowercaseSearchTerm) {
+          if (lowercaseSearchTerm.indexOf(lowerCase(this.searchText)) > -1) {
+            lineItem.MainLine.set('hide', false);
+          }
+          else {
+            lineItem.MainLine.set('hide', true);
+          }
+        }
+      });
+    } else {
+      forEach(this.view$.value.lineItems, (lineItem) => {
+        lineItem.MainLine.set('hide', false);
+      });
+    }
+  }
+
+  openCloneCartModal() {
+    this.cartName = `Clone of ${this.cart.Name}`
+    this.modalRef = this.modalService.show(this.cloneCartTemplate);
+  }
+
+  closeCloneCartModal() {
+    this.cartName = '';
+    this.modalRef.hide()
+  }
+
+  cloneCart() {
+    this.loading = true;
+    if (this.cartName) {
+      this.cart.Name = this.cartName
+    }
+    delete this.cart.Status;
+    this.cartService.cloneCart(this.cart.Id, this.cart, true, true).pipe(take(1)).subscribe(
+      res => {
+        this.loading = false;
+        this.modalRef.hide();
+        this.exceptionService.showSuccess('SUCCESS.CART.CLONE_CART_SUCCESS');
+      },
+      err => {
+        this.loading = false;
+        this.exceptionService.showError('MY_ACCOUNT.CART_LIST.CART_CREATION_FAILED');
+      }
+    );
+  }
 
   ngOnDestroy() {
-    if (!isNil(this.subscription))
-      this.subscription.unsubscribe();
+    if (!isNil(this.subscriptions))
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 }
 
@@ -115,5 +177,5 @@ export class ManageCartComponent implements OnInit {
 export interface ManageCartState {
   cart: Cart;
   lineItems: Array<ItemGroup>;
-  productList: Array<Product>;
+  productList: Array<ItemRequest>;
 }
