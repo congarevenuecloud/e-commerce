@@ -147,7 +147,7 @@ The objective of this section is to provide information about reference template
 
 This section is designed to provide administrators with information on the CPQ API references that enables commerce into any part of an application.
 
-Refer the [Docs](https://documentation.conga.com/conga-platform/latest/conga-cpq-api-reference-183763193.html) to get detailed information of REST APIs.
+Refer the [Docs](https://documentation.conga.com/cpq/latest/conga-platform/cpq-for-rest-api-developers-208508275.html) to get detailed information of REST APIs.
 
 <div id="further-help"/>
 
