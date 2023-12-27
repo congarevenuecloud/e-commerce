@@ -20,7 +20,8 @@
             "FAILED_TO_ADD": "fr_FR Failed to add item(s)",
             "FAILED_TO_UPDATE": "fr_FR Failed to update item(s)",
             "FAILED_TO_DELETE": "fr_FR Failed to delete item(s)",
-            "FAILED_TO_CLONE": "fr_FR Failed to clone selected line item(s)"
+            "FAILED_TO_CLONE": "fr_FR Failed to clone selected line item(s)",
+            "PENDING_CONFIGURATION": "fr_FR This product needs to be configured"
         },
         "CART_ITEM": {
             "VALIDATE": "The are errors with this cart item."
@@ -43,7 +44,9 @@
             "ADD_FAVORITE_TO_CART_FAILED": "fr_FR Adding items to favorite failed.",
             "CREATION_FAILED_TITLE": "fr_FR Favorite creation failed",
             "TRY_AGAIN_MSG":"fr_FR Your favorite {{name}} could not be created. Please try again."
-        }
+        },
+        "INVALID_GUEST_MESSAGE": "fr_FR You need to login to continue to this store. Redirecting to login screen…",
+        "GENERATE_DOCUMENT_ERROR": "fr_FR Document generation has failed"
     },
     "SUCCESS": {
         "TITLE": "fr_FR Success",
@@ -53,7 +56,11 @@
             "DELETED": "fr_FR Successfully deleted",
             "NEW_CART_CREATED": "fr_FR New cart created successfully",
             "ACTIVATED": "fr_FR Cart activated successfully",
-            "LINE_ITEM_CLONE": "fr_FR Cloning of selected line item(s) is successful"
+            "VIEW_UPDATED":"fr_FR View updated successfully",
+            "LINE_ITEM_CLONE": "fr_FR Cloning of selected line item(s) is successful",
+            "BULK_ADD": "fr_FR {{data}} item(s) added successfully.",
+            "BULK_DELETE": "fr_FR {{data}} item(s) deleted successfully.",
+            "CLONE_CART_SUCCESS": "fr_FR Cart cloned successfully"
         },
         "PROMOTION": {
             "VALID_PROMOTION_TITLE": "fr_FR Promotion Applied",
@@ -64,6 +71,9 @@
         "CONFIGURATION_UPDATED": "fr_FR Your configuration has been updated.",
         "QUOTE_UPDATED": "fr_FR Quote Updated Successfully!",
         "QUOTE_UPDATE_TITLE": "fr_FR Quote Update",
+        "DOCUMENT_GENERATED_TITLE": "fr_FR Document Generated",
+        "GENERATED_QUOTE": "fr_FR Your quote document {{data}} has been generated and can be viewed under the 'Attachments' tab.",
+        "GENERATED_ORDER": "fr_FR Your order document {{data}} has been generated and can be viewed under the 'Attachments' tab.",
         "FAVORITE": {
             "TITLE": "fr_FR Favorite items added!",
             "ADD_FAVORITE": "fr_FR Added new {{name}} Favorite.",
@@ -71,12 +81,17 @@
             "ADD_FAVORITE_TO_CART": "fr_FR Items from {{name}} were added to the cart."
         }
     },
+    "WARNING": {
+        "TITLE": "fr_FR Warning",
+        "GENERATE_DOCUMENT_STOPPED": "fr_FR Document generation has stopped",
+        "GENERATE_DOCUMENT_HIBERNATE": "fr_FR Document generation is hibernating"
+    },
     "INFO": {
         "TITLE": "fr_FR Info",
         "CART": {
             "CART_ACTION_TIMEOUT": "fr_FR Cart action timed out"
         },
-        "GENERATE_INFO": "fr_FR Your order document is being generated. You will get notified when its ready.",
+        "GENERATE_INFO": "fr_FR Your document is being generated. You will get notified when its ready.",
         "DISCOVERY": {
             "ADD_BEFORE_CONFIGURE_MESSAGE": "fr_FR To configure this product add it to the cart."
         },
@@ -187,6 +202,7 @@
             "TOTAL_QUOTES": "fr_FR Total Quotes"
         },
         "QUOTE_LIST": {
+            "CREATE_NEW": "fr_FR New Quote",
             "QUOTES": "fr_FR Quotes",
             "EXPECTED_START_DATE": "fr_FR Expected Started Date"
         },
@@ -288,6 +304,8 @@
         "QUOTE_TOTAL": "fr_FR Total quoted amount",
         "VALUE": "fr_FR Value",
         "APPLY": "fr_FR Apply",
+        "DEFAULT_VIEW":"fr_FR Default View",
+        "MY_VIEW":"fr_FR My View",
         "ORDERS": "fr_FR Orders",
         "QUICKADD": "fr_FR Quick-Add",
         "CART_TOTALS": "fr_FR Cart Totals",
@@ -318,6 +336,7 @@
         "TOTAL": "fr_FR Total",
         "APPROVAL_STAGE": "fr_FR Approval Stage",
         "ADD_TO_CART": "fr_FR Add to Cart",
+        "DELETE_FROM_CART": "fr_FR Delete from cart",
         "CONFIGURE": "fr_FR Configure",
         "REORDER": "fr_FR Reorder",
         "PRODUCT": "fr_FR Product",
@@ -343,6 +362,7 @@
         "FREQUENCY": "fr_FR Frequency",
         "NET_PRICE": "fr_FR Net Price",
         "SEARCH_CONFIGURATION": "fr_FR Search Configuration",
+        "SEARCH_LINE_ITEMS": "fr_FR Search Line Items",
         "QTY": "fr_FR Qty",
         "YES": "fr_FR Yes",
         "NO": "fr_FR No",
@@ -387,7 +407,12 @@
         "ORDER_AMOUNT_BY_STATUS": "fr_FR ORDER AMOUNT BY STATUS",
         "PRICE_NOT_AUTOUPDATED": "fr_FR * Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "fr_FR Update Prices",
-        "PRICE_ERROR": "fr_FR Pricing has failed for your cart. Please retry.",
+        "PRICE_ERROR": "fr_FR Pricing of your cart has failed, please proceed with either of the following.",
+        "RETRY":"fr_FR Retry",
+        "RETRY_CART":"fr_FR Retry pricing the cart",
+        "ABANDON":"fr_FR Abandon",
+        "ABANDON_CART":"fr_FR Abandon the cart",
+        "CLONE_CART":"fr_FR Create a copy of the cart",
         "FAVORITES": "fr_FR Favorites",
         "SELECTIONS": "fr_FR Selections",
         "PRODUCTS": "fr_FR Products",
@@ -419,7 +444,14 @@
             "REMOVE_ATTACHMENT": "fr_FR Remove Attachment",
             "BY": "fr_FR by",
             "MAKE_VISIBILITY_PRIVATE": "fr_FR Make visibility private"
-        }
+        },
+        "ALT_TEXT_IMAGE":"fr_FR Generic placeholder image",
+        "NO_LINE_ITEMS_MESSAGE": "fr_FR No line items yet on this {{record}}",
+        "PROCESSING_TITLE":"fr_FR Please wait",
+        "PROCESSING_MESSAGE":"fr_FR Your request is being processed.....",
+        "TABLE_ACTION_CONFIRMATION_MESSAGE":"fr_FR Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
+        "NO_MATCHING_ORDERS_FOUND": "fr_FR No matching orders found",
+        "NO_MATCHING_QUOTES_FOUND": "fr_FR No matching quotes found"    
     },
     "REVALIDATE_CART": {
         "REVALIDATION_REQUIRED": "fr_FR Revalidation required",
@@ -453,8 +485,8 @@
     "QUOTE_CONFIRMATION_MODAL": {
         "THANK_YOU": "fr_FR Thank You",
         "QUOTE_REQUEST": "fr_FR Quote Request",
-        "QUOTE_CONFIRMATION_MSG": "fr_FR Your quote has been send for review and assigned to the seller {{Sellername}}.",
-        "QUOTE_CONFIRMATION_Update_MSG": "fr_FR Your updated quote has been send for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRM_MSG": "fr_FR Your quote has been sent for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRMATION_Update_MSG": "fr_FR Your updated quote has been sent for review and assigned to the seller {{Sellername}}.",
         "QUOTE_CONFIRMATION_MSG_WITH_RFP": "fr_FR The Expected Response Date {{RFP_value}}.",
         "QUOTE_CONFIRMATION_NO": "fr_FR Your Quote is :",
         "REVIEW_YOUR_QUOTE": "fr_FR Review Your Quote"
@@ -711,7 +743,9 @@
         "PROMOTION_AMOUNT": "fr_FR Promotion Amount",
         "PROMOTION_APPLIED": "fr_FR Following promotions are applied with the product",
         "PROMOTION_APPLIED_TO": "fr_FR Promotions Applied",
+        "APPLY_PROMOTION":"fr_FR Apply Promotion",
         "APPLIED_PROMOTIONS": "fr_FR Applied Promotions",
+        "PROMOTIONS":"fr_FR Promotions",
         "TOTAL_PROMOTION_AMOUNT": "fr_FR Total Promotion Amount",
         "PROMOTION_APPLIEDTO": "fr_FR Promotions Applied To",
         "APPLIED_PROMOTION": "fr_FR applied to the following items in the cart.",
@@ -819,6 +853,8 @@
         "COMMENTS": "fr_FR Comments",
         "ATTACHMENTS": "fr_FR Attachments",
         "PRICE_SUMMARY": "fr_FR Price Summary",
+        "GENERATE_ORDER": "fr_FR Generate Order",
+        "GENERATE_QUOTE": "fr_FR Generate Quote",
         "SUMMARY": "fr_FR Summary",
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "fr_FR You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "fr_FR Your Order Is: {{orderName}}",

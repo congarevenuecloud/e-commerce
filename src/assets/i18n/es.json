@@ -20,7 +20,8 @@
             "FAILED_TO_ADD": "es_MX Failed to add item(s)",
             "FAILED_TO_UPDATE": "es_MX Failed to update item(s)",
             "FAILED_TO_DELETE": "es_MX Failed to delete item(s)",
-            "FAILED_TO_CLONE": "es_MX Failed to clone selected line item(s)"
+            "FAILED_TO_CLONE": "es_MX Failed to clone selected line item(s)",
+            "PENDING_CONFIGURATION": "es_MX This product needs to be configured"
         },
         "CART_ITEM": {
             "VALIDATE": "The are errors with this cart item."
@@ -43,7 +44,9 @@
             "ADD_FAVORITE_TO_CART_FAILED": "es_MX Adding items to favorite failed.",
             "CREATION_FAILED_TITLE": "es_MX Favorite creation failed",
             "TRY_AGAIN_MSG":"es_MX Your favorite {{name}} could not be created. Please try again."
-        }
+        },
+        "INVALID_GUEST_MESSAGE": "es_MX You need to login to continue to this store. Redirecting to login screen…",
+        "GENERATE_DOCUMENT_ERROR": "es_MX Document generation has failed"
     },
     "SUCCESS": {
         "TITLE": "es_MX Success",
@@ -53,7 +56,11 @@
             "DELETED": "es_MX Successfully deleted",
             "NEW_CART_CREATED": "es_MX New cart created successfully",
             "ACTIVATED": "es_MX Cart activated successfully",
-            "LINE_ITEM_CLONE": "es_MX Cloning of selected line item(s) is successful"
+            "VIEW_UPDATED":"es_MX View updated successfully",
+            "LINE_ITEM_CLONE": "es_MX Cloning of selected line item(s) is successful",
+            "BULK_ADD": "es_MX {{data}} item(s) added successfully.",
+            "BULK_DELETE": "es_MX {{data}} item(s) deleted successfully.",
+            "CLONE_CART_SUCCESS": "es_MX Cart cloned successfully"
         },
         "PROMOTION": {
             "VALID_PROMOTION_TITLE": "es_MX Promotion Applied",
@@ -64,6 +71,9 @@
         "CONFIGURATION_UPDATED": "es_MX Your configuration has been updated.",
         "QUOTE_UPDATED": "es_MX Quote Updated Successfully!",
         "QUOTE_UPDATE_TITLE": "es_MX Quote Update",
+        "DOCUMENT_GENERATED_TITLE": "es_MX Document Generated",
+        "GENERATED_QUOTE": "es_MX Your quote document {{data}} has been generated and can be viewed under the 'Attachments' tab.",
+        "GENERATED_ORDER": "es_MX Your order document {{data}} has been generated and can be viewed under the 'Attachments' tab.",
         "FAVORITE": {
             "TITLE": "es_MX Favorite items added!",
             "ADD_FAVORITE": "es_MX Added new {{name}} Favorite.",
@@ -71,12 +81,17 @@
             "ADD_FAVORITE_TO_CART": "es_MX Items from {{name}} were added to the cart."
         }
     },
+    "WARNING": {
+        "TITLE": "es_MX Warning",
+        "GENERATE_DOCUMENT_STOPPED": "es_MX Document generation has stopped",
+        "GENERATE_DOCUMENT_HIBERNATE": "es_MX Document generation is hibernating"
+    },
     "INFO": {
         "TITLE": "es_MX Info",
         "CART": {
             "CART_ACTION_TIMEOUT": "es_MX Cart action timed out"
         },
-        "GENERATE_INFO": "es_MX Your order document is being generated. You will get notified when its ready.",
+        "GENERATE_INFO": "es_MX Your document is being generated. You will get notified when its ready.",
         "DISCOVERY": {
             "ADD_BEFORE_CONFIGURE_MESSAGE": "es_MX To configure this product add it to the cart."
         },
@@ -189,6 +204,7 @@
             "FINALIZE": "es_MX Finalize"
         },
         "QUOTE_LIST": {
+            "CREATE_NEW": "es_MX New Quote",
             "QUOTES": "es_MX Quotes",
             "EXPECTED_START_DATE": "es_MX Expected Started Date"
         },
@@ -320,6 +336,7 @@
         "TOTAL": "es_MX Total",
         "APPROVAL_STAGE": "es_MX Approval Stage",
         "ADD_TO_CART": "es_MX Add to Cart",
+        "DELETE_FROM_CART": "es_MX Delete from cart",
         "CONFIGURE": "es_MX Configure",
         "REORDER": "es_MX Reorder",
         "PRODUCT": "es_MX Product",
@@ -336,6 +353,8 @@
         "ERROR_ALERT": "es_MX error",
         "WARNING_ALERT": "es_MX warning",
         "INFO_ALERT": "es_MX information",
+        "DEFAULT_VIEW":"es_MX Default View",
+        "MY_VIEW":"es_MX My View",
         "PRODUCT_CONFIGURATION": "es_MX Product Configuration",
         "SUBMIT": "es_MX Submit",
         "REGISTER": "es_MX Register",
@@ -345,6 +364,7 @@
         "FREQUENCY": "es_MX Frequency",
         "NET_PRICE": "es_MX Net Price",
         "SEARCH_CONFIGURATION": "es_MX Search Configuration",
+        "SEARCH_LINE_ITEMS": "es_MX Search Line Items",
         "QTY": "es_MX Qty",
         "YES": "es_MX Yes",
         "NO": "es_MX No",
@@ -391,7 +411,12 @@
         "ORDER_AMOUNT_BY_STATUS": "es_MX ORDER AMOUNT BY STATUS",
         "PRICE_NOT_AUTOUPDATED": "es_MX * Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "es_MX Update Prices",
-        "PRICE_ERROR": "es_MX Pricing has failed for your cart. Please retry.",
+        "PRICE_ERROR": "es_MX Pricing of your cart has failed, please proceed with either of the following.",
+        "RETRY":"es_MX Retry",
+        "RETRY_CART":"es_MX Retry pricing the cart",
+        "ABANDON":"es_MX Abandon",
+        "ABANDON_CART":"es_MX Abandon the cart",
+        "CLONE_CART":"es_MX Create a copy of the cart",
         "FAVORITES": "es_MX Favorites",
         "SELECTIONS": "es_MX Selections",
         "PRODUCTS": "es_MX Products",
@@ -424,7 +449,14 @@
             "BY": "es_MX by",
             "MAKE_VISIBILITY_PRIVATE": "es_MX Make visibility private",
             "INVALID_FILE": "es_MX Invalid file extension"
-        }
+        },
+        "ALT_TEXT_IMAGE":"es_MX Generic placeholder image",
+        "NO_LINE_ITEMS_MESSAGE": "es_MX No line items yet on this {{record}}",
+        "PROCESSING_TITLE":"es_MX Please wait",
+        "PROCESSING_MESSAGE":"es_MX Your request is being processed.....",
+        "TABLE_ACTION_CONFIRMATION_MESSAGE":"es_MX Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
+        "NO_MATCHING_ORDERS_FOUND": "es_MX No matching orders found",
+        "NO_MATCHING_QUOTES_FOUND": "es_MX No matching quotes found"    
     },
     "REVALIDATE_CART": {
         "REVALIDATION_REQUIRED": "es_MX Revalidation required",
@@ -458,8 +490,8 @@
     "QUOTE_CONFIRMATION_MODAL": {
         "THANK_YOU": "es_MX Thank You",
         "QUOTE_REQUEST": "es_MX Quote Request",
-        "QUOTE_CONFIRMATION_MSG": "es_MX Your quote has been send for review and assigned to the seller {{Sellername}}.",
-        "QUOTE_CONFIRMATION_Update_MSG": "es_MX Your updated quote has been send for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRM_MSG": "es_MX Your quote has been sent for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRMATION_Update_MSG": "es_MX Your updated quote has been sent for review and assigned to the seller {{Sellername}}.",
         "QUOTE_CONFIRMATION_MSG_WITH_RFP": "es_MX The Expected Response Date {{RFP_value}}.",
         "QUOTE_CONFIRMATION_NO": "es_MX Your Quote is :",
         "REVIEW_YOUR_QUOTE": "es_MX Review Your Quote"
@@ -716,7 +748,9 @@
         "PROMOTION_AMOUNT": "es_MX Promotion Amount",
         "PROMOTION_APPLIED": "es_MX Following promotions are applied with the product",
         "PROMOTION_APPLIED_TO": "es_MX Promotions Applied",
+        "APPLY_PROMOTION":"es_MX Apply Promotion",
         "APPLIED_PROMOTIONS": "es_MX Applied Promotions",
+        "PROMOTIONS":"es_MX Promotions",
         "TOTAL_PROMOTION_AMOUNT": "es_MX Total Promotion Amount",
         "PROMOTION_APPLIEDTO": "es_MX Promotions Applied To",
         "APPLIED_PROMOTION": "es_MX applied to the following items in the cart.",
@@ -824,6 +858,8 @@
         "COMMENTS": "es_MX Comments",
         "ATTACHMENTS": "es_MX Attachments",
         "PRICE_SUMMARY": "es_MX Price Summary",
+        "GENERATE_ORDER": "es_MX Generate Order",
+        "GENERATE_QUOTE": "es_MX Generate Quote",
         "SUMMARY": "es_MX Summary",
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "es_MX You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "es_MX Your Order Is: {{orderName}}",

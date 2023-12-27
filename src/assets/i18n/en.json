@@ -20,7 +20,8 @@
             "FAILED_TO_ADD": "Failed to add item(s)",
             "FAILED_TO_UPDATE": "Failed to update item(s)",
             "FAILED_TO_DELETE": "Failed to delete item(s)",
-            "FAILED_TO_CLONE": "Failed to clone selected line item(s)"
+            "FAILED_TO_CLONE": "Failed to clone selected line item(s)",
+            "PENDING_CONFIGURATION": "This product needs to be configured"
         },
         "CART_ITEM": {
             "VALIDATE": "The are errors with this cart item."
@@ -44,7 +45,9 @@
             "ADD_FAVORITE_TO_CART_FAILED": "Adding items to favorite failed.",
             "CREATION_FAILED_TITLE": "Favorite creation failed",
             "TRY_AGAIN_MSG":"Your favorite {{name}} could not be created. Please try again."
-        }
+        },
+        "INVALID_GUEST_MESSAGE": "You need to login to continue to this store. Redirecting to login screen…",
+        "GENERATE_DOCUMENT_ERROR": "Document generation has failed"
     },
     "SUCCESS": {
         "TITLE": "Success",
@@ -55,7 +58,11 @@
             "DELETED": "Successfully deleted",
             "NEW_CART_CREATED": "New cart created successfully",
             "ACTIVATED": "Cart activated successfully",
-            "LINE_ITEM_CLONE": "Cloning of selected line item(s) is successful"
+            "VIEW_UPDATED":"View updated successfully",
+            "LINE_ITEM_CLONE": "Cloning of selected line item(s) is successful",
+            "BULK_ADD": "{{data}} item(s) added successfully.",
+            "BULK_DELETE": "{{data}} item(s) deleted successfully.",
+            "CLONE_CART_SUCCESS": "Cart cloned successfully"
         },
         "PROMOTION": {
             "VALID_PROMOTION_TITLE": "Promotion Applied",
@@ -65,6 +72,9 @@
         },
         "QUOTE_UPDATED": "Quote Updated Successfully!",
         "QUOTE_UPDATE_TITLE": "Quote Update",
+        "DOCUMENT_GENERATED_TITLE": "Document Generated",
+        "GENERATED_QUOTE": "Your quote document {{data}} has been generated and can be viewed under the 'Attachments' tab.",
+        "GENERATED_ORDER": "Your order document {{data}} has been generated and can be viewed under the 'Attachments' tab.",
         "FAVORITE": {
             "TITLE": "Favorite items added!",
             "ADD_FAVORITE": "Added new {{name}} Favorite.",
@@ -72,12 +82,17 @@
             "ADD_FAVORITE_TO_CART": "Items from {{name}} were added to the cart."
         }
     },
+    "WARNING": {
+        "TITLE": "Warning",
+        "GENERATE_DOCUMENT_STOPPED": "Document generation has stopped",
+        "GENERATE_DOCUMENT_HIBERNATE": "Document generation is hibernating"
+    },
     "INFO": {
         "TITLE": "Info",
         "CART": {
             "CART_ACTION_TIMEOUT": "Cart action timed out"
         },
-        "GENERATE_INFO": "Your order document is being generated. You will get notified when its ready.",
+        "GENERATE_INFO": "Your document is being generated. You will get notified when its ready.",
         "DISCOVERY": {
             "ADD_BEFORE_CONFIGURE_MESSAGE": "To configure this product add it to the cart."
         },
@@ -147,7 +162,8 @@
             "IS_ACTIVE": "Is Active",
             "SET_ACTIVE": "Set Active",
             "CART_CREATION_FAILED": "Could not create cart. Please contact your administrator.",
-            "EFFECTIVE_DATE_NOT_UPDATED": "Failed to update effective date on the cart."
+            "EFFECTIVE_DATE_NOT_UPDATED": "Failed to update effective date on the cart.",
+            "CLONE_CART": "Clone Cart"
         },
         "FAVORITE_DETAIL": {
             "FAVORITE_SUMMARY": "Favorite Summary",
@@ -190,6 +206,7 @@
             "FINALIZE": "Finalize"
         },
         "QUOTE_LIST": {
+            "CREATE_NEW": "New Quote",
             "QUOTES": "Quotes",
             "EXPECTED_START_DATE": "Expected Started Date"
         },
@@ -307,6 +324,8 @@
         "DELETE": "Delete",
         "EDIT": "Edit",
         "CANCEL": "Cancel",
+        "DEFAULT_VIEW":"Default View",
+        "MY_VIEW":"My View",
         "UPDATE": "Update",
         "SAVE": "Save",
         "USERNAME": "Username",
@@ -321,6 +340,7 @@
         "TOTAL": "Total",
         "APPROVAL_STAGE": "Approval Stage",
         "ADD_TO_CART": "Add to Cart",
+        "DELETE_FROM_CART": "Delete from cart",
         "CONFIGURE": "Configure",
         "REORDER": "Reorder",
         "PRODUCT": "Product",
@@ -346,6 +366,7 @@
         "FREQUENCY": "Frequency",
         "NET_PRICE": "Net Price",
         "SEARCH_CONFIGURATION": "Search Configuration",
+        "SEARCH_LINE_ITEMS": "Search Line Items",
         "QTY": "Qty",
         "YES": "Yes",
         "NO": "No",
@@ -399,7 +420,12 @@
         "ORDER_AMOUNT_BY_STATUS": "ORDER AMOUNT BY STATUS",
         "PRICE_NOT_AUTOUPDATED": "* Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "Update Prices",
-        "PRICE_ERROR": "Pricing has failed for your cart. Please retry.",
+        "PRICE_ERROR": "Pricing of your cart has failed, please proceed with either of the following.",
+        "RETRY":"Retry",
+        "RETRY_CART":"Retry pricing the cart",
+        "ABANDON":"Abandon",
+        "ABANDON_CART":"Abandon the cart",
+        "CLONE_CART":"Create a copy of the cart",
         "FAVORITES": "Favorites",
         "SELECTIONS": "Selections",
         "PRODUCTS": "Products",
@@ -433,7 +459,14 @@
             "BY": "by",
             "MAKE_VISIBILITY_PRIVATE": "Make visibility private",
             "INVALID_FILE": "Invalid file extension"
-        }
+        },
+        "ALT_TEXT_IMAGE":"Generic placeholder image",
+        "NO_LINE_ITEMS_MESSAGE": "No line items yet on this {{record}}",
+        "PROCESSING_TITLE":"Please wait",
+        "PROCESSING_MESSAGE":"Your request is being processed.....",
+        "TABLE_ACTION_CONFIRMATION_MESSAGE":"Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
+        "NO_MATCHING_ORDERS_FOUND": "No matching orders found",
+        "NO_MATCHING_QUOTES_FOUND": "No matching quotes found"    
     },
     "REVALIDATE_CART": {
         "REVALIDATION_REQUIRED": "Revalidation required",
@@ -467,8 +500,8 @@
     "QUOTE_CONFIRMATION_MODAL": {
         "THANK_YOU": "Thank You",
         "QUOTE_REQUEST": "Quote Request",
-        "QUOTE_CONFIRMATION_MSG": "Your quote has been send for review and assigned to the seller {{Sellername}}.",
-        "QUOTE_CONFIRMATION_Update_MSG": "Your updated quote has been send for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRM_MSG": "Your quote has been sent for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRMATION_Update_MSG": "Your updated quote has been sent for review and assigned to the seller {{Sellername}}.",
         "QUOTE_CONFIRMATION_MSG_WITH_RFP": " The Expected Response Date {{RFP_value}}.",
         "QUOTE_CONFIRMATION_NO": "Your Quote is :",
         "REVIEW_YOUR_QUOTE": "Review Your Quote"
@@ -730,7 +763,9 @@
         "PROMOTION_AMOUNT": "Promotion Amount",
         "PROMOTION_APPLIED": "Following promotions are applied with the product",
         "PROMOTION_APPLIED_TO": "Promotions Applied",
+        "APPLY_PROMOTION":"Apply Promotion",
         "APPLIED_PROMOTIONS": "Applied Promotions",
+        "PROMOTIONS":"Promotions",
         "TOTAL_PROMOTION_AMOUNT": "Total Promotion Amount",
         "PROMOTION_APPLIEDTO": "Promotions Applied To",
         "APPLIED_PROMOTION": "applied to the following items in the cart.",
@@ -841,6 +876,8 @@
         "COMMENTS": "Comments",
         "ATTACHMENTS": "Attachments",
         "PRICE_SUMMARY": "Price Summary",
+        "GENERATE_ORDER": "Generate Order",
+        "GENERATE_QUOTE": "Generate Quote",
         "SUMMARY": "Summary",
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "Your Order Is: {{orderName}}",

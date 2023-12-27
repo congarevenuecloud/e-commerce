@@ -139,7 +139,7 @@ export class FavoriteListComponent implements OnInit {
   }
 
   private canEdit(favorite: Favorite) {
-    return this.isActiveFavorite(favorite) && get(get(favorite, 'CreatedBy'), 'Id') === get(this.user, 'Id');
+    return this.isActiveFavorite(favorite) && get(favorite, 'CreatedById') === get(this.user, 'Id');
   }
 
   private editFavorite(favorite: Favorite) {
@@ -147,7 +147,7 @@ export class FavoriteListComponent implements OnInit {
   }
 
   private canDelete(favorite: Favorite) {
-    return get(get(favorite, 'CreatedBy'), 'Id') === get(this.user, 'Id');
+    return get(favorite, 'CreatedById') === get(this.user, 'Id');
   }
 
   private fetchFavoriteTotals() {

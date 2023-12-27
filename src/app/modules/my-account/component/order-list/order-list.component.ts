@@ -21,7 +21,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
   ordersByStatus$: Observable<GroupByAggregateResponse>;
   orderAmountByStatus$: Observable<GroupByAggregateResponse>;
   colorPalette = ['#D22233', '#F2A515', '#6610f2', '#008000', '#17a2b8', '#0079CC', '#CD853F', '#6f42c1', '#20c997', '#fd7e14'];
-  aggregateFields : Array<AggregateFields> = [
+  aggregateFields: Array<AggregateFields> = [
     {
       AggregateFunction: 'count',
       AggregateField: 'Status'
@@ -30,7 +30,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
       AggregateFunction: 'sum',
       AggregateField: 'OrderAmount'
     }
-]
+  ]
 
   filterOptions: FilterOptions = {
     visibleFields: [
@@ -113,12 +113,12 @@ export class OrderListComponent implements OnInit, OnDestroy {
         }));
   }
 
-  getChartData(){
-    const queryFields=['Status'];
-    const groupByFields=['Status'];
-    return this.orderService.getOrderAggregatesByStatus(null, this.aggregateFields, queryFields,  groupByFields).pipe(take(1)).subscribe((data) => {
-      this.orderAmountByStatus$ = of(omit(mapValues(groupBy(data, 'Status'), (s) => sumBy(s, 'sum(OrderAmount)')),'null'));
-      this.ordersByStatus$=of(omit(mapValues(groupBy(data, 'Status'), s => sumBy(s, 'count(Status)')), 'null'))
+  getChartData() {
+    const queryFields = ['Status'];
+    const groupByFields = ['Status'];
+    return this.orderService.getOrderAggregatesByStatus(null, this.aggregateFields, queryFields, groupByFields, this.filterList$.value).pipe(take(1)).subscribe((data) => {
+      this.orderAmountByStatus$ = of(omit(mapValues(groupBy(data, 'Status'), (s) => sumBy(s, 'sum(OrderAmount)')), 'null'));
+      this.ordersByStatus$ = of(omit(mapValues(groupBy(data, 'Status'), s => sumBy(s, 'count(Status)')), 'null'))
     });
   }
 
@@ -153,8 +153,8 @@ export class OrderListComponent implements OnInit, OnDestroy {
       ).subscribe();
   }
 
-  getDateFormat(record:Order) {
-    return this.dateFormatPipe.transform(get(record,'CreatedDate'));
+  getDateFormat(record: Order) {
+    return this.dateFormatPipe.transform(get(record, 'CreatedDate'));
   }
 
   ngOnDestroy() {

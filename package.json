@@ -1,6 +1,6 @@
 {
   "name": "conga.ui.ecom.rc",
-  "version": "2023.10.0",
+  "version": "202311.3.8",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -21,13 +21,12 @@
     "@angular/platform-browser": "^14.3.0",
     "@angular/platform-browser-dynamic": "^14.3.0",
     "@angular/router": "^14.3.0",
-    "@congarevenuecloud/core": "^2023.10.17",
-    "@congarevenuecloud/ecommerce": "^2023.10.17",
-    "@congarevenuecloud/elements": "^2023.10.17",
+    "@congarevenuecloud/core": "^202311.3.8",
+    "@congarevenuecloud/ecommerce": "^202311.3.8",
+    "@congarevenuecloud/elements": "^202311.3.8",
     "@fortawesome/fontawesome-free": "^5.12.0",
     "@ng-select/ng-select": "^9.0.0",
     "@ngx-translate/core": "^13.0.0",
-    "@types/ws": "^8.5.4",
     "angular-auth-oidc-client": "15.0.0",
     "angular2-ladda": "^4.0.0",
     "bootstrap": "^4.4.1",
@@ -52,7 +51,6 @@
     "raven-js": "^3.27.2",
     "roboto-fontface": "^0.10.0",
     "rxjs": "~7.4.0",
-    "tslib": "^2.3.0",
     "xml-js": "^1.6.11",
     "zone.js": "~0.11.4"
   },

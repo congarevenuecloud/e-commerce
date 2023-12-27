@@ -2,7 +2,6 @@ import { Component, OnInit, HostListener, ChangeDetectionStrategy, ChangeDetecto
 import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { first, defaultTo, get, cloneDeep, isEqual } from 'lodash';
-import { ApiService } from '@congarevenuecloud/core';
 import { Storefront, StorefrontService, UserService, User, CartService, Cart, AccountService, Account } from '@congarevenuecloud/ecommerce';
 @Component({
   selector: 'app-header',
@@ -16,7 +15,7 @@ export class HeaderComponent implements OnInit {
   userInitials: string = null;
   storefront$: Observable<Storefront>;
   user$: Observable<User>;
-  myAccount$: Observable<Account>;  
+  myAccount$: Observable<Account>;
   showFavorites$: Observable<boolean>;
   cartView$: BehaviorSubject<Cart> = new BehaviorSubject(null);
   showAccountHome: boolean = false;
@@ -27,7 +26,6 @@ export class HeaderComponent implements OnInit {
   constructor(
     private userService: UserService,
     private storefrontService: StorefrontService,
-    private apiService: ApiService,
     private cartService: CartService,
     private accountService: AccountService,
     private cdr: ChangeDetectorRef
@@ -45,11 +43,11 @@ export class HeaderComponent implements OnInit {
   }
 
   login() {
-    this.apiService.login();
+    this.userService.login();
   }
 
   doLogout() {
-    this.apiService.logout();
+    this.userService.logout();
   }
 
   updateCartView() {
@@ -76,7 +74,7 @@ export class HeaderComponent implements OnInit {
     if (isArrowLeft) this.showAccountInfo = false;
 
     else if (
-      clickedElement.parentElement.classList.contains('account-section') ||
+      clickedElement.parentElement?.classList.contains('account-section') ||
       clickedElement.closest('.account-info') ||
       ['basicOption', 'ng-option'].some(className => clickedElement.classList.contains(className))) return;
 

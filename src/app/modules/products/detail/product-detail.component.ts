@@ -15,7 +15,8 @@ import {
     StorefrontService,
     Storefront,
     PriceListItemService,
-    Cart
+    Cart,
+    ItemRequest
 } from '@congarevenuecloud/ecommerce';
 import { ProductConfigurationComponent, ProductConfigurationSummaryComponent, ProductConfigurationService, RevalidateCartService } from '@congarevenuecloud/elements';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
@@ -32,7 +33,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     @ViewChild('confirmationTemplate') confirmationTemplate: TemplateRef<any>;
 
     viewState$: BehaviorSubject<ProductDetailsState> = new BehaviorSubject<ProductDetailsState>(null);
-    recommendedProducts$: Observable<Array<Product>>;
+    recommendedProducts$: Observable<Array<ItemRequest>>;
 
     attachments$: Observable<Array<ProductInformation>>;
     modalRef: BsModalRef;
@@ -194,11 +195,11 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
     changeProductToOptional(event: boolean) {
         if (this.cartItemList && this.cartItemList.length > 0)
-          forEach(this.cartItemList, c => {
-            c.IsOptional = event;
-          });
-          this.productConfigurationService.changeItemToOptional(this.cartItemList);
-      }
+            forEach(this.cartItemList, c => {
+                c.IsOptional = event;
+            });
+        this.productConfigurationService.changeItemToOptional(this.cartItemList);
+    }
     /**
      * Changes the quantity of the cart item passed to this method.
      *
