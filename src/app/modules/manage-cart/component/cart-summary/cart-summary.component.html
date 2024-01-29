@@ -1,0 +1,97 @@
+<div class="card animated fadeIn" *ngIf="cart">
+  <div class="card-header">
+    <h5 class="card-title mb-0" *ngIf="!cart.Proposald?.Id">{{'MANAGE_CART.CART_SUMMARY.CART_SUMMARY_TITLE' | translate }}</h5>
+    <h5 class="card-title mb-0" *ngIf="cart.Proposald?.Id">{{'DETAILS.PRICE_SUMMARY' | translate }}</h5>
+  </div>
+  <div class="card-body">
+    <div class="d-flex justify-content-between">
+      <span> {{'MANAGE_CART.CART_SUMMARY.TOTAL_PRICE' | translate }} </span>
+      <span class="font-weight-bold">
+        <span>{{cartTotal?.NetPrice | localCurrency | async}}</span>
+      </span>
+    </div>
+    <div *ngIf="(storefront$ | async)?.EnablePromotions && (storefront$ | async) !== null ? true : false" class="d-flex mt-2 justify-content-between">
+      <span> {{'MANAGE_CART.CART_SUMMARY.PROMOTIONS_APPLIED' | translate }} </span>
+      <span>{{totalPromotions | localCurrency | async}}</span>
+    </div>
+    <div *ngIf="(storefront$ | async)?.EnableTaxCalculations && (storefront$ | async) !== null ? true : false"
+      class="d-flex mt-2 justify-content-between small">
+      <span>
+        <a placement="auto" [popover]="taxPophover" [outsideClick]="true">
+          <u (click)="openEstimateTaxPopup()">
+            {{'MANAGE_CART.CART_SUMMARY.TAX' | translate }}
+          </u>
+        </a>
+      </span>
+      <span>{{totalEstimatedTax | localCurrency | async}}</span>
+    </div>
+    <hr class="mt-2 mb-3" />
+    <div class="d-flex justify-content-between">
+      <span> {{'MANAGE_CART.CART_SUMMARY.SUB_TOTAL' | translate }} </span>
+      <span class="font-weight-bold">
+        <span>{{cartSubTotal?.NetPrice | localCurrency | async}}</span>
+      </span>
+    </div>
+    <hr class="mt-2 mb-3" />
+    <div class="d-flex justify-content-end" *ngIf="!cart.Proposald?.Id">
+        <button *ngIf="(isLoggedIn$ | async) && (storefront$ | async)?.EnableRequestQuote" class="btn btn-link"
+          [routerLink]="['/proposals/create']" [ladda]="getCartState() === 'pending'" data-style="zoom-in"
+          [disabled]="!cart?.LineItems || cart?.LineItems?.length === 0 || hasErrors === true">
+          {{'COMMON.REQUEST_QUOTE' | translate }}
+        </button>
+        <button class="btn btn-primary" [routerLink]="['/checkout']" [ladda]="getCartState() === 'pending'" data-style="zoom-in"
+          [disabled]="!cart?.LineItems || cart?.LineItems?.length === 0 || hasErrors === true">
+          {{'MANAGE_CART.CART_SUMMARY.CHECKOUT' | translate }}
+        </button>
+    </div>
+
+    <div class="d-flex justify-content-end" *ngIf="cart.Proposald?.Id">
+      <button class="btn btn-link mr-2" (click)="openDiscardChageModals()"  [ladda]="getCartState() === 'pending'" data-style="zoom-in"
+      [disabled]="!cart?.LineItems || cart?.LineItems?.length === 0 || hasErrors === true">
+        {{'MANAGE_CART.CART_SUMMARY.DISCARD_CHANGES' | translate }}
+      </button>
+      <button class="btn btn-primary px-2" [routerLink]="['/proposals/create']"  [ladda]="getCartState() === 'pending'" data-style="zoom-in"
+      [disabled]="!cart?.LineItems || cart?.LineItems?.length === 0 || hasErrors === true">
+        {{'MANAGE_CART.CART_SUMMARY.FINALIZE_AND_SUBMIT' | translate }}
+      </button>
+    </div>
+  </div>
+</div>
+<!--
+  Not part of Nov 15 deliverable
+-->
+<!-- <div class="card mt-3" *ngIf="cart">
+  <div class="card-header">
+    Request a Quote
+  </div>
+  <div class="card-body">
+    <small class="mb-3 d-block">
+      Request a quote for your configuration and someone will be in touch to discuss next steps.
+    </small>
+    <button class="btn btn-block btn-outline-primary" [ladda]="state.requestQuoteLoading" data-style="zoom-in" (click)="createQuote()"
+      data-spinner-color="black" [disabled]="!cart?.LineItems || cart?.LineItems?.length === 0">Request a Quote</button>
+  </div>
+</div> -->
+
+<ng-template #discardChangesTemplate>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left"> {{'MANAGE_CART.DISCARD_CHANGES_MODAL.DISCARD_CHANGES_TITLE' | translate}} </h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="discardChangesModal.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body flex-column justify-content-center">
+    <p>{{'MANAGE_CART.DISCARD_CHANGES_MODAL.DISCARD_CHANGES_Message' | translate}}</p>
+    <p>{{'MANAGE_CART.DISCARD_CHANGES_MODAL.DISCARD_CHANGES_CONFIRMATION' | translate}}</p>
+    <div class="d-flex justify-content-end flex-wrap flex-md-nowrap">
+        <button class="btn btn-link" (click)="discardChangesModal.hide()"> {{ 'COMMON.CANCEL' | translate }} </button>
+        <button class="btn btn-primary m-2"  (click)="onDiscardChages()" [ladda]="loading" data-style="zoom-in"> {{ 'MANAGE_CART.DISCARD_CHANGES_MODAL.DISCARD_CHANGES' | translate }} </button>
+    </div>
+</div>
+</ng-template>
+
+<ng-template #taxPophover>
+  <apt-tax-pophover
+    *ngIf="(storefront$ | async)?.EnableTaxCalculations && (storefront$ | async) !== null ? true : false && showTaxPopUp"
+    [taxItems]="taxItems" [totalEstimatedTax]="totalEstimatedTax" class="small" [showTaxPopUp]="true"></apt-tax-pophover>
+</ng-template><hr class="mt-3 mb-2" />

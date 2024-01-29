@@ -1,0 +1,91 @@
+<div class="card animated fadeIn mt-3">
+    <h5 class="card-header mb-0">
+        {{ 'CART.CART_SUMMARY.YOUR_CART' | translate }}
+    </h5>
+
+    <div class="card-body">
+        <ul class="list-group" style="list-style-type: none;">
+            <ng-container *ngFor="let item of lineItems; last as isLast">
+                <li class="group-item d-flex justify-content-between lh-condensed"  *ngIf="item.LineType === 'Product/Service'" >
+                    <div class="details">
+                        <h6 class="my-0">
+                            {{item.Product.Name}}
+                        </h6>
+                        <small *ngIf="item?.Product?.ProductCode" class="text-muted" [translate]="'CART.CART_SUMMARY.PRODUCT_ID'" [translateParams]="{productCode: item?.Product?.ProductCode}"></small>
+                        <small class="text-muted">{{ 'CART.CART_SUMMARY.QUANTITY' | translate }} {{item.Quantity}}</small>
+                        <small *ngIf="item.Product.HasAttributes || item.Product.HasOptions">
+                            <a href="javascript:void(0)" (click)="openModal(item)">{{ 'CART.CART_SUMMARY.DETAILS' | translate }}</a>
+                        </small>
+                    </div>
+                    <div class="text-right">
+                        <small class="text-muted strike-text d-block"><span>{{item?.ExtendedPrice | localCurrency | async}}</span></small>
+                        <span class="text-muted d-block"><span>{{item?.NetPrice | localCurrency | async}}</span></span>
+                    </div>
+                </li>
+                <hr class="mt-2 mb-2" style="width: 100%;" *ngIf="!isLast" />
+            </ng-container>
+        </ul>
+    </div>
+</div>
+
+<!-- <h4 class=" mb-3 mt-5">
+    <span class="text-muted">Configuration Summary</span>
+</h4>
+<div class="card">
+    <div class="card-body">
+        <small class="mb-3 d-block">
+            Your own personalised quote complete with an overview of all of your options. Send to an email address or download directly
+            to your device.
+        </small>
+        <small class="text-info">{{state.configurationMessage}}</small>
+        <button class="btn btn-block btn-outline-primary" (click)="generatePdf()" [ladda]="state.downloadLoading" data-style="zoom-in" data-spinner-color="black">Download</button>
+        <button class="btn btn-block btn-outline-primary">Send as Email</button>
+    </div>
+</div> -->
+
+<!-- <h4 class=" mb-3 mt-5">
+    <span class="text-muted">Request a Quote</span>
+</h4>
+<div class="card">
+    <div class="card-body">
+        <small class="mb-3 d-block">
+             Request a quote for your configuration and someone will be in touch to discuss next steps.
+        </small>
+        <button class="btn btn-block btn-outline-primary" [ladda]="state.requestQuoteLoading" data-style="zoom-in" (click)="createQuote()" data-spinner-color="black">Request a Quote</button>
+    </div>
+</div> -->
+
+<!--<ng-template #productDetails>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">{{lineItem?.Product.Name}}</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+      <apt-product-configuration-summary [item]="lineItem">
+      </apt-product-configuration-summary>
+    </div>
+</ng-template>-->
+
+<apt-product-configuration-summary
+  *ngIf="lineItem"
+  [product]="lineItem.Product"
+  [relatedTo]="lineItem">
+</apt-product-configuration-summary>
+
+<ng-template #confirmationTemplate>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left"> {{generatedQuoteName}} </h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="confirmationModal.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body d-flex justify-content-center align-items-center confirmation py-5">
+    <i class="far fa-check-circle"></i>
+  </div>
+  <div class="modal-footer d-flex justify-content-center flex-wrap flex-md-nowrap">
+    <button class="btn btn-secondary d-block w-100 m-2" [routerLink]="['/']" (click)="confirmationModal.hide()"> {{ 'CART.CART_SUMMARY.CONTINUE_SHOPPING' | translate }} </button>
+    <button class="btn btn-primary d-block w-100 m-2" [routerLink]="['/my-account', 'quotes', generatedQuote.Name]" (click)="confirmationModal.hide()"> {{ 'CART.CART_SUMMARY.QUOTE_DETAILS' | translate }} </button>
+  </div>
+</ng-template>

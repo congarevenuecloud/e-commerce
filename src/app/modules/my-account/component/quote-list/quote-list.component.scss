@@ -1,0 +1,17 @@
+.dropdown-menu{
+    right: -26px;
+    top: -15px;
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+a{
+    cursor: pointer;
+}
+
+.summary>div:not(:first-child):not(:last-child)::after{
+    content: "|";
+    margin: 0 1rem;
+}

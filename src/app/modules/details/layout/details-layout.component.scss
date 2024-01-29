@@ -1,0 +1,148 @@
+@import "variables";
+
+@keyframes slide {
+  from {
+    top: $navbar-brand-height;
+  }
+
+  to {
+    top: 0;
+  }
+}
+
+:host {
+  display: block;
+}
+
+.navbar {
+  transition: all 0.2s ease 0s;
+
+  &.fixed-top {
+    top: 0;
+    box-shadow: $box-shadow;
+    z-index: 1031;
+    position: fixed;
+    animation-name: slide;
+    animation-duration: 0.2s;
+    background-color: $light;
+  }
+
+  &.expand {
+    top: calc(#{$navbar-brand-height} + 35px);
+  }
+
+  h3 {
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-link {
+    border: none;
+    margin-bottom: 0;
+    color: $gray-700;
+
+    &.active {
+      border-bottom: 3px solid $blue !important;
+    }
+
+    &:hover {
+      background: $gray-200;
+    }
+  }
+}
+
+.headerContainer {
+  height: 14rem;
+
+  .form-group {
+    margin-bottom: 0;
+
+    input:not(.form-control-plaintext) {
+      width: 4.375rem;
+    }
+  }
+
+  label {
+    white-space: nowrap;
+  }
+
+  .nav-link {
+
+    &.active,
+    &:hover {
+      border-bottom-width: 0.188rem;
+    }
+  }
+
+  .actions {
+    white-space: nowrap;
+
+    // overflow: hidden;
+    &.primary-actions {
+      height: 5rem;
+
+      >div {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    &.secondary-actions {
+      height: 4.375rem;
+
+      >div {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.headerContainerLarge {
+  height: 18rem;
+
+  .form-group {
+    margin-bottom: 0;
+
+    input:not(.form-control-plaintext) {
+      width: 4.375rem;
+    }
+  }
+
+  label {
+    white-space: nowrap;
+  }
+
+  .nav-link {
+
+    &.active,
+    &:hover {
+      border-bottom-width: 0.188rem;
+    }
+  }
+
+  .actions {
+    white-space: nowrap;
+
+    // overflow: hidden;
+    &.primary-actions {
+      height: 5rem;
+
+      >div {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    &.secondary-actions {
+      height: 4.375rem;
+
+      >div {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}

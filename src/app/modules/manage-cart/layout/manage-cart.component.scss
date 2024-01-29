@@ -1,0 +1,125 @@
+@import "../../../../variables.scss";
+
+dt,
+dd {
+    display: block;
+    width: 100%;
+}
+
+dl,
+dd,
+dt {
+    margin-bottom: 0;
+}
+
+dt {
+    margin-top: $btn-block-spacing-y;
+}
+
+table {
+    tr:first-child td {
+      border-top: none;
+    }
+}
+  
+div.table-responsive {
+    overflow-y: hidden;
+}
+
+.cart-total {
+    width: 100px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.fixed-height {
+    height: 30px;
+}
+
+p.description {
+    max-height: 55px;
+    overflow-y: hidden;
+}
+
+apt-price-summary {
+    button.active-color {
+        background-color: $white;
+    }
+
+    button.active-color:hover {
+        background-color: $white;
+    }
+}
+
+.cart-title {
+    font-size: 1rem;
+    font-weight: $font-weight-normal;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+    /* Adjust the width as needed */
+}
+
+.input-group {
+    input {
+        border-radius: 0.3rem;
+        padding-left: 2rem !important;
+        z-index: 0 !important;
+        border-top-left-radius: 0.25rem !important;
+        border-bottom-left-radius: 0.25rem !important;
+    }
+}
+
+.input-group-append {
+    position: absolute;
+    z-index: 1 !important;
+}
+
+.sidenav {
+    height: 100%;
+    position: fixed;
+    width: 0;
+    z-index: 1039 !important;
+    top: 0;
+    right: 0;
+    background-color: $white;
+    overflow-x: hidden;
+    transition: 0.5s;
+    box-shadow: 0 0 5px $gray-500;
+  }
+
+  .dropdown-toggle::after {
+    display: none;
+  }
+  
+  div.showNav{
+    width: 18.75rem;
+  }
+  
+  @media(max-width: 48.75rem) {
+    div.showNav{
+      width: 12.5rem;
+    } 
+  }
+  
+  @media(max-width: 37.5rem) {
+    div.showNav{
+      width: 12.5rem;
+    }
+  }
+  ::-webkit-scrollbar {
+    width: 0.375rem !important;
+    height: 0.375rem !important;
+    background: #fff !important;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #A8B2BB !important;
+    border-radius: 0.25rem !important;
+  }
