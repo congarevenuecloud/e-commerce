@@ -1,0 +1,36 @@
+@import "../../../../../variables.scss";
+
+.file-section {
+  border-style: dashed;
+  border-width: $border-width;
+}
+
+app-quote-details {
+  app-detail {
+    div.btn-group.global-actions {
+      right: -30px;
+      margin: 0 0 0 -30px;
+    }
+  }
+}
+
+.table-container {
+  max-height: 18em;
+}
+
+.table-container table thead {
+  position: sticky;
+  top: 0;
+  background-color: $white;
+  z-index: 1;
+}
+
+.custom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: $black;
+  z-index: 9999;
+}

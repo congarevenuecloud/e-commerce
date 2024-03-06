@@ -1,0 +1,44 @@
+@import "../../../../variables.scss";
+
+@keyframes slide {
+  from {
+    top: $navbar-brand-height;
+  }
+
+  to {
+    top: 0;
+  }
+}
+
+.navbar {
+  transition: all 0.2s ease 0s;
+
+  &.fixed-top {
+    top: 0;
+    box-shadow: $box-shadow;
+    z-index: 1031;
+    animation-name: slide;
+    animation-duration: 0.2s;
+    background-color: $light;
+  }
+
+  &.expand {
+    top: calc(#{$navbar-brand-height} + 35px);
+  }
+
+  h3 {
+    text-overflow: ellipsis;
+  }
+
+  .nav-link {
+    color: $gray-700;
+
+    &.active {
+      border-bottom: 3px solid $blue !important;
+    }
+
+    &:hover {
+      background: $gray-200;
+    }
+  }
+}

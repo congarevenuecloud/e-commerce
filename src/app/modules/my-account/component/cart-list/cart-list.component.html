@@ -1,0 +1,68 @@
+<ng-container *ngTemplateOutlet="cartList; context: { view: view$ | async }"></ng-container>
+
+<ng-template #cartList let-view="view">
+  <!-- Total Carts and Add new Cart action button -->
+  <div class="title-section mb-2">
+    <nav class="navbar border-0 navbar-light bg-white d-flex px-0 pt-0 justify-content-between">
+      <span class="navbar-brand">
+        {{'COMMON.CARTS' | translate}}
+        <span *ngIf="cartAggregate$ | async as cartAggregate">({{cartAggregate?.TotalRecord}})</span>
+      </span>
+      <button type="button" class="btn btn-primary btn-raised"
+        (click)="newCart(createCartTemplate)">{{'MY_ACCOUNT.CART_LIST.CREATE_NEW' | translate}}</button>
+    </nav>
+  </div>
+
+  <!-- Table component rendering list of carts with applicable actions and pagination -->
+  <apt-table #table *ngIf="view?.tableOptions else showLoader" [type]="type" class="d-block bg-white"
+    [options]="view?.tableOptions" [showErrorToaster]="true" [showMassActionConfirmationAlert]="true"></apt-table>
+
+  <!-- Spinner dots while data is loading -->
+  <ng-template #showLoader>
+    <div class="d-flex justify-content-center py-5">
+      <apt-dots></apt-dots>
+    </div>
+  </ng-template>
+
+  <!-- Template for creating new cart -->
+  <ng-template #createCartTemplate>
+    <form (ngSubmit)="handleFormSubmit()">
+      <div class="modal-header d-flex flex-row-reverse px-0 pb-1">
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body pt-0 bg-white custom-border-bottom-radius-0">
+        <h4 class="modal-title pull-left font-weight-bold  pb-3 pt-2">{{'MY_ACCOUNT.CART_LIST.CREATE_NEW' | translate}}
+        </h4>
+        <div>
+          <apt-input-field placeholder="{{'COMMON.NAME' | translate}}" name="cartName" [(ngModel)]="cart.Name"
+            [showLabel]="false" field="Name" [entity]="cart"></apt-input-field>
+        </div>
+        <small class="text-danger animated fadeIn" *ngIf="message">{{message}}</small>
+      </div>
+      <div class="d-flex justify-content-end modal-footer border-top  bg-white">
+        <button class="btn btn-link pr-1" type="button" (click)="modalRef.hide()">{{'COMMON.CANCEL' |
+          translate}}</button>
+        <button class="btn button btn-primary btn-raised px-1 m-0 w-25" type="submit" [ladda]="loading">{{'COMMON.SAVE'
+          |
+          translate}}</button>
+      </div>
+    </form>
+  </ng-template>
+
+  <!-- Template for setting cart effective date -->
+  <ng-template #effectiveDateTemplate>
+    <div class="modal-body bg-white pb-0 w-75 custom-border-bottom-radius-0">
+      <apt-input-field [entity]="cart" [field]="'EffectiveDate'" [(ngModel)]="cart.EffectiveDate">
+      </apt-input-field>
+    </div>
+    <div class="d-flex justify-content-end modal-footer bg-white border-top  w-75">
+      <button class="btn btn-link" type="button" (click)="modalRef.hide()">{{'COMMON.CANCEL' |
+        translate}}</button>
+      <button class="btn btn-primary btn-raised" type="button" [ladda]="loading"
+        (click)="setEffectiveDate()">{{'COMMON.UPDATE' |
+        translate}}</button>
+    </div>
+  </ng-template>
+</ng-template>

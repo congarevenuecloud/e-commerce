@@ -1,0 +1,25 @@
+@import "../../../../../variables.scss";
+
+app-order-detail {
+  app-detail {
+    div.btn-group.global-actions {
+      right: -30px;
+      margin: 0 0 0 -30px;
+    }
+  }
+.file-section {
+  border-style: dashed;
+  border-width: $border-width;
+}
+}
+
+.table-container {
+  max-height: 18em;
+}
+
+.table-container table thead {
+  position: sticky;
+  top: 0;
+  background-color: $white;
+  z-index: 1;
+}

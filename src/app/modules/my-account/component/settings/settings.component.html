@@ -1,0 +1,72 @@
+<nav class="border-bottom navbar-light bg-white d-flex justify-content-between">
+  <span class="navbar-brand">
+    {{'MY_ACCOUNT.SETTING.MY_SETTINGS' | translate}}
+  </span>
+</nav>
+
+<div class="row my-3 pb-5 pt-2">
+  <div class="col-sm-12 col-12 col-md-6 col-lg-6 card-margin">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title d-flex justify-content-between">
+          <span>{{'MY_ACCOUNT.SETTING.USER_INFO' | translate}}</span>
+        </h5>
+        <dl class="mt-4" *ngIf="user$ | async as user; else loading">
+          <dd>
+            <apt-output-field [record]="user" field="FirstName" [layout]="'stacked'"  (onChange)="updateUser($event)">
+            </apt-output-field>
+          </dd>
+
+          <dd>
+            <apt-output-field [record]="user" field="LastName" [layout]="'stacked'"  (onChange)="updateUser($event)">
+            </apt-output-field>
+          </dd>
+
+          <dd>
+            <apt-output-field [record]="user" field="Email" [layout]="'stacked'"  (onChange)="updateUser($event)">
+            </apt-output-field>
+          </dd>
+
+          <dd>
+            <apt-output-field [record]="user" field="UserName" [layout]="'stacked'"  (onChange)="updateUser($event)">
+            </apt-output-field>
+          </dd>
+
+          <dd>
+            <apt-output-field [record]="user" field="Locale" [layout]="'stacked'"  (onChange)="updateUser($event)">
+            </apt-output-field>
+          </dd>
+
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-12 col-12 col-md-6 col-lg-6 pt-lg-0 pt-md-0 pt-sm-4 pt-4 card-margin">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">{{'MY_ACCOUNT.SETTING.ACCOUNT_INFO' | translate}}</h5>
+        <dl class="mt-4" *ngIf="account$ | async as account; else loading">
+          <dd>
+            <apt-output-field [record]="account" field="Name" [layout]="'stacked'" [labelClass]="'font-weight-light'" [editable]="false"></apt-output-field>
+          </dd>
+
+          <dd class="pb-2">
+            <apt-address [value]="account" [type]="'Shipping'" [readonly]="true" [layout]="'stacked'" [labelClass]="'font-weight-light'"
+              [label]="'COMMON.SHIPPING_ADDRESS' | translate"></apt-address>
+          </dd>
+
+          <dd>
+            <apt-output-field [record]="account" field="Phone" [layout]="'stacked'" [labelClass]="'font-weight-light'" [editable]="false">
+            </apt-output-field>
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="d-flex justify-content-center py-5">
+    <apt-dots></apt-dots>
+  </div>
+</ng-template>

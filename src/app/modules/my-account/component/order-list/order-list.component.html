@@ -1,0 +1,102 @@
+<ng-container *ngTemplateOutlet="orderList; context: { view: view$ | async }"></ng-container>
+<ng-template #orderList let-view="view">
+    <div class="row d-lg-block d-md-block d-sm-none d-none">
+        <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
+            <div class="d-flex align-items-end mr-2">
+                <apt-data-filter [type]="type" [filterOptions]="filterOptions" [filterList]="filterList$ | async"
+                    (filterListChange)="handleFilterListChange($event)">
+                </apt-data-filter>
+            </div>
+            <div class="d-flex align-items-end">
+                <span class="text-muted">{{'COMMON.TOTAL_ORDERS' | translate}}:</span>
+                <h4 class="my-0 ml-2">{{totalRecords$ | async}}</h4>
+            </div>
+            <div class="mx-3">&#124;</div>
+            <div class="d-flex align-items-end">
+                <span class="text-muted">{{'COMMON.AMOUNT' | translate}}:</span>
+                <h4 class="my-0 ml-2">{{(totalAmount$ | async) | localCurrency | async}}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="row d-lg-none d-md-none d-sm-block d-block">
+        <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
+            <div class="d-flex align-items-end mr-2">
+                <apt-data-filter [type]="type" [filterOptions]="filterOptions" [filterList]="filterList$ | async"
+                    (filterListChange)="handleFilterListChange($event)">
+                </apt-data-filter>
+            </div>
+        </div>
+    </div>
+    <div class="row d-lg-none d-md-none d-sm-block d-block">
+        <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
+            <div class="d-flex align-items-end">
+                <span class="text-muted">{{'COMMON.TOTAL_ORDERS' | translate}}:</span>
+                <h4 class="my-0 ml-2">{{totalRecords$ | async}}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="row d-lg-none d-md-none d-sm-block d-block">
+        <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
+            <div class="d-flex align-items-end">
+                <span class="text-muted">{{'COMMON.AMOUNT' | translate}}:</span>
+                <h4 class="my-0 ml-2">{{(totalAmount$ | async) | localCurrency | async}}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-sm-12 col-md-6 col-lg-6 card-margin">
+            <div class="card">
+                <div class="card-header">
+                    <strong class="text-uppercase d-block">{{'MY_ACCOUNT.ORDER_DETAIL.ORDERS_BY_STATUS' |
+                        translate}}</strong>
+                </div>
+                <div class="card-body">
+                    <ng-container *ngIf="ordersByStatus$ | async as ordersByStatus; else loading">
+                        <apt-chart *ngIf="(ordersByStatus | json) != '{}'; else noData" [data]="ordersByStatus"
+                            [amountsByStatus]="orderAmountByStatus$ | async" [type]="'bar'" [showLegend]="false">
+                        </apt-chart>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-6 pt-lg-0 pt-md-0 pt-sm-3 pt-3">
+            <div class="card">
+                <div class="card-header">
+                    <strong class="text-uppercase d-block">{{'COMMON.ORDER_AMOUNT_BY_STATUS' | translate}}</strong>
+                </div>
+                <div class="card-body">
+                    <ng-container *ngIf="orderAmountByStatus$ | async as orderAmountByStatus; else loading">
+                        <apt-chart *ngIf="(orderAmountByStatus | json) != '{}'; else noData"
+                            [data]="orderAmountByStatus" [type]="'doughnut'" [legendPosition]="'right'"
+                            [colorPalette]="colorPalette" [labelDataTransform]="'currency'">
+                        </apt-chart>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-12 bg-white">
+            <div>
+                <div>
+                    <apt-table *ngIf="view?.tableOptions; else loading" [type]="type" [options]="view?.tableOptions"
+                        [showErrorToaster]="true"></apt-table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #loading>
+        <div class="d-flex justify-content-center">
+            <apt-dots></apt-dots>
+        </div>
+    </ng-template>
+
+    <ng-template #noData>
+        <div class="d-flex justify-content-center align-items-baseline">
+            <i class="fas fa-exclamation-triangle"> </i>
+            <p class="pl-1">{{'COMMON.NO_MATCHING_ORDERS_FOUND' | translate}}</p>
+        </div>
+    </ng-template>
+</ng-template>

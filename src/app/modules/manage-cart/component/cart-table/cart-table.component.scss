@@ -1,0 +1,33 @@
+@import "../../../../../variables.scss";
+
+dt, dd{
+    display: block;
+    width: 100%;
+}
+dl, dd, dt{
+    margin-bottom: 0;
+}
+dt{
+    margin-top: $btn-block-spacing-y;
+}
+table{
+    min-width: 800px;
+    height: 100px;
+    tr:first-child td{
+        border-top: none;
+    }
+}
+
+.cart-total {
+    width: 100px; 
+    overflow: hidden; 
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.fixed-height{
+    height: 30px;
+}
+p.description{
+    max-height: 55px;
+    overflow-y: hidden;
+}

@@ -1,0 +1,33 @@
+<div *ngIf="loadData$ | async">
+  <div *ngIf="!isInvalidGuest else routingMessage">
+    <apt-alert [showCartError]="true" [autoRun]="false"></apt-alert>
+    <apt-jumbotron></apt-jumbotron>
+    <div class="container pb-5">
+      <div>
+        <apt-product-carousel *ngIf="productListA$ | async as productListA; else loading" [productList]="productListA"
+          slides="4" [title]="categories[0]?.Name" subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tincidunt quam massa, a commodo orci finibus
+                      rhoncus. Nullam tempor, libero vel auctor efficitur, nibh lacus luctus orci, vitae fringilla lorem magna
+                      at metus."></apt-product-carousel>
+
+        <apt-product-carousel *ngIf="productListB$ | async as productListB; else loading" [productList]="productListB"
+          slides="4" [title]="categories[1]?.Name" subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tincidunt quam massa, a commodo orci finibus
+                  rhoncus. Nullam tempor, libero vel auctor efficitur, nibh lacus luctus orci, vitae fringilla lorem magna
+                  at metus."></apt-product-carousel>
+      </div>
+    </div>
+    <app-footer></app-footer>
+  </div>
+</div>
+
+<ng-template #routingMessage>
+  <div class="d-flex justify-content-center align-items-center vh-100 font-weight-bold">
+    <span class="mb-1">{{ 'ERROR.INVALID_GUEST_MESSAGE' | translate }} </span>
+    <h4><span class="ml-1">{{counter}}</span></h4>
+  </div>
+</ng-template>
+
+<ng-template #loading>
+  <div class="d-flex justify-content-center pt-5">
+    <apt-dots></apt-dots>
+  </div>
+</ng-template>
