@@ -1,16 +1,32 @@
 <ng-container *ngIf="cart$ | async as cart; else loadingTemplate">
-    <apt-breadcrumb *ngIf="!cart?.Proposald?.Id" [label]="'COMMON.CREATE_QUOTE' | translate"></apt-breadcrumb>
-    <apt-breadcrumb *ngIf="cart?.Proposald?.Id" [sobject]="quoteRequestObj" [label]="'CREATE_QUOTE.FINALIZE_AND_SUBMIT' | translate">
+    <apt-breadcrumb *ngIf="!cart?.Proposald?.Id" [label]="'COMMON.CREATE_QUOTE' | translate" class="border-bottom py-2"></apt-breadcrumb>
+    <apt-breadcrumb *ngIf="cart?.Proposald?.Id" [sobject]="quoteRequestObj" [label]="'CREATE_QUOTE.FINALIZE_AND_SUBMIT' | translate" class="border-bottom py-2">
     </apt-breadcrumb>
-    <div class="container-fluid animated fadeIn">
+    <div class="container-fluid animated fadeIn p-0">
+        
         <div class="px-4 py-2">
-            <h4 *ngIf="!cart?.Proposald?.Id">{{'COMMON.REQUEST_QUOTE' | translate }}</h4>
+            <div class="d-flex justify-content-between">
+                <h4 *ngIf="!cart?.Proposald?.Id">{{'COMMON.REQUEST_QUOTE' | translate }}</h4>
+                <div class="d-flex justify-content-end">
+                    <apt-captcha *ngIf="showCaptcha"
+                    (onCaptchaSuccess)="captchaSuccess(cart)"></apt-captcha>
+                    <button class="btn btn-link" [routerLink]="['/carts/active']">
+                        {{'COMMON.CANCEL' | translate }}
+                    </button>
+                    <button *ngIf="!showCaptcha" class="btn btn-primary btn-raised" (click)="quotePlacement(cart)"
+                        [disabled]="disableSubmit" [ladda]="loading" data-style="zoom-in">
+                        {{'COMMON.REQUEST_QUOTE' | translate }}
+                    </button>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-12 col-md-8 mb-4 py-2">
                     <app-request-quote-form [cart]="cart" (onQuoteUpdate)="onUpdate($event)" #form></app-request-quote-form>
                 </div>
                 <div class="col-12 col-md-4 mb-4 py-2">
-                    <apt-price-summary [disableSubmit]="disableSubmit" [record]="cart" [loading]="loading" [page]="'create-proposal'" (onRequestQuote)="convertCartToQuote(cart)"></apt-price-summary>
+                    <apt-price-summary [disableSubmit]="disableSubmit" [record]="cart" [loading]="loading"
+                    [page]="'create-proposal'" [showCaptcha]="false"
+                    (onRequestQuote)="convertCartToQuote(cart)" (onShowCaptcha)="loadCaptcha()"></apt-price-summary>
                     <cart-summary [cart]="cart"></cart-summary>
                 </div>
             </div>
@@ -20,7 +36,7 @@
 
     <ng-template #confirmationTemplate>
         <div class="modal-header align-items-center d-flex flex-row-reverse p-0 pb-2 mt-3 border-bottom border-secondary">
-            <button type="button" class="close close-button pull-right" aria-label="Close" (click)="confirmationModal.hide()" [routerLink]="['/proposals', quoteConfirmation.Id]">
+            <button type="button" class="close close-button pull-right" aria-label="Close" (click)="confirmationModal.hide()" [routerLink]="isLoggedIn ? ['/proposals', quoteConfirmation.Id] : ['/products']">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>

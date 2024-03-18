@@ -5,7 +5,7 @@ import { Observable, of, BehaviorSubject, Subscription, combineLatest, empty } f
 import { TranslateService } from '@ngx-translate/core';
 import { mergeMap } from 'rxjs/operators';
 import { FilterOperator } from '@congarevenuecloud/core';
-import { Category, ProductService, ProductResult, PreviousState, Cart, CartService, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote } from '@congarevenuecloud/ecommerce';
+import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote } from '@congarevenuecloud/ecommerce';
 import { DomSanitizer } from '@angular/platform-browser';
 /**
  * Product list component shows all the products in a list for user selection.
@@ -49,7 +49,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
   searchString: string = null;
   data$: BehaviorSubject<ProductResult> = new BehaviorSubject<ProductResult>(null);
   productFamilies$: Observable<Array<string>> = new Observable<Array<string>>();
-  cart$: Observable<Cart>;
   category: Category;
   subscription: Subscription;
   hasSearchError: boolean;
@@ -81,7 +80,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
    */
 
   constructor(private activatedRoute: ActivatedRoute, private sanitizer: DomSanitizer,
-    private cartService: CartService, private router: Router, private categoryService: CategoryService,
+    private router: Router, private categoryService: CategoryService,
     public productService: ProductService, private translateService: TranslateService, private accountService: AccountService) { }
 
   ngOnDestroy() {

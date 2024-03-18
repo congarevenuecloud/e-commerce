@@ -31,6 +31,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   attachemntSubscription: Subscription;
 
   @ViewChild('attachmentSection') attachmentSection: ElementRef;
+  @ViewChild('fileInput') fileInput: ElementRef;
 
   private subscriptions: Subscription[] = [];
   orderGenerated: boolean = false;
@@ -81,6 +82,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   file: File;
 
   uploadFileList: any;
+  
+  isSupportedFileType:boolean = true;
+
+  supportedFileTypes:string;
+  
   lookupOptions: LookupOptions = {
     primaryTextField: 'Name',
     secondaryTextField: 'Email',
@@ -89,6 +95,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
 
   isPrivate: boolean = false;
   maxFileSizeLimit = 29360128;
+  cartRecord: Cart;
 
   constructor(private activatedRoute: ActivatedRoute,
     private orderService: OrderService,
@@ -103,7 +110,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     private contactService: ContactService,
     private attachmentService: AttachmentService,
     private quoteService: QuoteService,
-    private productInformationService: ProductInformationService
+    private productInformationService: ProductInformationService,
+    private cartService: CartService
   ) { }
 
   ngOnInit() {
@@ -114,7 +122,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       this.lookupOptions.sortOrder = null;
       this.lookupOptions.page = 10;
     }));
-  }
+    this.subscriptions.push(this.attachmentService.getSupportedAttachmentType().pipe(
+      take(1)
+    ).subscribe((data: string)=>{
+      this.supportedFileTypes = data;
+    }))  }
 
   getOrder() {
     if (this.orderSubscription) this.orderSubscription.unsubscribe();
@@ -141,6 +153,9 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
 
         order.OrderLineItems = get(order, 'OrderLineItems');
         this.orderLineItems$.next(LineItemService.groupItems(order.OrderLineItems));
+        this.cartService.fetchCartStatus(get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id')).pipe(take(1)).subscribe(c => {
+          this.cartRecord = c;
+        })
         return this.updateOrder(order);
       })).subscribe();
     this.getAttachments();
@@ -154,9 +169,9 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       'ShipToAccount': order.ShipToAccount,
       'BillToAccount': order.BillToAccount
     } as Order;
-    this.orderService.updateOrder(order.Id, payload).pipe(switchMap(c=>this.updateOrderValue(c))).subscribe(r => {
+    this.subscriptions.push(this.orderService.updateOrder(order.Id, payload).pipe(switchMap(c => this.updateOrderValue(c))).subscribe(r => {
       this.updateOrder(r);
-    });
+    }));
   }
 
   deleteAttachment(attachment: AttachmentDetails) {
@@ -232,19 +247,18 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
 
   onGenerateOrder() {
     if (this.attachmentSection) this.attachmentSection.nativeElement.scrollIntoView({ behavior: 'smooth' });
-    let  obsv$;
-    if(get(this.order, 'Status') == 'Draft') {
-        const payload = { 'Status': 'Generated'};
-        obsv$ = this.orderService.updateOrder(this.order.Id, payload as Order);
+    let obsv$;
+    if (get(this.order, 'Status') == 'Draft') {
+      const payload = { 'Status': 'Generated' };
+      obsv$ = this.orderService.updateOrder(this.order.Id, payload as Order);
     } else {
       obsv$ = of(null);
     }
-      
-  combineLatest([this.emailService.getEmailTemplateByName('DC Order generate-document Template'), obsv$]).pipe(
+
+    combineLatest([this.emailService.getEmailTemplateByName('DC Order generate-document Template'), obsv$]).pipe(
       switchMap(result => {
-        return first(result) ? this.emailService.sendEmailNotificationWithTemplate(get(first(result), 'Id'), this.order, get(this.order.PrimaryContact, 'Id')): of(null)
-      }), take(1)).subscribe(() => { });
-    this.getOrder();
+        return first(result) ? this.emailService.sendEmailNotificationWithTemplate(get(first(result), 'Id'), this.order, get(this.order.PrimaryContact, 'Id')) : of(null)
+      }), take(1)).subscribe(() => { this.getOrder(); });
   }
 
   addComment(orderId: string) {
@@ -292,6 +306,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     this.uploadFileList = null;
     this.attachmentsLoader = false;
     this.isPrivate = false;
+    this.fileInput.nativeElement.value = null;
+    this.isSupportedFileType = true;
   }
 
   getAttachments() {
@@ -335,6 +351,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       this.uploadFileList = event.target.files;
       this.hasFileSizeExceeded(this.uploadFileList, this.maxFileSizeLimit);
       this.file = fileList[0];
+      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList,this.supportedFileTypes);
     }
   }
 
@@ -349,6 +366,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     if (fileList.length > 0) {
       this.uploadFileList = event.dataTransfer.files;
       this.hasFileSizeExceeded(this.uploadFileList, event.target.dataset.maxSize);
+      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList,this.supportedFileTypes);
     } else {
       let f = [];
       for (let i = 0; i < itemList.length; i++) {

@@ -16,7 +16,6 @@ export class MyAccountLayoutComponent implements OnInit {
   me$: Observable<User>;
   /** @ignore */
   userInitials: string = null;
-  cart$: Observable<Cart>;
   showFavorites$: Observable<boolean>;
 
   /** @ignore */
@@ -34,7 +33,6 @@ export class MyAccountLayoutComponent implements OnInit {
         this.userInitials = defaultTo(first(user.FirstName), '') + defaultTo(first(user.LastName), '');
       })
     );
-    this.cart$ = this.cartService.getMyCart();
     this.showFavorites$ = this.storefrontService.isFavoriteEnabled();
   }
 

@@ -53,6 +53,7 @@
         "CART": {
             "ITEM_ADDED_TOASTR_MESSAGE": "es_MX {{productName}} was added to the cart.",
             "ITEM_ADDED_TOASTR_TITLE": "es_MX Item Added",
+            "BULK_MESSAGE": "{{productName}} were added to the cart.",
             "DELETED": "es_MX Successfully deleted",
             "NEW_CART_CREATED": "es_MX New cart created successfully",
             "ACTIVATED": "es_MX Cart activated successfully",
@@ -439,11 +440,14 @@
         "WELCOME_MESSAGE": "es_MX Hello, {{userName}}!",
         "GUEST_WELCOME_MESSAGE": "es_MX Hello, sign in!",
         "PAGES":"es_MX Pages",
+        "ADD_PRODUCTS": "Add Products",
         "ATTACHMENT_DETAILS": {
             "TITLE": "es_MX Attach new file(s)",
             "INPUT_LABEL": "es_MX Drop files to Attach or",
             "BROWSE": "es_MX browse",
             "FILE_SIZE_EXCEEDED_ERROR": "es_MX Size exceeds 28MB",
+            "UNSUPPORTED_FILE_TYPE_ERROR":"es_MX Unsupported file type. [Supported file types are {{supportedFileTypes}}]",
+            "SUPPORTED_FILE_TYPES":"es_MX Supported file types are {{supportedFileTypes}}",
             "NO_ATTACHMENTS": "es_MX No attachments have been added yet",
             "REMOVE_ATTACHMENT": "es_MX Remove Attachment",
             "BY": "es_MX by",
@@ -490,8 +494,8 @@
     "QUOTE_CONFIRMATION_MODAL": {
         "THANK_YOU": "es_MX Thank You",
         "QUOTE_REQUEST": "es_MX Quote Request",
-        "QUOTE_CONFIRM_MSG": "es_MX Your quote has been sent for review and assigned to the seller {{Sellername}}.",
-        "QUOTE_CONFIRMATION_Update_MSG": "es_MX Your updated quote has been sent for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRM_MSG": "es_MX Your quote has been send for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRMATION_Update_MSG": "es_MX Your updated quote has been send for review and assigned to the seller {{Sellername}}.",
         "QUOTE_CONFIRMATION_MSG_WITH_RFP": "es_MX The Expected Response Date {{RFP_value}}.",
         "QUOTE_CONFIRMATION_NO": "es_MX Your Quote is :",
         "REVIEW_YOUR_QUOTE": "es_MX Review Your Quote"
@@ -860,6 +864,10 @@
         "PRICE_SUMMARY": "es_MX Price Summary",
         "GENERATE_ORDER": "es_MX Generate Order",
         "GENERATE_QUOTE": "es_MX Generate Quote",
+        "GENERATE": "es_MX Generate",
+        "TEMPLATE": "es_MX Template",
+        "FILE_FORMAT": "es_MX File Format",
+        "INCLUDE_WATERMARK": "es_MX Include Watermark",
         "SUMMARY": "es_MX Summary",
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "es_MX You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "es_MX Your Order Is: {{orderName}}",
@@ -908,6 +916,17 @@
     "CONFIGURATION": {
         "EMPTY": "es_MX This product has not been configured",
         "NO_CONFIGURATION": "es_MX This product does not have any configuration options"
+    },
+    "ACTION_BAR": {
+        "CONFIRM_ORDER": "es_MX Confirm Order",
+        "ORDER_CONFIRMATION_TOASTR_TITLE": "es_MX Order Confirmation",
+        "ORDER_CONFIRMATION_TOASTR_MESSAGE": "es_MX Order has been confirmed.",
+        "CHANGE_ACCOUNT_TITLE": "es_MX Account Changed",
+        "CHANGE_PRICE_LIST_TITLE": "es_MX Price List Changed",
+        "CHANGE_PRICE_LIST_MESSAGE": "es_MX The active price list has been changed.",
+        "ORDER_CONFIRMATION_FAILURE": "es_MX Order could not be confirmed. Please try again.",
+        "CART_CREATION_TOASTR_MESSAGE": "es_MX A new cart has been created.",
+        "PRESENT": "es_MX Present"
     },
     "TABLE": {
         "SEARCH": "es_MX Search",

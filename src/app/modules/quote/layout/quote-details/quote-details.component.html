@@ -1,10 +1,18 @@
 <app-detail *ngIf="quote; else loading" [context]="quote" [route]="'proposals'">
   <div class="detail-header">
-    <div class="d-flex align-items-center mb-3">
-      <span class="page-header ">{{quote?.Name}}</span>
-      <span class="badge badge-primary mt-1 ml-3 px-3 py-2 border text-uppercase"
-        *ngIf="quote?.ApprovalStage">{{quote?.ApprovalStage}}</span>
-      <div *ngIf="quote?.Items?.length > 0" class="pr-3">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <span class="page-header d-lg-block d-md-block d-sm-none d-none">{{quote?.Name}}</span>
+        <span tooltip="{{quote?.Name}}" class="page-header d-block d-sm-block d-md-none d-lg-none">{{quote?.Name |
+          truncate:13}}</span>
+        <span class="badge badge-primary mt-1 ml-3 px-3 py-2 border text-uppercase"
+          *ngIf="quote?.ApprovalStage">{{quote?.ApprovalStage}}</span>
+      </div>
+      <apt-generate-document [record]="quote" *ngIf="quote.ApprovalStage !== 'Accepted'"
+        [ngClass]="quote.ApprovalStage === 'Draft' ?  'pr-2 ml-auto d-lg-block d-md-block d-sm-none d-none ' : 'pr-3 ml-auto d-lg-block d-md-block d-sm-none d-none'"
+        (onStatusUpdate)="onGenerateQuote()">
+      </apt-generate-document>
+      <div *ngIf="quote?.Items?.length > 0" class="pr-3 d-lg-block d-md-block d-sm-none d-none">
         <button type="button"
           [ngClass]="quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' ?  'btn btn-outline-primary btn-link text-primary text-primary' :'btn btn-primary btn-raised'"
           [ladda]="acceptLoader"
@@ -20,13 +28,33 @@
       <div class="align-items-stretch d-flex" *ngIf="quote?.ApprovalStage === 'Generated'">
         <apt-present-document [record]="quote"></apt-present-document>
       </div> -->
-      <div *ngIf="quote?.ApprovalStage === 'Accepted' && order$ | async as order">
-        <span class="pr-4 d-flex align-items-center">
+      <div class="d-sm-block d-block ml-auto d-md-none d-lg-none pt-2"
+        *ngIf="quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented' || quote?.ApprovalStage === 'Approved'">
+        <div class="dropdown">
+          <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          </a>
+          <div class="dropdown-menu dropdown-menu-right px-3" aria-labelledby="dropdownMenuButton">
+            <ng-container *ngTemplateOutlet="quoteActionButtons"></ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="d-lg-block d-md-block d-sm-none d-none"
+        *ngIf="quote?.ApprovalStage === 'Accepted' && order$ | async as order">
+        <span class="pr-4 d-flex align-items-baseline">
           <apt-output-field [record]="order" field="Name" [label]="'MY_ACCOUNT.ORDER_DETAIL.ORDER_ID' | translate"
             layout="inline" [editable]="false" [showQuickView]="true"></apt-output-field>
           <span class="badge badge-primary ml-1">{{order?.Status}}</span>
         </span>
       </div>
+    </div>
+    <div class="d-lg-none d-md-none d-sm-block d-block"
+      *ngIf="quote?.ApprovalStage === 'Accepted' && order$ | async as order">
+      <span class="pr-4 d-flex align-items-baseline">
+        <apt-output-field [record]="order" field="Name" [label]="'MY_ACCOUNT.ORDER_DETAIL.ORDER_ID' | translate"
+          layout="inline" [editable]="false" [showQuickView]="true"></apt-output-field>
+        <span class="badge badge-primary ml-1">{{order?.Status}}</span>
+      </span>
     </div>
   </div>
 
@@ -104,8 +132,9 @@
       </div>
     </div>
   </app-detail-section>
-
-  <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-4">
+  
+  <div class="pt-4">
+    <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-4">
     <div class="card">
       <div *ngIf="quoteLineItems$ | async as quoteLineItems">
         <div class="card-header">
@@ -122,8 +151,8 @@
             <table class="table border-bottom">
               <tbody>
                 <ng-container *ngFor="let item of quoteLineItems; let i = index">
-                  <apt-line-item-table-row [index]="i" [parent]="item.MainLine" [options]="item.Flat"
-                    [children]="item.SecondaryLines" [editableFields]="false">
+                  <apt-line-item-table-row [cart]="cartRecord" [index]="i" [parent]="item.MainLine"
+                    [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false">
                   </apt-line-item-table-row>
                 </ng-container>
               </tbody>
@@ -143,9 +172,11 @@
         </div>
       </div>
     </div>
-  </app-detail-section>
+     </app-detail-section>
+  </div>
 
-  <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-4">
+  <div class="pt-4">
+    <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-4">
     <div class="card" #attachmentSection *ngIf="attachmentList$ | async as attachmentList; else loading">
       <div class="card-header">
         <h5>
@@ -155,9 +186,63 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="col-12 col-md-7 border-right attachment-container">
+          <div class="col-lg-6 col-md-6 d-none d-lg-block d-md-block d-sm-none border-right attachment-container">
             <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
-              <div class="table-container">
+              <div class="table-container overflow-auto">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="Name"
+                          [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileSize"
+                          [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
+                          [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="CreatedBy"
+                          [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
+                          field="CreatedDate" [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let attachment of attachmentList; let i = index">
+                      <th scope="row">{{i + 1}}</th>
+                      <td>
+                        <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
+                          target="_self">{{attachment?.DocumentMetadata?.Name}}</a>
+                      </td>
+                      <td>{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
+                      <td>{{getFileType(attachment?.DocumentMetadata?.FileType)}}</td>
+                      <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
+                        {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
+                      <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
+                      <td><button *ngIf="isLoggedIn" class="btn btn-link p-0 m-0" (click)="deleteAttachment(attachment)"
+                          [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
+                          data-spinner-color="black">
+                          <span class="fa fa-trash"></span>
+                        </button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ng-container>
+            <ng-template #emptyAttachments>
+              <div class="d-flex align-items-center justify-content-center flex-column h-100 text-muted">
+                <i class="fa fa-4x fa-file-o mb-2"></i>
+                {{'COMMON.ATTACHMENT_DETAILS.NO_ATTACHMENTS' | translate}}
+              </div>
+            </ng-template>
+          </div>
+          <div class="col-12 d-block d-lg-none d-md-none d-sm-block attachment-container">
+            <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
+              <div class="table-container overflow-auto">
                 <table class="table table-sm">
                   <thead>
                     <tr>
@@ -209,26 +294,43 @@
               </div>
             </ng-template>
           </div>
-          <div class="col-12 col-md-5">
+          <div class="col-12 col-md-6 pt-sm-3 pt-3">
             <form (ngSubmit)="uploadAttachment(quote.Id)">
               <label class="font-weight-bold">{{'COMMON.ATTACHMENT_DETAILS.TITLE' | translate}}</label>
               <div class="file-section d-flex align-items-center justify-content-center border-secondary file-upload"
                 (dragover)="onDragFile($event)" (drop)="onDropFile($event)" data-max-size="26214400">
-                <label class="p-5 position-relative" for="browse"><span
-                    class="position-absolute upload-icon-position"><i
+                <label class="py-5 px-4 position-relative" for="browse"><span><i
                       class="fa fa-4x fa-cloud-upload text-black-50"></i></span><span
-                    class="pl-4">{{'COMMON.ATTACHMENT_DETAILS.INPUT_LABEL' | translate}}</span><span
+                    class="pl-2">{{'COMMON.ATTACHMENT_DETAILS.INPUT_LABEL' | translate}}</span><span
                     class="pl-1 text-underline cursor-pointer">{{'COMMON.ATTACHMENT_DETAILS.BROWSE' |
                     translate}}</span></label>
-                <input id="browse" class="d-none p-5" type="file" (change)="fileChange($event)" />
+                <input #fileInput id="browse" class="d-none p-5" type="file" (change)="fileChange($event)" />
               </div>
               <div class="mt-2" *ngIf="hasSizeError && file != null">
                 <p class="text-danger">
                   {{'COMMON.ATTACHMENT_DETAILS.FILE_SIZE_EXCEEDED_ERROR' | translate}}
                 </p>
               </div>
+              
+              <div class="mt-2" *ngIf="file==null && isSupportedFileType && supportedFileTypes?.length">
+                <p>
+                  {{
+                    "COMMON.ATTACHMENT_DETAILS.SUPPORTED_FILE_TYPES"
+                    | translate:{supportedFileTypes:supportedFileTypes}
+                    }}
+                </p>
+              </div>
+
+              <div class="mt-2" *ngIf="!isSupportedFileType && file != null && supportedFileTypes?.length">
+                <p class="text-danger">
+                  {{
+                    "COMMON.ATTACHMENT_DETAILS.UNSUPPORTED_FILE_TYPE_ERROR"
+                    | translate:{supportedFileTypes:supportedFileTypes}
+                    }}
+                </p>
+              </div>
               <div class="form-group">
-                <div class="mt-2" *ngIf="uploadFileList && !hasSizeError">
+                <div class="mt-2" *ngIf="uploadFileList && !hasSizeError && isSupportedFileType">
                   <div class="d-flex justify-content-between" *ngFor="let file of uploadFileList">
                     <div class="w-50">
                       <input type="checkbox" [(ngModel)]="isPrivate" name="attachmentVisibilityScope"
@@ -245,7 +347,7 @@
                 <button class="btn btn-link" (click)="clearFiles()" type="button">{{'COMMON.CLEAR' |
                   translate}}</button>
                 <button class="btn btn-primary btn-primary" type="submit"
-                  [disabled]="(hasSizeError && file != null) || !file" [ladda]="attachmentsLoader">{{'COMMON.UPLOAD' |
+                  [disabled]="(!isSupportedFileType ||hasSizeError && file != null) || !file" [ladda]="attachmentsLoader">{{'COMMON.UPLOAD' |
                   translate }}</button>
               </div>
             </form>
@@ -253,14 +355,15 @@
         </div>
       </div>
     </div>
-  </app-detail-section>
+     </app-detail-section>
+  </div>
   <ng-template #intimationTemplate>
-    <div class="modal-header align-items-center d-flex flex-row-reverse p-0 border-bottom border-secondary">
-      <button type="button" class="close pull-right" aria-label="Close" (click)="closeModal()">
+    <div class="modal-header align-items-center d-flex flex-row-reverse pb-0 border-bottom border-secondary">
+      <button type="button" class="close close-button pull-right pr-0" aria-label="Close" (click)="closeModal()">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    <div class="modal-body d-flex flex-column justify-content-center py-4">
+    <div class="modal-body bg-white d-flex flex-column justify-content-center py-4">
       <h6 class="modal-title pull-left font-weight-bold pb-2">
         {{'COMMON.ACCEPT_QUOTE' | translate}}
       </h6>
@@ -270,6 +373,20 @@
     </div>
   </ng-template>
 </app-detail>
+
+<ng-template #quoteActionButtons>
+  <div>
+    <apt-generate-document [record]="quote" [ngClass]="'p-0 m-0'"
+      (onStatusUpdate)="onGenerateQuote()">
+    </apt-generate-document>
+  </div>
+  <div *ngIf="quote?.Items?.length > 0">
+    <button type="button" [ladda]="acceptLoader" class="btn-link btn text-primary px-2 ml-auto"
+      *ngIf="quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented'"
+      (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">{{'COMMON.ACCEPT_QUOTE'
+      |translate}}</button>
+  </div>
+</ng-template>
 
 <ng-template #loading>
   <div class="d-flex justify-content-center pt-5">

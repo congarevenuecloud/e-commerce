@@ -1,6 +1,6 @@
 <div *ngIf="loadData$ | async">
   <div *ngIf="!isInvalidGuest else routingMessage">
-    <apt-alert [record]="cart$ | async" [autoRun]="false"></apt-alert>
+    <apt-alert [showCartError]="true" [autoRun]="false"></apt-alert>
     <apt-jumbotron></apt-jumbotron>
     <div class="container pb-5">
       <div>

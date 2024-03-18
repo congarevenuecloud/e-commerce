@@ -30,7 +30,7 @@ export class ManageCartComponent implements OnInit {
   confirmationModal: BsModalRef;
   loading: boolean = false;
   primaryLI: Array<CartItem> = [];
-  readonly: boolean = false;
+  readOnly: boolean = false;
   cart: Cart;
   disabled: boolean;
   subscriptions: Array<Subscription> = new Array();
@@ -44,6 +44,7 @@ export class ManageCartComponent implements OnInit {
       onClick: () => this.openCloneCartModal(),
     },
   ]
+  showSideNav: boolean= false;
   constructor(private cartService: CartService,
     private cartItemService: CartItemService,
     private orderService: OrderService,
@@ -64,13 +65,13 @@ export class ManageCartComponent implements OnInit {
       this.crService.getRecommendationsForCart(), get(this.activatedRoute.params, "_value.id") ? this.cartService.getCartWithId(get(this.activatedRoute.params, "_value.id")) : of(null), this.revalidateCartService.revalidateFlag]).pipe(
         switchMap(([cart, products, nonactive, revalidateFlag]) => {
           this.disabled = revalidateFlag;
-          this.readonly = get(cart, 'Id') === get(nonactive, 'Id') || isNull(nonactive) ? false : true;
-          if (this.readonly) {
+          this.readOnly = get(cart, 'Id') === get(nonactive, 'Id') || isNull(nonactive) ? false : true;
+          if (this.readOnly) {
             this.batchActionService.setShowCloneAction(true);
           } else {
             this.batchActionService.setShowCloneAction(false);
           }
-          cart = this.readonly ? nonactive : cart;
+          cart = this.readOnly ? nonactive : cart;
           this.cart = cart;
           this.primaryLI = filter((get(cart, 'LineItems')), (i) => i.IsPrimaryLine && i.LineType === 'Product/Service');
           if (!isNil(get(cart, 'BusinessObjectId'))) {
@@ -79,10 +80,12 @@ export class ManageCartComponent implements OnInit {
           } else {
             this.businessObject$ = of(null);
           }
-          return combineLatest([of(cart), this.businessObject$, of(products)]);
+          return combineLatest([this.cartService.fetchCartStatus(get(this.cart, 'Id')), this.businessObject$, of(products)]);
         }),
         switchMap(([cartInfo, businessObjectInfo, productsInfo]) => {
           isEqual(get(cartInfo, 'BusinessObjectType'), 'Proposal') ? set(cartInfo, 'Proposald', businessObjectInfo) : set(cartInfo, 'Order', businessObjectInfo);
+          cartInfo.set('error',get(this.cart,'_metadata.error'));
+          cartInfo.set('ConfigResponse',get(this.cart,'ConfigResponse'));
           const cartItems = get(cartInfo, 'LineItems');
           return of({
             cart: cartInfo,
@@ -106,7 +109,7 @@ export class ManageCartComponent implements OnInit {
 
     this.subscriptions.push(this.cartService.updateCartById(cart.Id, payload).subscribe(r => {
       this.cart = r;
-    }));
+    }))
   }
   createQuote(cart: Cart) {
     this.quoteService.convertCartToQuote(cart.Proposald).pipe(take(1)).subscribe(
@@ -167,9 +170,33 @@ export class ManageCartComponent implements OnInit {
     );
   }
 
+  convertCartToQuote(quote: Quote) {
+    this.quoteService.convertCartToQuote(quote).pipe(take(1)).subscribe(
+      res => {
+        this.loading = false;
+        this.quoteConfirmation = res;
+        this.ngZone.run(() => {
+          this.router.navigate(['/proposals', this.quoteConfirmation.Id]);
+        });
+      },
+      err => {
+        this.loading = false;
+      }
+    );
+  }
+
+  openNav() {
+    this.showSideNav= true;
+  }
+  
+  /* Set the width of the side navigation to 0 */
+  closeNav() {
+    this.showSideNav=false;
+  }
+
   ngOnDestroy() {
     if (!isNil(this.subscriptions))
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+      this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 }
 

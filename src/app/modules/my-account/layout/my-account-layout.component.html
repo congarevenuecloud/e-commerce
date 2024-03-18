@@ -1,11 +1,11 @@
-<div class="bg-white border-bottom">
+<div class="bg-white border-bottom py-2">
   <apt-breadcrumb [label]="'HEADER.MY_ACCOUNT' | translate"></apt-breadcrumb>
 </div>
-<apt-alert [record]="cart$ | async" [autoRun]="false"></apt-alert>
+<apt-alert [showCartError]="true" [autoRun]="false"></apt-alert>
 <div class="row no-gutters flex-fill">
-  <div class="col-2 border-right bg-white">
-    <div class="card" *ngIf="me$ | async as me">
-      <div class="card-body">
+  <div class="col-2 border-right bg-white d-none d-sm-none d-lg-block d-md-block">
+    <div class="card border-0" *ngIf="me$ | async as me">
+      <div class="card-body pb-0">
         <div class="media">
           <h4
             class="d-flex justify-content-center align-items-center bg-secondary text-white rounded-circle user-avatar">
@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <ul class="list-group list-group-flush pt-0">
+    <ul class="list-group list-group-flush p-2">
       <a class="list-group-item list-group-item-action py-2 border-top" href="javascript:void(0)" [routerLink]="['/my-account/dashboard']"
       [routerLinkActive]="'active'">
       <i class="fas fa-tachometer-alt"></i>
@@ -52,7 +52,7 @@
     </a>
     </ul>
   </div>
-  <div class="col-10 pt-2 px-3">
+  <div class="col-lg-10 col-md-10 col-sm-12 col-12 pt-2 px-4 bg-white">
     <router-outlet></router-outlet>
   </div>
 </div>

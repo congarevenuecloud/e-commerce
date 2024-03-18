@@ -38,13 +38,16 @@ export class CreateQuoteComponent implements OnInit {
   loading: boolean = false;
   quoteRequestObj: Quote;
   quoteBreadCrumbObj$: Observable<Quote>;
-  disableSubmit: boolean = false;
+  disableSubmit: boolean = true;
+  // TODO: Update the variable names to avoid confusions.
+  showCaptcha: boolean=false;
+  displayCaptcha: boolean;
   isLoggedIn: boolean;
   subscriptions: Subscription;
 
   constructor(private cartService: CartService, private quoteService: QuoteService,private userService: UserService, private modalService: BsModalService, private translate: TranslateService, private storefrontService: StorefrontService, private ngZone: NgZone) { }
 
-  ngOnInit() {
+ ngOnInit() {
     this.quoteRequestObj = new Quote();
     this.cart$ = this.cartService.getMyCart();
     this.subscriptions=this.userService.isLoggedIn().subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn);
@@ -52,21 +55,32 @@ export class CreateQuoteComponent implements OnInit {
 
   onUpdate($event: Quote) {
     this.quoteRequestObj = $event;
-    this.disableSubmit = this.isLoggedIn ? isEmpty(this.quoteRequestObj.PrimaryContact && this.quoteRequestObj.ProposalName) : (!this.form?.form?.valid || this.form?.form?.pristine);
+    this.disableSubmit = this.isLoggedIn ? isEmpty(this.quoteRequestObj.PrimaryContact && this.quoteRequestObj.ProposalName) : (!get(this.form?.form,'valid') || get(this.form?.form,'pristine') || isNil(get(this.quoteRequestObj.PrimaryContact,'FirstName')) || isNil(get(this.quoteRequestObj.PrimaryContact,'LastName')) || isNil(get(this.quoteRequestObj.PrimaryContact,'Email')));
   }
 
-  /**
-   * Method converts cart to quote.
-   * @fires convertCartToQuote method.
-   * @param instance of quote
-   * @returns quote object.
-   */
+  loadCaptcha() {
+       this.displayCaptcha = true;
+  }
+
+  captchaSuccess(cart: Cart){
+    this.showCaptcha= false;
+    this.convertCartToQuote(cart);
+  }
+
+  quotePlacement(cart: Cart){
+  if(this.displayCaptcha)
+     this.showCaptcha=true;
+  else{
+    this.convertCartToQuote(cart);
+  }
+  }
   convertCartToQuote(cart: Cart) {
     const quoteAmountGroup = find(get(cart, 'SummaryGroups'), c => get(c, 'LineType') === 'Grand Total');
     set(this.quoteRequestObj, 'GrandTotal.Value', defaultTo(get(quoteAmountGroup, 'NetPrice', 0).toString(), '0'));
     if (this.quoteRequestObj.PrimaryContact) {
       this.loading = true;
       this.quoteService.convertCartToQuote(this.quoteRequestObj).pipe(take(1)).subscribe(res => {
+        this.loading = false;
         this.quoteConfirmation = res;
         this.confirmationModal = this.modalService.show(this.confirmationTemplate, { class: 'modal-lg' });
       },

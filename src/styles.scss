@@ -59,7 +59,7 @@ button {
 
   &.ladda-button[class*="btn-outline-"],
   &.ladda-button[class*="btn-link"] {
-    .ladda-spinner > div > div > div {
+    .ladda-spinner>div>div>div {
       background: $primary !important;
     }
   }
@@ -110,6 +110,7 @@ address {
 .card .card-footer {
   background-color: $white !important;
 }
+
 .navbar,
 .card {
   box-shadow: none;
@@ -137,7 +138,7 @@ address {
   right: 0;
   left: auto;
   opacity: 1;
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .175);
 }
 
 // mini-cart related fixes
@@ -186,8 +187,8 @@ label {
   padding: 0.25rem 0.5rem;
 }
 
-.input-group-sm > .form-control:not(textarea),
-.input-group-sm > .custom-file-control:not(textarea),
+.input-group-sm>.form-control:not(textarea),
+.input-group-sm>.custom-file-control:not(textarea),
 fieldset[disabled][disabled] .form-control,
 fieldset[disabled][disabled] .custom-file-control,
 .form-control.disabled,
@@ -217,10 +218,8 @@ apt-breadcrumb {
   top: 0;
   z-index: 1030;
   width: 100%;
-  padding-top: 1.25rem;
-  padding-bottom: 0.625rem;
 
-  & > nav > div {
+  &>nav>div {
     // height: $breadcrumb-height;
     height: fit-content;
   }
@@ -228,6 +227,7 @@ apt-breadcrumb {
 
 ngx-gallery {
   ngx-gallery-arrows div.ngx-gallery-arrow-wrapper {
+
     &.ngx-gallery-arrow-right,
     &.ngx-gallery-arrow-left {
       z-index: 100;
@@ -251,8 +251,8 @@ apt-price-summary div[class="card-body"] button.btn.btn-link:focus {
 }
 
 popover-container.Popover {
-  width: 25rem;
-  max-width: 25rem;
+  width: 22rem;
+  max-width: 22rem;
 
   &.show {
     animation: showPopover 0.4s ease-in forwards;
@@ -262,23 +262,26 @@ popover-container.Popover {
   border-radius: 0.25rem;
 }
 
-.popover{
-  border:$popover-border !important;
+.popover {
+  border: $popover-border !important;
 }
-.popover-body{
+
+.popover-body {
   padding: 0rem 0rem !important;
 }
 
-.rightspace{
+.rightspace {
   padding-right: 5rem !important;
 }
 
 .modal-content {
   background-color: transparent !important;
 }
+
 .modal-space {
   padding-left: 47.5rem !important;
 }
+
 .modal-body {
   border-radius: 0.25rem 0.25rem 0.25rem 0.25rem !important;
 }
@@ -339,28 +342,55 @@ popover-container.optionPopover {
   width: 37.5rem;
   max-width: 37.5rem;
 }
+
 typeahead-container {
   border-radius: 0.25rem !important;
   border: 0.063rem solid rgba(198, 205, 210, 1) !important;
 }
-typeahead-container.dropdown-menu {
-  padding-bottom: 0 !important;
-  right: inherit !important;
-  opacity: 1 !important;
-  padding: 0rem !important;
-  height: auto !important;
 
-  button.dropdown-item {
-    padding: 0 1.5rem;
-    max-width: 100%;
-  }
+div.input-icons{
+  typeahead-container.dropdown-menu {
+    padding-bottom: 0 !important;
+    right: inherit !important;
+    opacity: 1 !important;
+    padding: 0rem !important;
+    height: auto !important;
 
-  .dropdown-item.active,
-  .dropdown-item:active {
-    background-color: rgba(230, 234, 238, 1);
-    color: $black;
+    button.dropdown-item {
+      padding: 0 1.5rem;
+      width: 29.375rem;
+      max-width: 100%;
+    }
+
+    .dropdown-item.active,
+    .dropdown-item:active {
+      background-color: rgba(230, 234, 238, 1);
+      color: $black;
+    }
   }
 }
+
+td.col-md-3{
+  typeahead-container.dropdown-menu {
+    padding-bottom: 0 !important;
+    right: inherit !important;
+    opacity: 1 !important;
+    padding: 0rem !important;
+    height: 6.25rem !important;
+
+    button.dropdown-item {
+      padding: 0 1.5rem;
+      max-width: 100%;
+    }
+
+    .dropdown-item.active,
+    .dropdown-item:active {
+      background-color: rgba(230, 234, 238, 1);
+      color: $black;
+    }
+  }
+}
+
 
 apt-alert {
   div.alert:first-child {
@@ -369,7 +399,7 @@ apt-alert {
 }
 
 apt-constraint-rule-alert {
-  alert > div.alert:first-child {
+  alert>div.alert:first-child {
     margin-top: 0.25rem;
     margin-bottom: 0rem;
     height: 3rem;
@@ -643,7 +673,7 @@ app-cart-detail apt-line-item-table-row apt-input-field {
   }
 }
 
-.full-length-display{
+.full-length-display {
   padding-bottom: 4.375rem !important;
 }
 
@@ -723,15 +753,18 @@ div.tooltip {
   }
 }
 
+div.flex-fill{
+  background-color: $gray-100;
+}
+
 .list-group {
   .list-group-item {
     &.active {
       background-color: $EC-Sky-1;
+      border-radius: 5px;
       color: inherit;
-      border-left: 0.25rem solid $CC-Primary-active;
       border-top: none;
-      border-bottom: var(--bs-list-group-border-width) solid 
-      var(--bs-list-group-border-color);
+      border-bottom: var(--bs-list-group-border-width) solid var(--bs-list-group-border-color);
     }
   }
 }
@@ -810,7 +843,7 @@ cc-page-header {
 }
 
 .accordion .card-header {
-  font-size: $font-size-sm;
+  font-size: $font-size-md;
   background-color: $gray-100 !important;
 }
 
@@ -874,37 +907,45 @@ table.table {
     padding-left: 1.73rem !important;
     padding-right: 1.125rem !important;
   }
+
   .input-icons i {
     position: absolute;
     padding-top: 0.813rem;
     padding-left: 0.5rem;
   }
+
   input.form-control:focus {
     box-shadow: none !important;
     border: 0.088rem solid rgba(0, 36, 163, 1) !important;
     background-image: none !important;
   }
+
   apt-spinner {
     position: absolute;
     right: 4rem;
     top: 3.7rem !important;
   }
+
   typeahead-container {
     right: 3.125rem !important;
     top: 0.313rem !important;
   }
+
   div.border {
     border-radius: 0.25rem;
     border: 0.063rem solid rgba(198, 205, 210, 1) !important;
   }
+
   div.truncates {
     width: 16.125rem;
     padding-top: 0.625rem;
     padding-bottom: 0.625rem;
+
     i.fa {
       font-size: 1.5rem;
       color: rgba(1, 112, 239, 1) !important;
     }
+
     span {
       line-height: 1.25rem;
       color: black;
@@ -952,6 +993,7 @@ apt-add-to-cart {
 ol.breadcrumb {
   background-color: $white;
   padding-left: 1.5rem;
+
   li.breadcrumb-item {
     font-size: $font-size-md;
     line-height: $line-height-lg;
@@ -1016,6 +1058,7 @@ apt-table {
 .custom-primary-icon {
   color: $blue;
   cursor: pointer;
+
   &:hover {
     color: $CC-primary-hover;
   }
@@ -1103,7 +1146,7 @@ apt-promotion {
       div.card-body {
         form.input-group {
           apt-input-field {
-            width: 250px !important;
+            width: 12.5rem !important;
           }
         }
       }
@@ -1181,23 +1224,53 @@ apt-line-item-menu {
     border-radius: 50%;
   }
 
-  label.px-1{
+  label.px-1 {
     font-weight: 500 !important;
   }
 
-  .active{
+  .active {
     color: $dark-blue;
   }
 
-  .inactive{
+  .inactive {
     color: $black ;
   }
 
-  .disabled{
+  .disabled {
     color: $gray-500;
   }
 
   button.btn-raised:hover {
     color: $dark-blue;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  
+  ol.breadcrumb li:nth-child(n+3) {
+    display: none;
+  }
+
+  .card-margin {
+    margin-bottom:1rem;
+  }
+
+  app-header .sf-label, .wrap-text span dd, ol.breadcrumb li:nth-child(2) {
+    max-width: 3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // TODO: This will be taken out once related categories is moved as a modal
+  .category-list-container {
+    .card-body {
+      padding-bottom: 0rem !important;
+      ul.list-unstyled {
+        li a {
+          font-size: $font-size-md;
+        }
+      }
+    }
   }
 }

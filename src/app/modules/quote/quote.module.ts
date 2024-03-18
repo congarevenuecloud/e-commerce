@@ -5,7 +5,7 @@ import { CreateQuoteComponent } from './layout/quote-create/create-quote.compone
 import { RequestQuoteFormComponent } from './component/request-quote-form/request-quote-form.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { PricingModule } from '@congarevenuecloud/ecommerce';
-import { PriceModule, BreadcrumbModule, InputFieldModule, AddressModule, IconModule, LineItemTableRowModule, PriceSummaryModule, ButtonModule } from '@congarevenuecloud/elements';
+import { PriceModule, BreadcrumbModule, InputFieldModule, AddressModule, IconModule, LineItemTableRowModule, PriceSummaryModule, ButtonModule, CaptchaModule } from '@congarevenuecloud/elements';
 import { DatepickerModule, BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { FormsModule } from '@angular/forms';
 import { DetailsModule } from '../details/details.module';
@@ -15,10 +15,15 @@ import { LaddaModule } from 'angular2-ladda';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { CartModule } from '../cart/cart.module';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { CongaModule } from '@congarevenuecloud/core';
 
 @NgModule({
   imports: [
     CommonModule,
+    CaptchaModule,
+    TooltipModule,
+    CongaModule,
     QuoteRoutingModule,
     FormsModule,
     PriceModule,

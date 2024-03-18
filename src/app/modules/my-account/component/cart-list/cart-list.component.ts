@@ -3,7 +3,7 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { TranslateService } from '@ngx-translate/core';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { Observable, of } from 'rxjs';
-import { map, mergeMap, take, tap } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { ClassType } from 'class-transformer/ClassTransformer';
 import { find, first, get, isNil } from 'lodash';
 import { AObject, FilterOperator } from '@congarevenuecloud/core';
@@ -44,6 +44,10 @@ export class CartListComponent implements OnInit {
         map(() => {
           tableOptions = {
             tableOptions: {
+              stickyColumnCount: 1,
+              stickyColumns: [{
+                prop: 'Name'
+              }],
               columns: [
                 {
                   prop: 'Name',
@@ -238,16 +242,23 @@ export class CartListComponent implements OnInit {
   }
 
   getFilters(): Array<FieldFilter> {
-    return [{
-      field: 'Account.Id',
-      value: localStorage.getItem('account'),
-      filterOperator: FilterOperator.EQUAL
-    },
-    {
-      field: 'UseType',
-      value: 'Shadow',
-      filterOperator: FilterOperator.NOT_EQUAL
-    }] as Array<FieldFilter>;
+    return [
+      {
+        field: 'Account.Id',
+        value: localStorage.getItem('account'),
+        filterOperator: FilterOperator.EQUAL
+      },
+      {
+        field: 'UseType',
+        value: 'Shadow',
+        filterOperator: FilterOperator.NOT_EQUAL
+      },
+      {
+        field: 'BusinessObjectType',
+        value: 'FavoriteConfiguration',
+        filterOperator: FilterOperator.NOT_EQUAL
+      }
+    ] as Array<FieldFilter>;
   }
 }
 

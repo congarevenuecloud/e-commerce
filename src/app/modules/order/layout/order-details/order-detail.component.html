@@ -1,18 +1,13 @@
 <app-detail *ngIf="order$ | async as order; else loading" [context]="order" [route]="'orders'">
 
-  <div class="btn-group secondary-actions align-self-stretch" role="group" [ngSwitch]="order?.Status"
+  <div class="btn-group secondary-actions" role="group" [ngSwitch]="order?.Status"
     [tooltip]="order.hasErrors ? ('DETAILS.MISSING_REQ_FIELDS' | translate) : ''">
-
-    <ng-container *ngSwitchCase="'Draft'">
-      <button *ngIf="isLoggedIn" type="button" class="border-left btn btn-link text-primary px-4"
-        (click)="confirmOrder(order.Id, order.PrimaryContact.Id)" [ladda]="isLoading" data-style="zoom-in"
-        [disabled]="order.hasErrors">{{'MY_ACCOUNT.ORDER_DETAIL.CONFIRM_ORDER' | translate}}</button>
-    </ng-container>
 
   </div>
   <div class="detail-header">
     <div class="d-flex align-items-center mb-2">
-      <span class="page-header">{{ order?.Name }}</span>
+      <span class="page-header d-lg-block d-md-block d-sm-none d-none">{{ order?.Name }}</span>
+      <span tooltip="{{order?.Name}}" class="page-header d-lg-none d-md-none d-sm-block d-block">{{ order?.Name | truncate:13 }}</span>
       <span class="badge badge-primary ml-3 px-3 py-1 border" *ngIf="order?.Status">{{order?.Status}}</span>
       <div *ngIf="order?.Proposal as proposal" class="ml-auto">
         <apt-output-field [record]="proposal" field="Name" labelClass="d-none" [editable]="false"
@@ -36,7 +31,7 @@
             </div>
             <div class="row">
               <div class="flex-shrink-1 col-md-4 mb-2">
-                <apt-output-field [record]="order" field="CreatedDate"  [editable]="false">
+                <apt-output-field [record]="order" field="CreatedDate" [editable]="false">
                 </apt-output-field>
               </div>
               <div class="flex-shrink-1 col-md-4 mb-2">
@@ -92,7 +87,8 @@
     </div>
   </app-detail-section>
 
-  <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-4">
+  <div class="pt-4">
+     <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-4">
     <div class="card">
       <div *ngIf="orderLineItems$ | async as orderLineItems">
         <div class="card-header">
@@ -106,11 +102,11 @@
         </div>
         <div class="card-body">
           <div *ngIf="orderLineItems?.length > 0; else noProducts">
-            <table class="table table-responsive">
+            <table class="table">
               <tbody>
                 <ng-container *ngFor="let item of orderLineItems; let i = index">
-                  <apt-line-item-table-row [index]="i" [parent]="item.MainLine" [options]="item.Flat"
-                    [children]="item.SecondaryLines" [editableFields]="false">
+                  <apt-line-item-table-row [cart]="cartRecord" [index]="i" [parent]="item.MainLine"
+                    [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false">
                   </apt-line-item-table-row>
                 </ng-container>
               </tbody>
@@ -119,8 +115,10 @@
         </div>
       </div>
     </div>
-  </app-detail-section>
-  <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-4">
+     </app-detail-section>
+  </div>
+  <div class="pt-4">
+    <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-4">
     <div class="card" #attachmentSection *ngIf="attachmentList$ | async as attachmentList; else loading">
       <div class="card-header">
         <h5>
@@ -130,9 +128,9 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="col-12 col-md-7 border-right attachment-container">
+          <div class="col-lg-6 col-md-6 d-none d-lg-block d-md-block d-sm-none border-right attachment-container">
             <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
-              <div class="table-container">
+              <div class="table-container overflow-auto">
                 <table class="table table-sm">
                   <thead>
                     <tr>
@@ -167,11 +165,11 @@
                       <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
                         {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
                       <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
-                      <td><button class="btn btn-link p-0 m-0"
-                        (click)="deleteAttachment(attachment)" [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
-                        data-spinner-color="black">
-                        <span class="fa fa-trash"></span>
-                      </button></td>
+                      <td><button *ngIf="isLoggedIn" class="btn btn-link p-0 m-0" (click)="deleteAttachment(attachment)"
+                          [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
+                          data-spinner-color="black">
+                          <span class="fa fa-trash"></span>
+                        </button></td>
                     </tr>
                   </tbody>
                 </table>
@@ -184,27 +182,98 @@
               </div>
             </ng-template>
           </div>
-          <div class="col-12 col-md-5">
+          <div class="col-12 d-block d-lg-none d-md-none d-sm-block attachment-container">
+            <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
+              <div class="table-container overflow-auto">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="Name"
+                          [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileSize"
+                          [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
+                          [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="CreatedBy"
+                          [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
+                          field="CreatedDate" [labelOnly]="true">
+                        </apt-output-field></th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let attachment of attachmentList; let i = index">
+                      <th scope="row">{{i + 1}}</th>
+                      <td>
+                        <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
+                          target="_blank">{{attachment?.DocumentMetadata?.Name}}</a>
+                      </td>
+                      <td>{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
+                      <td>{{attachment?.DocumentMetadata?.FileType}}</td>
+                      <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
+                        {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
+                      <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
+                      <td><button class="btn btn-link p-0 m-0" (click)="deleteAttachment(attachment)"
+                          [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
+                          data-spinner-color="black">
+                          <span class="fa fa-trash"></span>
+                        </button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ng-container>
+            <ng-template #emptyAttachments>
+              <div class="d-flex align-items-center justify-content-center flex-column h-100 text-muted">
+                <i class="fa fa-4x fa-file-o mb-2"></i>
+                {{'COMMON.ATTACHMENT_DETAILS.NO_ATTACHMENTS' | translate}}
+              </div>
+            </ng-template>
+          </div>
+          <div class="col-12 col-md-6 pt-sm-3 pt-3">
             <form (ngSubmit)="uploadAttachment(order.Id)">
               <label class="font-weight-bold">{{'COMMON.ATTACHMENT_DETAILS.TITLE' | translate}}</label>
               <div
-                class="file-section bg-light d-flex align-items-center justify-content-center border-secondary file-upload"
+                class="file-section bg-white d-flex align-items-center justify-content-center border-secondary file-upload"
                 (dragover)="onDragFile($event)" (drop)="onDropFile($event)" data-max-size="26214400">
-                <label class="p-5 position-relative" for="browse"><span
-                    class="position-absolute upload-icon-position"><i
+                <label class="py-5 px-4 position-relative" for="browse"><span><i
                       class="fa fa-4x fa-cloud-upload text-black-50"></i></span><span
-                    class="pl-4">{{'COMMON.ATTACHMENT_DETAILS.INPUT_LABEL' | translate}}</span><span
+                    class="pl-2">{{'COMMON.ATTACHMENT_DETAILS.INPUT_LABEL' | translate}}</span><span
                     class="pl-1 text-underline cursor-pointer">{{'COMMON.ATTACHMENT_DETAILS.BROWSE' |
                     translate}}</span></label>
-                <input id="browse" class="d-none p-5" type="file" (change)="fileChange($event)" />
+                <input #fileInput id="browse" class="d-none p-5" type="file" (change)="fileChange($event)" />
               </div>
               <div class="mt-2" *ngIf="hasSizeError && file != null">
                 <p class="text-danger">
                   {{'COMMON.ATTACHMENT_DETAILS.FILE_SIZE_EXCEEDED_ERROR' | translate}}
                 </p>
               </div>
+
+              <div class="mt-2" *ngIf="file==null && isSupportedFileType && supportedFileTypes?.length">
+                <p>
+                  {{
+                    "COMMON.ATTACHMENT_DETAILS.SUPPORTED_FILE_TYPES"
+                    | translate:{supportedFileTypes:supportedFileTypes}
+                    }}
+                </p>
+              </div>
+
+              <div class="mt-2" *ngIf="!isSupportedFileType && file != null && supportedFileTypes?.length">
+                <p class="text-danger">
+                  {{
+                    "COMMON.ATTACHMENT_DETAILS.UNSUPPORTED_FILE_TYPE_ERROR"
+                    | translate:{supportedFileTypes:supportedFileTypes}
+                    }}
+                </p>
+              </div>
               <div class="form-group">
-                <div class="mt-2" *ngIf="uploadFileList && !hasSizeError">
+                <div class="mt-2" *ngIf="uploadFileList && !hasSizeError && isSupportedFileType">
                   <div class="d-flex justify-content-between" *ngFor="let file of uploadFileList">
                     <div class="w-50">
                       <input type="checkbox" [(ngModel)]="isPrivate" name="attachmentVisibilityScope"
@@ -221,7 +290,7 @@
                 <button class="btn btn-link" (click)="clearFiles()" type="button">{{'COMMON.CLEAR' |
                   translate}}</button>
                 <button class="btn btn-primary btn-primary" type="submit"
-                  [disabled]="(hasSizeError && file != null) || !file" [ladda]="attachmentsLoader">{{'COMMON.UPLOAD' |
+                  [disabled]="(!isSupportedFileType ||hasSizeError && file != null) || !file" [ladda]="attachmentsLoader">{{'COMMON.UPLOAD' |
                   translate }}</button>
               </div>
             </form>
@@ -229,7 +298,8 @@
         </div>
       </div>
     </div>
-  </app-detail-section>
+    </app-detail-section>
+  </div>
 </app-detail>
 
 <ng-template #loading>

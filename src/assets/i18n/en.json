@@ -54,6 +54,7 @@
         "CART": {
             "ITEM_ADDED_TOASTR_MESSAGE": "{{productName}} was added to the cart.",
             "ITEM_ADDED_TOASTR_TITLE": "Item Added",
+            "BULK_MESSAGE": "{{productName}} were added to the cart.",
             "CONFIGURATION_UPDATED": "{{productName}} configuration has been updated.",
             "DELETED": "Successfully deleted",
             "NEW_CART_CREATED": "New cart created successfully",
@@ -449,11 +450,14 @@
         "WELCOME_MESSAGE": "Hello, {{userName}}!",
         "GUEST_WELCOME_MESSAGE": "Hello, sign in!",
         "PAGES":"Pages",
+        "ADD_PRODUCTS": "Add Products",
         "ATTACHMENT_DETAILS": {
             "TITLE": "Attach new file(s)",
             "INPUT_LABEL": "Drop files to Attach or",
             "BROWSE": "browse",
             "FILE_SIZE_EXCEEDED_ERROR": "Size exceeds 28MB",
+            "UNSUPPORTED_FILE_TYPE_ERROR":"Unsupported file type. [Supported file types are {{supportedFileTypes}}]",
+            "SUPPORTED_FILE_TYPES":"Supported file types are {{supportedFileTypes}}",
             "NO_ATTACHMENTS": "No attachments have been added yet",
             "REMOVE_ATTACHMENT": "Remove Attachment",
             "BY": "by",
@@ -500,8 +504,8 @@
     "QUOTE_CONFIRMATION_MODAL": {
         "THANK_YOU": "Thank You",
         "QUOTE_REQUEST": "Quote Request",
-        "QUOTE_CONFIRM_MSG": "Your quote has been sent for review and assigned to the seller {{Sellername}}.",
-        "QUOTE_CONFIRMATION_Update_MSG": "Your updated quote has been sent for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRM_MSG": "Your quote has been send for review and assigned to the seller {{Sellername}}.",
+        "QUOTE_CONFIRMATION_Update_MSG": "Your updated quote has been send for review and assigned to the seller {{Sellername}}.",
         "QUOTE_CONFIRMATION_MSG_WITH_RFP": " The Expected Response Date {{RFP_value}}.",
         "QUOTE_CONFIRMATION_NO": "Your Quote is :",
         "REVIEW_YOUR_QUOTE": "Review Your Quote"
@@ -877,6 +881,10 @@
         "ATTACHMENTS": "Attachments",
         "PRICE_SUMMARY": "Price Summary",
         "GENERATE_ORDER": "Generate Order",
+        "GENERATE": "Generate",
+        "INCLUDE_WATERMARK": "Include Watermark",
+        "TEMPLATE": "Template",
+        "FILE_FORMAT": "File Format",
         "GENERATE_QUOTE": "Generate Quote",
         "SUMMARY": "Summary",
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
@@ -937,6 +945,17 @@
     "CONFIGURATION": {
         "EMPTY": "This product has not been configured",
         "NO_CONFIGURATION": "This product does not have any configuration options"
+    },
+    "ACTION_BAR": {
+        "CONFIRM_ORDER": "Confirm Order",
+        "ORDER_CONFIRMATION_TOASTR_TITLE": "Order Confirmation",
+        "ORDER_CONFIRMATION_TOASTR_MESSAGE": "Order has been confirmed.",
+        "CHANGE_ACCOUNT_TITLE": "Account Changed",
+        "CHANGE_PRICE_LIST_TITLE": "Price List Changed",
+        "CHANGE_PRICE_LIST_MESSAGE": "The active price list has been changed.",
+        "ORDER_CONFIRMATION_FAILURE": "Order could not be confirmed. Please try again.",
+        "CART_CREATION_TOASTR_MESSAGE": "A new cart has been created.",
+        "PRESENT": "Present"
     },
     "TABLE": {
         "SEARCH": "Search",

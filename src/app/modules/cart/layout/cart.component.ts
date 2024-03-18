@@ -5,7 +5,7 @@ import { switchMap, take } from 'rxjs/operators';
 import { TabsetComponent } from 'ngx-bootstrap/tabs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import { get, uniqueId, find, defaultTo } from 'lodash';
+import { get, uniqueId, find, defaultTo, isNil, set } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigurationService } from '@congarevenuecloud/core';
 import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate } from '@congarevenuecloud/ecommerce';
@@ -101,6 +101,9 @@ export class CartComponent implements OnInit, OnDestroy {
   billToAccount$: Observable<Account>;
   pricingSummaryType: 'checkout' | 'paymentForOrder' | '' = 'checkout';
   breadcrumbs;
+  disableSubmit: boolean = false;
+  showCaptcha: boolean = false;
+  displayCaptcha: boolean;
 
   private subscriptions: Subscription[] = [];
 
@@ -151,6 +154,21 @@ export class CartComponent implements OnInit, OnDestroy {
 
     this.onBillToChange();
     this.onShipToChange();
+    this.isButtonDisabled();
+  }
+
+  isButtonDisabled() {
+    this.disableSubmit = this.isLoggedIn ? (isNil(this.order.PrimaryContact) || isNil(this.order.ShipToAccount)) : isNil(get(this.primaryContact, 'FirstName')) || isNil(get(this.primaryContact, 'LastName')) || isNil(get(this.primaryContact, 'Email')) || isNil(get(this.order, 'Name'));
+  }
+
+  onPrimaryContactChange($event: Contact) {
+    isNil($event) ? set(this.order, 'PrimaryContact', $event) : this.subscriptions.push(
+      this.contactService.fetch(get($event, 'Id')).subscribe(c => {
+        set(this.order, 'PrimaryContact', c);
+        this.order.PrimaryContact.Id = get(c, 'Id');
+      })
+    );
+    this.isButtonDisabled()
   }
 
 
@@ -166,6 +184,11 @@ export class CartComponent implements OnInit, OnDestroy {
     else {
       setTimeout(() => this.staticTabs.tabs[1].active = true, 50);
     }
+  }
+
+  updatePrimaryContact(field: string, $event: string) {
+    set(this.primaryContact, field, $event.length > 0 ? $event : null)
+    this.isButtonDisabled();
   }
 
   /**
@@ -212,6 +235,7 @@ export class CartComponent implements OnInit, OnDestroy {
   onShipToChange() {
     if (get(this.order.ShipToAccount, 'Id'))
       this.shipToAccount$ = this.accountService.getAccount(get(this.order.ShipToAccount, 'Id'));
+    this.isButtonDisabled();
   }
 
   convertCartToOrder(order: Order, primaryContact: Contact, cart?: Cart, selectedAccount?: AccountInfo, acceptOrder?: boolean) {
@@ -259,6 +283,23 @@ export class CartComponent implements OnInit, OnDestroy {
   closeModal() {
     this.confirmationModal.hide();
     this.redirectOrderPage();
+  }
+
+  loadCaptcha() {
+    this.displayCaptcha = true;
+  }
+
+  captchaSuccess(cart: Cart) {
+    this.showCaptcha = false;
+    this.submitOrder();
+  }
+
+  orderPlacement() {
+    if (this.displayCaptcha)
+      this.showCaptcha = true;
+    else {
+      this.submitOrder();
+    }
   }
 
   ngOnDestroy() {

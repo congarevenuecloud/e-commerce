@@ -14,7 +14,8 @@ import {
   InputFieldModule,
   AddressModule,
   PriceModule,
-  IconModule
+  IconModule,
+  CaptchaModule
 } from '@congarevenuecloud/elements';
 
 import { ComponentModule } from '../../components/component.module';
@@ -32,6 +33,7 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     CartRoutingModule,
     FormsModule,
     ComponentModule,
+    CaptchaModule,
     ConfigurationSummaryModule,
     PriceModule,
     IconModule,

@@ -1,6 +1,6 @@
 <ng-container *ngTemplateOutlet="orderList; context: { view: view$ | async }"></ng-container>
 <ng-template #orderList let-view="view">
-    <div class="row">
+    <div class="row d-lg-block d-md-block d-sm-none d-none">
         <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
             <div class="d-flex align-items-end mr-2">
                 <apt-data-filter [type]="type" [filterOptions]="filterOptions" [filterList]="filterList$ | async"
@@ -11,14 +11,41 @@
                 <span class="text-muted">{{'COMMON.TOTAL_ORDERS' | translate}}:</span>
                 <h4 class="my-0 ml-2">{{totalRecords$ | async}}</h4>
             </div>
+            <div class="mx-3">&#124;</div>
             <div class="d-flex align-items-end">
                 <span class="text-muted">{{'COMMON.AMOUNT' | translate}}:</span>
                 <h4 class="my-0 ml-2">{{(totalAmount$ | async) | localCurrency | async}}</h4>
             </div>
         </div>
     </div>
+    <div class="row d-lg-none d-md-none d-sm-block d-block">
+        <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
+            <div class="d-flex align-items-end mr-2">
+                <apt-data-filter [type]="type" [filterOptions]="filterOptions" [filterList]="filterList$ | async"
+                    (filterListChange)="handleFilterListChange($event)">
+                </apt-data-filter>
+            </div>
+        </div>
+    </div>
+    <div class="row d-lg-none d-md-none d-sm-block d-block">
+        <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
+            <div class="d-flex align-items-end">
+                <span class="text-muted">{{'COMMON.TOTAL_ORDERS' | translate}}:</span>
+                <h4 class="my-0 ml-2">{{totalRecords$ | async}}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="row d-lg-none d-md-none d-sm-block d-block">
+        <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
+            <div class="d-flex align-items-end">
+                <span class="text-muted">{{'COMMON.AMOUNT' | translate}}:</span>
+                <h4 class="my-0 ml-2">{{(totalAmount$ | async) | localCurrency | async}}</h4>
+            </div>
+        </div>
+    </div>
+
     <div class="row mt-3">
-        <div class="col-6">
+        <div class="col-sm-12 col-md-6 col-lg-6 card-margin">
             <div class="card">
                 <div class="card-header">
                     <strong class="text-uppercase d-block">{{'MY_ACCOUNT.ORDER_DETAIL.ORDERS_BY_STATUS' |
@@ -33,7 +60,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6">
+        <div class="col-sm-12 col-md-6 col-lg-6 pt-lg-0 pt-md-0 pt-sm-3 pt-3">
             <div class="card">
                 <div class="card-header">
                     <strong class="text-uppercase d-block">{{'COMMON.ORDER_AMOUNT_BY_STATUS' | translate}}</strong>
@@ -50,9 +77,9 @@
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col-12">
-            <div class="">
-                <div class="">
+        <div class="col-12 bg-white">
+            <div>
+                <div>
                     <apt-table *ngIf="view?.tableOptions; else loading" [type]="type" [options]="view?.tableOptions"
                         [showErrorToaster]="true"></apt-table>
                 </div>

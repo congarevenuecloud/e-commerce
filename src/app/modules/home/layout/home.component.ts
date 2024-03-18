@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { first, get, slice, reverse, sortBy, last, forEach } from 'lodash';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Product, CategoryService, ProductService, Category, CartService, Cart, UserService, ItemRequest, GuestUserService } from '@congarevenuecloud/ecommerce';
+import { Product, CategoryService, ProductService, Category, UserService, ItemRequest, GuestUserService } from '@congarevenuecloud/ecommerce';
 
 @Component({
   selector: 'app-home',
@@ -16,7 +16,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   productListB$: Observable<Array<ItemRequest>>;
 
   categories: Array<Category>;
-  cart$: Observable<Cart>;
   subscriptions: Array<Subscription> = new Array();
   listItem: Array<ItemRequest> = [];
   counter: number = 3;
@@ -24,7 +23,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   loadData$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   constructor(private userService: UserService, private guestUserService: GuestUserService,
-    private cartService: CartService, private categoryService: CategoryService, private productService: ProductService) {
+    private categoryService: CategoryService, private productService: ProductService) {
   }
 
   ngOnInit() {
@@ -41,7 +40,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         }, 1000);
       }
     }));
-    this.cart$ = this.cartService.getMyCart();
     this.subscriptions.push(this.categoryService.getCategories()
       .subscribe(categoryList => {
         this.categories = slice(reverse(sortBy(categoryList, 'ProductCount')), 0, 2);

@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, OnDestroy, TemplateRef } from '@angular/c
 import { ActivatedRoute, Router } from '@angular/router';
 import { get, isNil, find, forEach, maxBy, filter, has, defaultTo, first, set } from 'lodash';
 import { combineLatest, Observable, Subscription, of, BehaviorSubject } from 'rxjs';
-import { switchMap, map as rmap, distinctUntilChanged } from 'rxjs/operators';
+import { switchMap, map as rmap, distinctUntilChanged, take } from 'rxjs/operators';
 
 import {
     CartService,
@@ -99,8 +99,16 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
                 const productFeatureValues$ = this.productService.getProductsWithFeatureValues([get(params, 'id')]).pipe(rmap((products: Array<Product>) => get(first(products), 'ProductFeatureValues')));
                 return combineLatest([product$, cartItem$, this.storefrontService.getStorefront(), this.revalidateCartService.revalidateFlag, productFeatureValues$]);
             }),
-            rmap(([product, cartItemList, storefront, revalidate, productFeatureValues]) => {
-                this.recommendedProducts$ = this.crService.getRecommendationsForProducts();
+            switchMap(([product, cartItemList, storefront, revalidate, productFeatureValues]) => {
+                if (!isNil(cartItemList)) {
+                    this.subscriptions.push(this.cartService.updateConfigStatusDetails(cartItemList).pipe(take(1)).subscribe());
+                }
+                const pli = PriceListItemService.getPriceListItemForProduct(product as Product);
+                this.currentQty = isNil(cartItemList) ? defaultTo(get(pli, 'DefaultQuantity'), 1) : get(cartItemList, 'Quantity', 1);
+                return combineLatest([of(product), of(cartItemList), of(storefront), of(revalidate), of(productFeatureValues), this.productConfigurationService.changeProductQuantity(this.currentQty)])
+            }),
+            rmap(([product, cartItemList, storefront, revalidate, productFeatureValues, qty]) => {
+                this.recommendedProducts$ = this.crService.getRecommendationsForProduct(product?.Id);
                 const pli = PriceListItemService.getPriceListItemForProduct(product as Product);
                 this.currentQty = isNil(cartItemList) ? defaultTo(get(pli, 'DefaultQuantity'), 1) : get(cartItemList, 'Quantity', 1);
                 this.productConfigurationService.changeProductQuantity(this.currentQty);
@@ -120,8 +128,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.subscriptions.push(this.productConfigurationService.unsavedConfiguration.subscribe(res => {
             this.unsavedConfiguration = res;
         }));
-
-        this.recommendedProducts$ = this.crService.getRecommendationsForProducts();
 
         this.subscriptions.push(this.productConfigurationService.configurationChange.subscribe(response => {
             if (get(response, 'configurationChanged')) this.configurationChanged = true;
@@ -166,12 +172,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
             this.router.navigate(['/products', get(this, 'product.Id'), get(primaryItem, 'Id')]);
         }
 
-        if (get(cartItems, 'LineItems')) {
-            cartItems = get(cartItems, 'LineItems');
-        }
-        this.relatedTo = primaryItem;
-        if (!isNil(primaryItem) && (get(primaryItem, 'HasOptions') || get(primaryItem, 'HasAttributes')))
-            this.router.navigate(['/products', get(this.viewState$, 'value.product.Id'), get(primaryItem, 'Id')]);
+        if (!isNil(this.relatedTo) && (get(this.relatedTo, 'HasOptions') || get(this.relatedTo, 'HasAttributes')))
+            this.router.navigate(['/products', get(this.viewState$, 'value.product.Id'), get(this.relatedTo, 'Id')]);
 
         this.productConfigurationService.onChangeConfiguration({
             product: get(this, 'product'),
@@ -189,7 +191,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         if (this.cartItemList && this.cartItemList.length > 0)
             forEach(this.cartItemList, c => {
                 if (c.LineType === 'Product/Service') c.Quantity = newQty;
-                this.productConfigurationService.changeProductQuantity(newQty);
+                this.subscriptions.push(this.productConfigurationService.changeProductQuantity(newQty).subscribe(() => { }));
             });
     }
 

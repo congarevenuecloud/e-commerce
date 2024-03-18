@@ -4,15 +4,11 @@
 /dist
 /tmp
 /out-tsc
-# Only exists if Bazel was run
-/bazel-out
+/build
+/src/assets/css
 
 # dependencies
 /node_modules
-.angular
-
-# profiling files
-chrome-profiler-events*.json
 
 # IDEs and editors
 /.idea
@@ -29,15 +25,11 @@ chrome-profiler-events*.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.history/*
 
 # misc
 /.sass-cache
 /connect.lock
 /coverage
-/projects/congarevenuecloud/ecommerce/coverage
-/projects/congarevenuecloud/elements/coverage
-/projects/congarevenuecloud/core/coverage
 /libpeerconnection.log
 npm-debug.log
 yarn-error.log
@@ -47,3 +39,5 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+package-lock.json
+.sfdx/tools/apex.db

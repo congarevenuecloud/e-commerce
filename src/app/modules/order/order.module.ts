@@ -26,6 +26,7 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 import { ComponentModule } from '../../components/component.module';
 import { LaddaModule } from 'angular2-ladda';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { CongaModule } from '@congarevenuecloud/core';
 import { OrderDetailComponent } from './layout/order-details/order-detail.component';
 
 
@@ -33,6 +34,7 @@ import { OrderDetailComponent } from './layout/order-details/order-detail.compon
   declarations: [OrderDetailComponent],
   imports: [
     CommonModule,
+    CongaModule,
     OrderRoutingModule,
     TableModule,
     ChartModule,

@@ -51,6 +51,11 @@ export class FavoriteListComponent implements OnInit {
           this.user = user;
           tableOptions = {
             tableOptions: {
+              stickyColumnCount:1,
+              stickyColumns: [{
+                prop: 'Name',
+                label: 'Favorite Name'
+              }],
               columns: [
                 {
                   prop: 'Name',

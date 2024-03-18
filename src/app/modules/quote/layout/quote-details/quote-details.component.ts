@@ -9,7 +9,7 @@ import { ApiService } from '@congarevenuecloud/core';
 import {
   UserService, QuoteService, Quote, Order, OrderService, Note, NoteService, AttachmentService,
   AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService, QuoteLineItemService, Account, AccountService, Contact, ContactService, LineItem, QuoteLineItem,
-  CartService
+  CartService, Cart
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, RevalidateCartService, ToasterPosition } from '@congarevenuecloud/elements';
 import { DOCUMENT } from '@angular/common';
@@ -29,6 +29,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   quote
 
   @ViewChild('attachmentSection') attachmentSection: ElementRef;
+  @ViewChild('fileInput') fileInput: ElementRef;
 
   note: Note = new Note();
 
@@ -41,6 +42,10 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   file: File;
 
   uploadFileList: any;
+
+  isSupportedFileType:boolean = true;
+
+  supportedFileTypes:string;
 
   editLoader = false;
 
@@ -91,6 +96,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   isPrivate: boolean = false;
   maxFileSizeLimit = 29360128;
+  cartRecord: Cart;
 
   constructor(private activatedRoute: ActivatedRoute,
     private quoteService: QuoteService,
@@ -116,6 +122,11 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getQuote();
+    this.quoteSubscription.push(this.attachmentService.getSupportedAttachmentType().pipe(
+      take(1)
+    ).subscribe((data: string)=>{
+      this.supportedFileTypes = data;
+    }))
   }
 
   getQuote() {
@@ -126,11 +137,17 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
         map(params => get(params, 'id')),
         switchMap(quoteId => combineLatest([this.quoteService.getQuoteById(quoteId), this.userService.isLoggedIn()])),
         switchMap(([quote, isLoggedIn]) => {
-          this.quoteLineItems$.next(LineItemService.groupItems(get(quote, 'Items')));
+          const quoteLineItems = LineItemService.groupItems(get(quote, 'Items'));
+          this.quoteLineItems$.next(quoteLineItems);
           this.isLoggedIn = isLoggedIn;
+          return combineLatest([isEmpty(quoteLineItems) ? of(null) : (this.cartService.fetchCartStatus(get(get(first(this.quoteLineItems$.value), 'MainLine.Configuration'), 'Id'))), of(quote)])
+        }),
+        take(1),
+        switchMap(([cartRecord, quote]) => {
+          this.cartRecord = cartRecord;
           return this.updateQuoteValue(quote);
-        }
-        )).subscribe());
+        })
+      ).subscribe());
     this.getAttachments();
   }
 
@@ -239,17 +256,18 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   onGenerateQuote() {
     if (this.attachmentSection) this.attachmentSection.nativeElement.scrollIntoView({ behavior: 'smooth' });
     let obsv$;
-    if(get(this.quote, 'ApprovalStage') == 'Draft'){
-      const payload = { 'ApprovalStage': 'Generated'};
+    if (get(this.quote, 'ApprovalStage') == 'Draft') {
+      const payload = { 'ApprovalStage': 'Generated' };
       obsv$ = this.quoteService.updateQuote(this.quote.Id, payload as Quote);
     } else {
       obsv$ = of(null);
     }
-    combineLatest([this.emailService.getEmailTemplateByName('DC Quote generate-document Template'),obsv$]).pipe(
+    combineLatest([this.emailService.getEmailTemplateByName('DC Quote generate-document Template'), obsv$]).pipe(
       switchMap(result => {
         return first(result) ? this.emailService.sendEmailNotificationWithTemplate(get(first(result), 'Id'), this.quote, get(this.quote.PrimaryContact, 'Id')) : of(null)
-      }), take(1)).subscribe(() => { });
-    this.getQuote();
+      }), take(1)).subscribe(() => {
+        this.getQuote();
+      });
     this.quoteGenerated = true;
   }
 
@@ -259,6 +277,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     this.uploadFileList = null;
     this.attachmentsLoader = false;
     this.isPrivate = false;
+    this.fileInput.nativeElement.value = null;
+    this.isSupportedFileType = true;
   }
 
 
@@ -318,6 +338,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
       this.uploadFileList = event.target.files;
       this.hasFileSizeExceeded(this.uploadFileList, this.maxFileSizeLimit);
       this.file = fileList[0];
+      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList,this.supportedFileTypes);
     }
   }
 
@@ -334,6 +355,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     if (fileList.length > 0) {
       this.uploadFileList = event.dataTransfer.files;
       this.hasFileSizeExceeded(this.uploadFileList, event.target.dataset.maxSize);
+      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList,this.supportedFileTypes);
     } else {
       let f = [];
       for (let i = 0; i < itemList.length; i++) {

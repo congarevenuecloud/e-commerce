@@ -42,17 +42,17 @@ export class DetailsLayoutComponent implements AfterContentInit {
   @HostListener('window:scroll', ['$event'])
   onScroll(event) {
     if (this.headerClass != null && window.pageYOffset < 35) {
-      this.headerClass = 'fixed-top expand';
+      this.headerClass = 'fixed-top  position-fixed expand';
       setTimeout(() => this.headerClass = null, 200);
     } else if (window.pageYOffset >= 35) {
-      this.headerClass = 'fixed-top';
+      this.headerClass = 'fixed-top position-fixed';
     } else {
       this.headerClass = null;
     }
 
     this.setActiveTab();
   }
-  headerClass: 'fixed-top' | 'fixed-top expand' = null;
+  headerClass: 'fixed-top position-fixed' | 'fixed-top  position-fixed expand' = null;
 
   /**
    * scrollTo method scrolls the page to the specified tab content.
