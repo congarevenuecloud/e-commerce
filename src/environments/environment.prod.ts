@@ -9,9 +9,12 @@ export const environment: Configuration = {
   productIdentifier: 'Id',
   translationModule: 'Digital Commerce',
   hashRouting: true,
+  lineItemPageSize: 500,
+  toasterTimeout: 2000,
+  captchaSiteKey: 'Enter your captcha site key here',
   storefrontId: 'Enter your storefront ID here',
   endpoint: 'Enter your endpoint URL here',
   clientId: 'Enter your client ID here',
   authority: 'Enter your authority URL here',
-  loginEndpoint: 'Enter your login endpoint URL here'
+  loginEndpoint: 'Enter your login endpoint URL here'  
 };
