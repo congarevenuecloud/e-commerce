@@ -1,5 +1,5 @@
 {
-  "version": "202402.2.0",
+  "version": "202402.2.10",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
