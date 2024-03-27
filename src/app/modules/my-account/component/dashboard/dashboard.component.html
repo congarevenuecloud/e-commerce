@@ -1,0 +1,97 @@
+<div class="row pt-2 pb-3 mb-2 border-bottom">
+    <div class="col-12 col-md-3">
+        <div class="card h-100">
+            <div class="card-body p-0">
+                <div class="d-flex justify-content-between py-2 px-3">
+                    <span class="font-weight-bold">{{'MY_ACCOUNT.DASHBOARD.ORDERS_THIS_WEEK' | translate}}</span>
+                    <h6><span class="badge badge-primary">{{'MY_ACCOUNT.DASHBOARD.WEEKLY' | translate}}</span></h6>
+                </div>
+                <div class="p-3">
+                    <div>
+                        <h2 class="m-0 font-weight-bold text-center dashboard-status">{{ totalOrderRecords$ | async }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3 pt-lg-0 pt-md-2 pt-sm-2 pt-2">
+        <div class="card h-100">
+            <div class="card-body p-0">
+                <div class="d-flex justify-content-between py-2 px-3">
+                    <span class="font-weight-bold">{{'MY_ACCOUNT.DASHBOARD.QUOTES_THIS_WEEK' | translate}}</span>
+                    <h6><span class="badge badge-primary">{{'MY_ACCOUNT.DASHBOARD.WEEKLY' | translate}}</span></h6>
+                </div>
+                <div class="p-3">
+                    <h2 class="m-0 font-weight-bold text-center dashboard-status">{{ totalQuoteRecords$ | async }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3 pt-lg-0 pt-md-2 pt-sm-2 pt-2">
+        <div class="card h-100">
+            <div class="card-body p-0">
+                <div class="d-flex justify-content-between py-2 px-3">
+                    <span class="font-weight-bold">{{'COMMON.ORDER_TOTAL' | translate}}</span>
+                    <h6>
+                        <span class="badge badge-primary">{{'COMMON.TOTAL' | translate}}</span>
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <div>
+                        <h2 class="m-0 font-weight-bold text-center dashboard-status">{{totalOrderAmount$ | async | convertCurrency | async }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3 pt-lg-0 pt-md-2 pt-sm-2 pt-2">
+        <div class="card h-100">
+            <div class="card-body p-0">
+                <div class="d-flex justify-content-between py-2 px-3">
+                    <span class="font-weight-bold">{{'COMMON.QUOTE_TOTAL' | translate}}</span>
+                    <h6>
+                        <span class="badge badge-primary">{{'COMMON.TOTAL' | translate}}</span>
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <h2 class="m-0 font-weight-bold text-center dashboard-status">{{totalQuoteAmount$ | async | convertCurrency | async }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row py-4 mt-2 full-length-display">
+    <div class="col-12 col-md-6 ">
+        <div class="">
+            <div class=" d-flex justify-content-between mb-3">
+                {{'MY_ACCOUNT.DASHBOARD.RECENT_ORDERS' | translate}}
+                <a href="javascript:void(0)" [routerLink]="['/orders']">{{'MY_ACCOUNT.DASHBOARD.SHOW_MORE' |
+                    translate}} ></a>
+            </div>
+            <div class="">
+                <apt-table *ngIf="view$ | async as view; else loading" [type]="orderType" [showTableControls]=false
+                    [showErrorToaster]=true [options]="view?.tableOptions"></apt-table>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 pt-lg-0 pt-md-0 pt-sm-4 pt-4">
+        <div class="">
+            <div class=" d-flex justify-content-between mb-3">
+                {{'MY_ACCOUNT.DASHBOARD.RECENT_QUOTES' | translate}}
+                <a href="javascript:void(0)" [routerLink]="['/proposals']">{{'MY_ACCOUNT.DASHBOARD.SHOW_MORE' |
+                    translate}} ></a>
+            </div>
+            <div class="">
+                <apt-table *ngIf="quoteView$ | async as quoteView; else loading" [type]="quoteType"
+                    [showTableControls]=false [showErrorToaster]=true
+                    [options]="quoteView?.tableOptions"></apt-table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #loading>
+    <div class="d-flex justify-content-center">
+        <apt-dots></apt-dots>
+    </div>
+</ng-template>

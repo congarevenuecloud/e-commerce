@@ -1,0 +1,172 @@
+<div class="fixed-top navbar navbar-light bg-light border-bottom py-0">
+  <div class="d-flex align-items-center">
+    <button class="navbar-toggler px-2 border-0" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      (click)="menuModal.show()">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <ng-container *ngIf="storefront$ | async as storefront">
+      <button class="navbar-brand btn btn-link d-none d-md-inline-block p-0 mr-2 d-lg-block d-sm-none"
+        [routerLink]="['/']" *ngIf="storefront?.Logo">
+        <img class="pl-2" [src]="storefront?.Logo | image" />
+      </button>
+      <span class="mr-1 mt-1 d-none d-md-block d-lg-block d-sm-none">
+        <img src="./assets/images/conga.png" alt="" srcset="" height="24">
+      </span>
+      <span class="sf-label mb-0 d-lg-block d-md-block d-sm-none d-none">{{storefront?.Name}}</span>
+      <span tooltip="{{storefront?.Name}}" class="sf-label m-0 d-lg-none d-md-none d-sm-block d-block">
+        {{storefront?.Name | truncate:8}}
+      </span>
+    </ng-container>
+  </div>
+
+  <div class="actions d-flex align-items-center m-0">
+    <apt-product-search [typeAheadLimit]="7"></apt-product-search>
+    <apt-mini-cart></apt-mini-cart>
+    <ng-container *ngIf="user$ | async as user">
+      <div class="d-flex user-action flex-column text-primary align-items-flex-start exclude-border">
+        <strong>
+          <font size="1" *ngIf="user?.Alias !== 'guest'">{{ 'COMMON.WELCOME_MESSAGE' | translate: {userName:
+            user?.FirstName} }}</font>
+        </strong>
+        <strong>
+          <font size="1" *ngIf="user?.Alias === 'guest'">{{ 'COMMON.GUEST_WELCOME_MESSAGE' | translate }}</font>
+        </strong>
+        <div class="dropdown">
+          <button class="btn btn-link dropdown-toggle font-weight-bold p-0 m-0"
+            (click)="toggleMyAccountDropdown($event)" data-toggle="dropdown" #btnDropdown> {{'COMMON.ACCOUNT' |
+            translate}} <i class="fa fa-caret-down fa-lg ml-1"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right mt-1" aria-labelledby="dropdownMenuButton" id="accountMenu"
+            [ngClass]="showAccountHome ? 'show' : ''">
+            <div *ngIf="user?.Alias !== 'guest' else guestTemplate" class="m-2">
+              <div dropdown-item class="media m-2 pb-2">
+                <h4 class="d-flex justify-content-center align-items-center bg-secondary rounded-circle text-white p-2">
+                  {{userInitials}}</h4>
+                <div class="media-body ml-3 text-truncate">
+                  <h5 class="my-0">{{user?.FirstName}}</h5>
+                  <h5 class="my-0">{{user?.LastName}}</h5>
+                  <div>{{user?.Title}}</div>
+                </div>
+              </div>
+              <div class="text-nowrap px-3 d-flex" *ngIf="cartView$ | async as cartView">
+                <div class="cursor-pointer" (click)="loadAccountDetails()"><b>{{ 'COMMON.ACCOUNT' | translate }}:</b>
+                  <span class="account-section text-primary pl-1"><u>{{cart?.Account?.Name}}</u></span>
+                </div>
+              </div>
+              <div dropdown-item class="nav flex-column nav-pills pl-3" id="v-pills-tab" role="tablist"
+                aria-orientation="vertical">
+                <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/orders']"
+                  [routerLinkActive]="'active'">
+                  <i class="fas fa-list-ul"></i>
+                  {{'COMMON.MY_ORDERS' | translate}}
+                </a>
+                <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/quotes']"
+                  [routerLinkActive]="'active'">
+                  <i class="fas fa-pencil-alt"></i>
+                  {{'COMMON.MY_QUOTES' | translate}}
+                </a>
+                <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/carts']"
+                  [routerLinkActive]="'active'">
+                  <i class="fas fa-shopping-cart"></i>
+                  {{'COMMON.MY_CARTS' | translate}}
+                </a>
+                <a class="pt-3" href="javascript:void(0)" *ngIf="showFavorites$ | async"
+                  [routerLink]="['/my-account/favorites']" [routerLinkActive]="'active'">
+                  <i class="fas fa-shopping-cart"></i>
+                  {{'COMMON.FAVORITES' | translate}}
+                </a>
+                <a class="pt-3 d-lg-none d-md-none d-sm-block d-block" href="javascript:void(0)" [routerLink]="['/my-account/settings']"
+                  [routerLinkActive]="'active'">
+                  <i class="fas fa-cog"></i>
+                  {{'MY_ACCOUNT.SETTINGS' | translate}}
+                </a>
+                <a class="pt-3" href="javascript:void(0)" (click)="doLogout()">
+                  <i class="fas fa-sign-out-alt"></i>
+                  {{'HEADER.LOG_OUT' | translate}}
+                </a>
+              </div>
+            </div>
+            <ng-template #guestTemplate>
+              <div class="dropdown-item">
+                <span class="">{{ 'HEADER.GUEST_BROWSING_MESSAGE' | translate }}</span><br>
+              </div>
+              <div class="dropdown-item">
+                <button class="d-block-flex btn btn-primary btn-raised btn-block" (click)="login()">
+                  {{ 'HEADER.SIGN_IN' | translate }}
+                </button>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+        <div class="dropdown">
+          <div class="dropdown-menu account-info p-3" [ngClass]="showAccountInfo ? 'show' : ''">
+            <a *ngIf="!loading" class="position-absolute back-icon" href="javascript:void(0)"
+              (click)="navigateToAccountHome()"><i class="fa fa-chevron-left mr-1"></i>{{ 'HEADER.BACK' | translate |
+              uppercase }}</a>
+            <ng-container *ngIf="cartView$ | async as cartView">
+              <div class="dropdown-body align-items-end mt-2 pt-4">
+                <apt-input-field [showLabel]="false" [valueClass]="'mb-0'" [entity]="cartView" [field]="'Account'"
+                  [(ngModel)]="cartView.Account" [allowClearableLookups]="false" [spinnerSize]="'small'"
+                  (ngModelChange)="updateAccountInfo($event)">
+                </apt-input-field>
+              </div>
+              <div *ngIf="myAccount$ | async as soldTo; else showLoader">
+                <apt-output-field [record]="cartView" field="Account" layout="inline" [showQuickView]="true"
+                  [showQuickViewFormat]="'normal'" [valueOnly]="true">
+                </apt-output-field>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <apt-cr-constraint-icon></apt-cr-constraint-icon>
+  </div>
+</div>
+
+<apt-mini-profile #profile></apt-mini-profile>
+
+<div bsModal #menuModal="bs-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1">
+  <div class="modal-dialog modal-lg menu">
+    <div class="modal-content bg-white py-1" *ngIf="user$ | async as user">
+      <div class="modal-header d-block p-0">
+        <div class="list-group list-group-flush">
+          <a href="javascript:void(0)" [routerLink]="['/']" (click)="menuModal.hide()"
+            class="list-group-item list-group-item-action border-0">
+            <i class="fas fa-home mr-4"></i>{{'HEADER.HOME' | translate}}
+          </a>
+          <a href="javascript:void(0)" [routerLink]="['/my-account']" *ngIf="user?.Alias !== 'guest'"
+            (click)="menuModal.hide()" class="list-group-item list-group-item-action border-0">
+            <i class="fas fa-cog mr-4"></i>{{'HEADER.MY_ACCOUNT' | translate}}
+          </a>
+          <a href="javascript:void(0)" [routerLink]="['/products']" (click)="menuModal.hide()"
+            class="list-group-item list-group-item-action border-0">
+            <i class="fas fa-th mr-4"></i>{{'HEADER.PRODUCT_CATALOG' | translate}}
+          </a>
+          <a href="javascript:void(0)" *ngIf="user?.Alias === 'guest'" (click)="login()"
+            class="list-group-item list-group-item-action border-0">
+            <i class="fas fa-sign-in-alt mr-4"></i>{{'HEADER.LOG_IN' | translate}}
+          </a>
+        </div>
+      </div>
+      <ng-scrollbar>
+        <div class="modal-body border-top d-flex align-items-stretch">
+          <app-category-carousel [modalRef]="menuModal"></app-category-carousel>
+        </div>
+      </ng-scrollbar>
+      <div class="list-group p-0">
+        <a href="javascript:void(0)" *ngIf="user?.Alias !== 'guest'" (click)="doLogout()"
+          class="list-group-item list-group-item-action border-bottom-0">
+          <i class="fas fa-sign-out-alt  mr-3"></i>{{'HEADER.LOG_OUT' | translate}}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #showLoader>
+  <div class="d-flex py-3 justify-content-center">
+    <apt-dots></apt-dots>
+  </div>
+</ng-template>

@@ -1,0 +1,97 @@
+<div class="w-100">
+  <div class="d-flex justify-content-center">
+    <footer class="border-top p-5">
+      <div class="row">
+        <div class="col-12 col-md-4 col-lg-3">
+          <img [src]="(storefront$ | async)?.Logo | image" height="35" />
+          <p class="mt-3">
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the subas
+            industry's standard
+            dummy text ever since the 1500s.
+          </p>
+          <p>
+            When an unknown printer took a galley of type and If you are going to use a passage of Lorem Ipsum scrambled
+            it to make.
+          </p>
+        </div>
+        <div class="col-12 col-md-4 col-lg-3">
+          <h4 class="pl-4 text-secondary">
+            <strong>{{'FOOTER.PRODUCTS' | translate}}</strong>
+          </h4>
+          <ul class="mt-3">
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.NEW_PRODUCTS' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.DISCOUNT_PRODUCTS' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.BSET_SELL_PRODUCTS' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.POPULAR_PRODUCTS' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.MANUFACTURERS' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.SUPPLIERS' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.SPECIAL_PRODUCTS' | translate}}</button>
+            </li>
+          </ul>
+        </div>
+        <div class="col-12 col-md-4 col-lg-3">
+          <h4 class="pl-4 text-secondary">
+            <strong>{{'FOOTER.MY_ACCOUNT' | translate}}</strong>
+          </h4>
+          <ul class="mt-3">
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.MY_ACCOUNT' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.MY_WISHLIST' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.MY_CART' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.SIGN_IN' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.REGISTRATION' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.CHECKOUT' | translate}}</button>
+            </li>
+            <li>
+              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.ORDER_COMPLETE' | translate}}</button>
+            </li>
+          </ul>
+        </div>
+        <div class="col-12 col-md-4 col-lg-3">
+          <h4 class="text-secondary">
+            <strong>{{'FOOTER.GET_IN_TOUCH' | translate}}</strong>
+          </h4>
+          <form class="mt-3">
+            <div class="form-group">
+              <input type="text" class="form-control" placeholder="{{'FOOTER.YOUR_NAME_HERE' | translate}}">
+            </div>
+            <div class="form-group">
+              <input type="email" class="form-control" placeholder="{{'FOOTER.YOUR_EMAIL_HERE' | translate}}">
+            </div>
+            <div class="form-group">
+              <textarea class="px-2 form-control" placeholder="{{'FOOTER.YOUR_MESSAGE_HERE' | translate}}"
+                rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">{{'FOOTER.SUBMIT' | translate}}</button>
+          </form>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <div class="bg-dark text-white d-flex justify-content-between px-4 py-2">
+    <div>{{copyrightMessage}}</div>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="carousel slide flex-grow-1" id="menuCarousel" data-ride="carousel" data-interval="0"
+  *ngIf="view$ | async as view">
+  <div class="carousel-inner h-100">
+    <div class="carousel-item active">
+      <ul class="list-group list-group-flush">
+        <ng-container *ngFor="let category of view?.categoryTree">
+          <a class="list-group-item list-group-item-action border-0" href="#menuCarousel" (click)="goToCategory(category, view)"
+            data-slide="next" *ngIf="category?.Children?.length > 0; else direct">{{category?.Label}}</a>
+          <ng-template #direct>
+            <a class="list-group-item list-group-item-action border-0" (click)="modalRef.hide()"
+              [routerLink]="['/products/category', category.Id]">{{category?.Label}}</a>
+          </ng-template>
+        </ng-container>
+      </ul>
+    </div>
+    <div class="carousel-item" *ngFor="let currentCategory of view?.categoryBranch">
+      <div *ngIf="currentCategory?.Id">
+        <div class="d-flex justify-content-between">
+          <a href="#menuCarousel" data-slide="prev" (click)="goBack(view, currentCategory)">
+            <i class="fas fa-arrow-left mr-2"></i>{{ 'HEADER.BACK' | translate | uppercase }}
+          </a>
+          <a href="#menuCarousel" [routerLink]="['/products/category', currentCategory.Id]" (click)="modalRef.hide()"
+            data-slide-to="0">{{ 'HEADER.SHOW_ALL' | translate | uppercase }}</a>
+        </div>
+        <ul class="list-group list-group-flush mt-3">
+          <ng-container *ngFor="let category of currentCategory?.Children">
+            <a class="list-group-item list-group-item-action border-0" href="#menuCarousel"
+              (click)="goToCategory(category, view)" data-slide="next"
+              *ngIf="category.Children && category.Children.length > 0; else link">{{category?.Label}}</a>
+            <ng-template #link>
+              <a class="list-group-item list-group-item-action border-0" href="#menuCarousel" (click)="modalRef.hide()"
+                [routerLink]="['/products/category', category.Id]" data-slide-to="0">{{category?.Label}}</a>
+            </ng-template>
+          </ng-container>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

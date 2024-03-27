@@ -1,0 +1,123 @@
+<app-detail *ngIf="favorite$ | async as favorite; else loading" [context]="favorite" [route]="'favorites'">
+  <div *ngIf="favorite?.IsActive" class="primary-actions d-lg-block d-md-block d-sm-none d-none py-2">
+    <button type="button" class="btn btn-primary btn-raised px-4" (click)="addFavoriteToCart(favorite)"
+      [ladda]="isLoading" data-style="zoom-in">
+      {{ "COMMON.ADD_TO_CART" | translate }}
+    </button>
+  </div>
+
+  <div class="detail-header">
+    <div class="d-flex align-items-end mb-2 py-2">
+      <h3 class="m-0">{{favorite?.Name}}</h3>
+      <span class="badge badge-info ml-3 px-3 py-1 border"
+        *ngIf="!favorite?.IsActive">{{'MY_ACCOUNT.FAVORITE_DETAIL.INACTIVE' | translate}}</span>
+    </div>
+    <div *ngIf="favorite?.IsActive" class="d-lg-none d-md-none d-sm-block d-block d-flex align-items-end">
+      <button type="button" class="btn btn-primary btn-raised px-4" (click)="addFavoriteToCart(favorite)"
+        [ladda]="isLoading" data-style="zoom-in">
+        {{ "COMMON.ADD_TO_CART" | translate }}
+      </button>
+    </div>
+  </div>
+
+  <app-detail-section [title]="'DETAILS.FAVORITE_SUMMARY' | translate">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5>
+              {{'DETAILS.FAVORITE_SUMMARY' | translate}}
+            </h5>
+          </div>
+          <div class="card-body">
+            <div>
+              <apt-alert [record]="favorite"></apt-alert>
+            </div>
+            <div *ngIf="user$ | async as user">
+              <div class="row">
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="favorite" field="Name" label=" Name" [editable]="
+                  favorite?.IsActive && favorite?.CreatedBy?.Id === user?.Id
+                " (onChange)="updateFavorite($event.Name, favorite, 'Name')">
+                  </apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <span>
+                    <dt [ngClass]="labelClass" class="mutedLabels mt-2">
+                      {{ "FAVORITE.VISIBILITY" | translate }}
+                    </dt>
+                    <dd class="m-0 position-relative">
+                      <span *ngFor="let scope of favoriteScopes"
+                        class="custom-control custom-radio custom-control-inline pt-1">
+                        <input type="radio" class="custom-control-input" [id]="scope" [name]="scope" [disabled]="
+                            !(
+                              favorite?.IsActive &&
+                              favorite?.CreatedBy?.Id === user?.Id
+                            )
+                          " [checked]="favorite.Scope === scope" [value]="scope"
+                          (change)="updateFavorite(scope, favorite, 'Scope')" />
+
+                        <label class="custom-control-label mr-auto pt-1" [for]="scope">{{
+                          scope
+                          }}</label>
+                      </span>
+                    </dd>
+                  </span>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="favorite.CreatedBy" field="Name" [editable]="false"
+                  [label]="'COMMON.CREATED_BY' | translate"></apt-output-field>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="favorite" field="Description" [editable]="
+                  favorite?.IsActive && favorite?.CreatedBy?.Id === user?.Id
+                " (onChange)="
+                  updateFavorite($event.Description, favorite, 'Description')
+                "></apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="favorite" field="IsActive" label="Active" [editable]="false">
+                  </apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="favorite" field="CreatedDate" [editable]="false">
+                  </apt-output-field>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-detail-section>
+
+  <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="py-2">
+          {{'DETAILS.LINE_ITEMS' | translate}}
+        </h5>
+      </div>
+      <div class="card-body">
+        <table class="table table-responsive" *ngIf="lineItems$ | async as lineItems; else loading">
+          <tbody>
+            <ng-container *ngFor="let item of lineItems; let i = index">
+              <apt-line-item-table-row [index]="i" [parent]="item.MainLine" [options]="item.Options"
+                [children]="item.SecondaryLines" [editableFields]="false" [cart]="cart">
+              </apt-line-item-table-row>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </app-detail-section>
+</app-detail>
+
+<ng-template #loading>
+  <div class="d-flex justify-content-center pt-5">
+    <apt-dots></apt-dots>
+  </div>
+</ng-template>

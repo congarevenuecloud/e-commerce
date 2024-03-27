@@ -1,0 +1,57 @@
+@import "../../../../variables.scss";
+
+apt-price-summary {
+    button.active-color {
+        background-color: $white;
+    }
+
+    button.active-color:hover {
+        background-color: $white;
+    }
+}
+
+.cart-title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-normal;
+}
+
+.input-group {
+    input {
+        padding-left: 2rem !important;
+        z-index: 0 !important;
+    }
+}
+
+.input-group-append {
+    z-index: 1 !important;
+}
+
+.sidenav {
+    width: 0;
+    z-index: 1039 !important;
+    top: 0;
+    right: 0;
+    background-color: $white;
+    overflow-x: hidden;
+    transition: 0.5s;
+    box-shadow: 0 0 5px $gray-500;
+  }
+
+  .dropdown-toggle::after {
+    display: none;
+  }
+  
+  div.showNav{
+    width: 18.75rem;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 0.375rem !important;
+    height: 0.375rem !important;
+    background: $white !important;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: $EC-Space-4 !important;
+    border-radius: 0.25rem !important;
+  }

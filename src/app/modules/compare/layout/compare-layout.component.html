@@ -1,0 +1,10 @@
+<apt-alert [showCartError]="true" [autoRun]="false"></apt-alert>
+<ng-container *ngIf="products; else spinner">
+  <apt-product-compare [identifiers]="identifiers"></apt-product-compare>
+</ng-container>
+
+<ng-template #spinner>
+  <div class="d-flex justify-content-center pt-5">
+    <apt-spinner></apt-spinner>
+  </div>
+</ng-template>

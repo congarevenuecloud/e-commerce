@@ -1,0 +1,132 @@
+<div class="border-bottom bg-white d-flex justify-content-between py-2">
+  <apt-breadcrumb [sobject]="category" [label]="(!category) ? ('HEADER.PRODUCT_CATALOG' | translate) : category?.Label">
+  </apt-breadcrumb>
+  <div class="px-3 d-flex align-items-center">
+    <app-quick-add [layout]="'modal'" [fields]="fields" [productFieldType]="'lookup'"
+      [businessObjectFields]="businessObjectFields" [btnClass]="'btn-custom-secondary border-0'"></app-quick-add>
+  </div>
+</div>
+
+<apt-alert [showCartError]="true" [autoRun]="false"></apt-alert>
+<apt-constraint-rule-alert></apt-constraint-rule-alert>
+<div class="container-fluid py-4" id="top">
+  <div class="d-flex justify-content-end mb-2">
+    <!-- This will be added back when assets feature is available in RLP -->
+    <!-- <apt-installed-products></apt-installed-products> -->
+  </div>
+  <div class="row">
+    <div class="col-12 col-lg-3">
+      <div>
+
+        <!-- Product type filter will be added back when assets feature is available in RLP -->
+        <!-- <apt-product-type-filter (onFilterAdd)="onFilterAdd($event)" (onFilterRemove)="onFilterRemove($event)">
+                </apt-product-type-filter> -->
+
+        <apt-category-filter [category]="category" title="{{'PRODUCT_LIST.RELATED_CATEGORIES' | translate}}" limit="10"
+          relationship="peers" class="mb-2" (onChange)="onCategory($event)"></apt-category-filter>
+
+        <apt-category-filter [category]="category" title="{{'COMMON.SUB_CATEGORIES' | translate}}" limit="10"
+          relationship="children" selection="multi" class="mb-2" (onChange)="onSubcategoryFilter($event)">
+        </apt-category-filter>
+
+        <div *ngIf="data$ | async as data">
+          <apt-facet-filter class="mb-2" [facet]="data?.Facets" [record]="product"
+            (userSelection)="getFacetFilterSelection($event)"></apt-facet-filter>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-9">
+      <div *ngIf="!hasSearchError else showSearchError">
+
+        <div *ngIf="data$ | async as data;else loading">
+          <div *ngIf="data?.TotalCount > 0; else noResult">
+            <nav class="navbar navbar-light bg-white p-0 mb-3">
+              <pl-results [recordCount]="data?.TotalCount" [limit]="pageSize" [offset]="(page - 1) * pageSize"
+                [page]="page" [view]="view" [query]="searchString" [sortBy]="sortField" (onViewChange)="onView($event)"
+                (onSortChange)="onSortChange($event)" (onPageSizeChange)="onPageSizeChange($event)"
+                class="d-block w-100">
+              </pl-results>
+            </nav>
+
+            <div class="d-flex justify-content-center position-relative pagination" *ngIf="data?.TotalCount > 0">
+              <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
+                [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="5"
+                [firstText]="paginationButtonLabels.first" [previousText]="paginationButtonLabels.previous"
+                [nextText]="paginationButtonLabels.next" [lastText]="paginationButtonLabels.last">
+              </pagination>
+              <div class="select-all d-none d-sm-none d-md-block mb-lg-0 mb-md-1 mb-sm-1 mb-1">
+                <apt-select-all [items]="data.Products"></apt-select-all>
+              </div>
+            </div>
+
+            <div class="row" *ngIf="view == 'grid' && data?.Products">
+              <div class="col-12 col-sm-6 col-md-4 col-xl-3 mb-3" *ngFor="let product of data?.Products">
+                <apt-product-card [product]="product" class="mb-3"></apt-product-card>
+              </div>
+            </div>
+
+            <div class="row" *ngIf="view == 'list' && data?.Products">
+              <div class="col-12">
+                <ul class="list-unstyled list-group">
+                  <li *ngFor="let product of data?.Products let i = index; let last = last" class="list-group-item"
+                    [class.mb-3]="last">
+                    <apt-product-card [product]="product" type="media"></apt-product-card>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-center pagination" *ngIf="data?.TotalCount > 0">
+              <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
+                [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="5"
+                [firstText]="paginationButtonLabels.first" [previousText]="paginationButtonLabels.previous"
+                [nextText]="paginationButtonLabels.next" [lastText]="paginationButtonLabels.last">
+              </pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="d-flex justify-content-center pt-5">
+    <apt-dots></apt-dots>
+  </div>
+</ng-template>
+
+<ng-template #noResult>
+  <div *ngIf="searchString; else noResult">
+    <div class="d-flex justify-content-center mt-5">
+      <div class="w-50"><span>{{'PRODUCT_LIST.YOUR_SEARCH' | translate}}</span>
+        <span><strong><em> &#8212; {{searchString | safeHtml}}</em></strong></span>
+        <span>{{'PRODUCT_LIST.NO_MATCH' | translate}}</span>
+        <br>
+        <br>
+        <span>{{'PRODUCT_LIST.SUGGESTIONS' | translate}}</span>
+        <ul class="pl-3">
+          <li>{{'PRODUCT_LIST.SUGGESTIONS_1' | translate}}</li>
+          <li>{{'PRODUCT_LIST.SUGGESTIONS_2' | translate}}</li>
+          <li>{{'PRODUCT_LIST.SUGGESTIONS_3' | translate}}</li>
+          <li>{{'PRODUCT_LIST.SUGGESTIONS_4' | translate}}</li>
+          <li [innerHTML]="'PRODUCT_LIST.SUGGESTIONS_5' | translate"></li>
+          <li>{{'PRODUCT_LIST.SUGGESTIONS_6' | translate}}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <ng-template #noResult>
+    <div class="d-flex justify-content-center mt-5 text-center">
+      <div class="w-50">
+        <span>{{'PRODUCT_LIST.NO_RESULT' | translate}}</span>
+      </div>
+    </div>
+  </ng-template>
+</ng-template>
+
+<ng-template #showSearchError>
+  <div class="d-flex justify-content-center font-weight-bold m-5">
+    {{'HEADER.MIN_VALIDATION_SEARCH_ERROR' | translate}}
+  </div>
+</ng-template>

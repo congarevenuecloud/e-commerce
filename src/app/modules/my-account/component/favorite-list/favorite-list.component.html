@@ -1,0 +1,24 @@
+<div class="mb-2">
+  <nav class="navbar border-0 navbar-light bg-white d-flex px-0 pt-0 justify-content-between">
+    <span class="navbar-brand">
+      {{'COMMON.FAVORITES' | translate}}
+      <span>( {{totalRecords$ | async}} )</span>
+    </span>
+  </nav>
+</div>
+
+<!-- Table component rendering list of favorites with applicable actions and pagination -->
+<div class="row">
+  <div class="col-12 bg-white">
+      <div *ngIf="(view$ | async) as view; else spinner">
+    <apt-table *ngIf="view?.tableOptions; else loading" [type]="type" [options]="view?.tableOptions" [showErrorToaster]="true" [payload]="payload"></apt-table>
+  </div>
+</div>
+</div>
+
+<!-- Spinner dots while data is loading -->
+<ng-template #spinner>
+  <div class="d-flex justify-content-center py-5">
+    <apt-dots></apt-dots>
+  </div>
+</ng-template> 

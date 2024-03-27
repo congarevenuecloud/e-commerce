@@ -1,0 +1,58 @@
+<div class="bg-white border-bottom py-2">
+  <apt-breadcrumb [label]="'HEADER.MY_ACCOUNT' | translate"></apt-breadcrumb>
+</div>
+<apt-alert [showCartError]="true" [autoRun]="false"></apt-alert>
+<div class="row no-gutters flex-fill">
+  <div class="col-2 border-right bg-white d-none d-sm-none d-lg-block d-md-block">
+    <div class="card border-0" *ngIf="me$ | async as me">
+      <div class="card-body pb-0">
+        <div class="media">
+          <h4
+            class="d-flex justify-content-center align-items-center bg-secondary text-white rounded-circle user-avatar">
+            {{userInitials}}</h4>
+          <div class="media-body ml-3 text-truncate">
+            <h5 class="my-0">{{me?.FirstName}}</h5>
+            <h5 class="my-0">{{me?.LastName}}</h5>
+            <div>{{me?.Title}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="list-group list-group-flush p-2">
+      <a class="list-group-item list-group-item-action py-2 border-top" href="javascript:void(0)" [routerLink]="['/my-account/dashboard']"
+      [routerLinkActive]="'active'">
+      <i class="fas fa-tachometer-alt"></i>
+      {{'MY_ACCOUNT.OVERVIEW' | translate}}
+    </a>
+    <a class="list-group-item list-group-item-action py-2" href="javascript:void(0)" [routerLink]="['/my-account/orders']"
+      [routerLinkActive]="'active'">
+      <i class="fas fa-list-ul"></i>
+      {{'COMMON.ORDERS' | translate}}
+    </a>
+    <a class="list-group-item list-group-item-action py-2" href="javascript:void(0)" [routerLink]="['/my-account/quotes']"
+      [routerLinkActive]="'active'">
+      <i class="fas fa-pencil-alt"></i>
+      {{'COMMON.QUOTES' | translate}}
+    </a>
+    <a class="list-group-item list-group-item-action py-2" href="javascript:void(0)" [routerLink]="['/my-account/carts']"
+      [routerLinkActive]="'active'">
+      <i class="fas fa-shopping-cart"></i>
+      {{'COMMON.CARTS' | translate}}
+    </a>
+    <a *ngIf="showFavorites$ | async" class="list-group-item list-group-item-action py-2" href="javascript:void(0)"
+      [routerLink]="['/my-account/favorites']" [routerLinkActive]="'active'">
+      <i class="fas fa-heart"></i>
+      {{'COMMON.FAVORITES' | translate}}
+    </a>
+    <a class="list-group-item list-group-item-action py-2" href="javascript:void(0)" [routerLink]="['/my-account/settings']"
+      [routerLinkActive]="'active'">
+      <i class="fas fa-cog"></i>
+      {{'MY_ACCOUNT.SETTINGS' | translate}}
+    </a>
+    </ul>
+  </div>
+  <div class="col-lg-10 col-md-10 col-sm-12 col-12 pt-2 px-4 bg-white">
+    <router-outlet></router-outlet>
+  </div>
+</div>

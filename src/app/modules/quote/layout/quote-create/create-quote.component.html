@@ -1,0 +1,70 @@
+<ng-container *ngIf="cart$ | async as cart; else loadingTemplate">
+    <apt-breadcrumb *ngIf="!cart?.Proposald?.Id" [label]="'COMMON.CREATE_QUOTE' | translate" class="border-bottom py-2"></apt-breadcrumb>
+    <apt-breadcrumb *ngIf="cart?.Proposald?.Id" [sobject]="quoteRequestObj" [label]="'CREATE_QUOTE.FINALIZE_AND_SUBMIT' | translate" class="border-bottom py-2">
+    </apt-breadcrumb>
+    <div class="container-fluid animated fadeIn p-0">
+        
+        <div class="px-4 py-2">
+            <div class="d-flex justify-content-between">
+                <h4 *ngIf="!cart?.Proposald?.Id">{{'COMMON.REQUEST_QUOTE' | translate }}</h4>
+                <div class="d-flex justify-content-end">
+                    <apt-captcha *ngIf="showCaptcha"
+                    (onCaptchaSuccess)="captchaSuccess(cart)"></apt-captcha>
+                    <button class="btn btn-link" [routerLink]="['/carts/active']">
+                        {{'COMMON.CANCEL' | translate }}
+                    </button>
+                    <button *ngIf="!showCaptcha" class="btn btn-primary btn-raised" (click)="quotePlacement(cart)"
+                        [disabled]="disableSubmit" [ladda]="loading" data-style="zoom-in">
+                        {{'COMMON.REQUEST_QUOTE' | translate }}
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-8 mb-4 py-2">
+                    <app-request-quote-form [cart]="cart" (onQuoteUpdate)="onUpdate($event)" #form></app-request-quote-form>
+                </div>
+                <div class="col-12 col-md-4 mb-4 py-2">
+                    <apt-price-summary [disableSubmit]="disableSubmit" [record]="cart" [loading]="loading"
+                    [page]="'create-proposal'" [showCaptcha]="false"
+                    (onRequestQuote)="convertCartToQuote(cart)" (onShowCaptcha)="loadCaptcha()"></apt-price-summary>
+                    <cart-summary [cart]="cart"></cart-summary>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <ng-template #confirmationTemplate>
+        <div class="modal-header align-items-center d-flex flex-row-reverse p-0 pb-2 mt-3 border-bottom border-secondary">
+            <button type="button" class="close close-button pull-right" aria-label="Close" (click)="confirmationModal.hide()" [routerLink]="isLoggedIn ? ['/proposals', quoteConfirmation.Id] : ['/products']">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body bg-white d-flex flex-column justify-content-center py-4">
+            <h6 class="modal-title pull-left font-weight-bold pb-2"> {{'QUOTE_CONFIRMATION_MODAL.QUOTE_REQUEST' | translate}} </h6>
+            <p class="text-center">
+                <strong>{{ 'MODAL.THANK_YOU' | translate }}
+                    {{quoteConfirmation?.CreatedBy?.FirstName}}!</strong>
+            </p>
+            <small class="text-center" *ngIf="!cart?.Proposald?.Id"
+                [translate]="'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRM_MSG'"
+                [translateParams]="{Sellername: quoteConfirmation?.CreatedBy?.Name}"></small>
+            <small class="text-center" *ngIf="quoteConfirmation?.RFPResponseDueDate"
+                [translate]="'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRMATION_MSG_WITH_RFP'"
+                [translateParams]="{RFP_value: quoteConfirmation.RFPResponseDueDate | date: 'yyyy-MM-dd'}"></small>
+            <small class="text-center" *ngIf="cart?.Proposald?.Id"
+                [translate]="'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRMATION_Update_MSG'"
+                [translateParams]="{Sellername: quoteConfirmation?.CreatedBy?.Name, RFP_value: quoteConfirmation.RFPResponseDueDate | date: 'yyyy-MM-dd'}"></small>
+            <h5 class="text-center my-3">{{ 'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRMATION_NO' | translate }}
+                {{quoteConfirmation.Name}}</h5>
+            <button class="btn btn-outline-primary w-35 mx-auto" (click)="confirmationModal.hide()"
+                [routerLink]="['/proposals', quoteConfirmation.Id]">{{ 'QUOTE_CONFIRMATION_MODAL.REVIEW_YOUR_QUOTE' | translate }}</button>
+        </div>
+    </ng-template>
+</ng-container>
+
+<ng-template #loadingTemplate>
+    <div class="d-flex justify-content-center pt-5 mt-5">
+        <apt-spinner></apt-spinner>
+    </div>
+</ng-template>

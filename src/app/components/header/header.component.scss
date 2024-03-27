@@ -1,0 +1,40 @@
+@use "sass:math";
+@import "variables";
+.navbar-brand {
+  width: 3rem;
+  img {
+    max-height: 2rem;
+  }
+}
+
+.navbar {
+  transition: margin 300ms;
+  transition: height 300ms;
+  z-index: 1031;
+}
+
+.navbar-brand > img {
+  transition: 0.45s;
+  &.scale {
+    transform: scale(0.725);
+  }
+}
+
+.modal.show .modal-dialog.menu {
+  left: 0;
+}
+.modal-dialog.menu {
+  transition: left 300ms;
+  margin: -1px 0 0 0;
+  left: -20rem;
+  top: 0rem;
+  width: 20rem;
+  .modal-content {
+    height: 100vh;
+  }
+}
+
+.account-info.show {
+  min-width: 20rem;
+  left: inherit;
+}

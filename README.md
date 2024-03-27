@@ -1,6 +1,6 @@
 # Digital Commerce Core Reference Template
 
-This is the base reference application for the Conga ecommerce product. Follow below instructions to get started. See the [docs](https://github.com/congarevenuecloud/February23/index.html) for more detailed instructions on interacting with the underlying SDK.
+This is the base reference application for the Conga ecommerce product. Follow below instructions to get started. See the [docs](https://congarevenuecloud.github.io/202402.2.0/) for more detailed instructions on interacting with the underlying SDK.
 
 ---
 
@@ -96,12 +96,10 @@ The `endpoint`, `clientId` and `authority` fields in the environment file will b
 
 **Development Mode**
 
-> Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
+> Run `ng serve` for a dev server. Navigate to `https://localhost:3000`. The app will automatically reload if you change any of the source files.
 **Production Mode**
 
-> Run `ng serve --aot` for a production server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
+> Run `ng serve --aot` for a production server. Navigate to `https://localhost:3000`. The app will automatically reload if you change any of the source files.
 <div id="product-identifier"/>
 
 ## Product identifier
@@ -139,7 +137,7 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 
 ## Digital Commerce SDK
 
-The objective of this section is to provide information about reference templates, base libraries, models, and components that can be inherited and reused. This section also provides information about services that are sufficient for most of the business logic. You can create orders, request quotes, and more with the **SDK libraries**. See the [Docs](https://github.com/congarevenuecloud/February23/index.html) for more information.
+The objective of this section is to provide information about reference templates, base libraries, models, and components that can be inherited and reused. This section also provides information about services that are sufficient for most of the business logic. You can create orders, request quotes, and more with the **SDK libraries**. See the [Docs](https://congarevenuecloud.github.io/202402.2.0/) for more information.
 
 <div id="digital-commerce-for-rest-api-developers"/>
 
@@ -147,7 +145,7 @@ The objective of this section is to provide information about reference template
 
 This section is designed to provide administrators with information on the CPQ API references that enables commerce into any part of an application.
 
-Refer the [Docs](https://documentation.conga.com/conga-platform/latest/conga-cpq-api-reference-183763193.html) to get detailed information of REST APIs.
+Refer the [Docs](https://developer.conga.com/revenue) to get detailed information of CPQ APIs.
 
 <div id="further-help"/>
 

@@ -1,0 +1,17 @@
+.pagination {
+  .select-all {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pagination {
+    flex-direction: column;
+
+    .select-all {
+      position: relative;
+    }
+  }
+}
