@@ -5,7 +5,7 @@ import { Observable, of, BehaviorSubject, Subscription, combineLatest, empty } f
 import { TranslateService } from '@ngx-translate/core';
 import { mergeMap } from 'rxjs/operators';
 import { FilterOperator } from '@congarevenuecloud/core';
-import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote } from '@congarevenuecloud/ecommerce';
+import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote, CartService } from '@congarevenuecloud/ecommerce';
 import { DomSanitizer } from '@angular/platform-browser';
 /**
  * Product list component shows all the products in a list for user selection.
@@ -31,7 +31,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   /**
    * A field name on which one wants to apply sorting.
    */
-  sortField: string = 'Relevance';
+  sortField: string = 'Name';
   /**
    * Value of the product family field filter.
    */
@@ -71,6 +71,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   fields: string[];
   object: any;
   businessObjectFields: string[];
+  priceError$: Observable<boolean>;
   /**
    * Array of product families associated with the list of assets.
    */
@@ -81,7 +82,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   constructor(private activatedRoute: ActivatedRoute, private sanitizer: DomSanitizer,
     private router: Router, private categoryService: CategoryService,
-    public productService: ProductService, private translateService: TranslateService, private accountService: AccountService) { }
+    public productService: ProductService, private translateService: TranslateService, private accountService: AccountService, private cartService: CartService) { }
 
   ngOnDestroy() {
     if (!isNil(this.subscription))
@@ -89,6 +90,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.priceError$ = this.cartService.getCartPriceStatus();
     this.router.events.subscribe((eventname: NavigationStart) => {
       if (eventname.navigationTrigger === 'popstate' && eventname instanceof NavigationStart) {
         this.productService.eventback.next(true);

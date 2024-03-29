@@ -66,6 +66,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     configurationPending: boolean;
     disabled: boolean = false;
     discovery: string;
+    priceProgress: boolean = false;
 
     constructor(private cartService: CartService,
         private router: Router,
@@ -137,6 +138,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
             this.relatedTo = get(this.viewState$, 'value.relatedTo');
             this.product = get(response, 'product');
             this.cartItemList = get(response, 'itemList');
+            this.priceProgress= get(response, 'priceProgress');
             if (get(response, 'configurationFlags.optionChanged') || get(response, 'configurationFlags.attributeChanged')) this.configurationChanged = true;
             if (!isNil(this.cartItemList)) this.primaryLineItem = find(this.cartItemList, (r) => get(r, 'LineType') == 'Product/Service');
         }));
@@ -188,11 +190,11 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
      * to see the updated the netprice of the product.
      */
     changeProductQuantity(newQty: any) {
-        if (this.cartItemList && this.cartItemList.length > 0)
-            forEach(this.cartItemList, c => {
-                if (c.LineType === 'Product/Service') c.Quantity = newQty;
-                this.subscriptions.push(this.productConfigurationService.changeProductQuantity(newQty).subscribe(() => { }));
-            });
+        if (this.cartItemList && this.cartItemList.length > 0 && !isNil(get(this.viewState$,'value.relatedTo'))){
+            let item  = find(this.cartItemList, c => c.LineType === 'Product/Service');
+            item.Quantity = newQty;
+            this.subscriptions.push(this.productConfigurationService.changeProductQuantity(newQty, item).subscribe(() => { }));
+     }
     }
 
     changeProductToOptional(event: boolean) {

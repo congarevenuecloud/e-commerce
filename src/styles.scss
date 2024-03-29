@@ -1225,17 +1225,9 @@ apt-line-item-menu {
 }
 
 @media only screen and (max-width: 600px) {
-  
-  ol.breadcrumb li:nth-child(n+3) {
-    display: none;
-  }
 
-  .card-margin {
-    margin-bottom:1rem;
-  }
 
   app-header .sf-label, .wrap-text span dd, ol.breadcrumb li:nth-child(2) {
-    max-width: 3rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

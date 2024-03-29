@@ -1,4 +1,4 @@
-@import "../../../../variables.scss";
+@import "variables.scss";
 
 apt-price-summary {
     button.active-color {
@@ -34,7 +34,7 @@ apt-price-summary {
     background-color: $white;
     overflow-x: hidden;
     transition: 0.5s;
-    box-shadow: 0 0 5px $gray-500;
+    box-shadow: 0 0 1px $gray-500;
   }
 
   .dropdown-toggle::after {

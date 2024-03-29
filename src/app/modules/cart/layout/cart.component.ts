@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, TemplateRef, OnDestroy, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, Subscription, of } from 'rxjs';
+import { Observable, Subscription, combineLatest, of } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 import { TabsetComponent } from 'ngx-bootstrap/tabs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
@@ -127,13 +127,13 @@ export class CartComponent implements OnInit, OnDestroy {
     this.subscriptions.push(this.userService.getCurrentUserLocale(false).subscribe((currentLocale) => this.currentUserLocale = currentLocale));
     this.primaryContact = new Contact();
     this.order = new Order();
-    this.subscriptions.push(this.cartService.getMyCart().subscribe(cart => {
+    this.subscriptions.push(combineLatest(this.cartService.getMyCart(),this.accountService.getCurrentAccount()).subscribe(([cart, account]) => {
       this.cart = cart;
       // Setting default values
       this.order.Name = 'New Order'
-      this.order.SoldToAccount = get(cart, 'Account');
-      this.order.BillToAccount = get(cart, 'Account');
-      this.order.ShipToAccount = get(cart, 'Account');
+      this.order.SoldToAccount = isNil(get(cart, 'Account')) ? account: get(cart, 'Account');
+      this.order.BillToAccount = isNil(get(cart, 'Account')) ? account: get(cart, 'Account');
+      this.order.ShipToAccount = isNil(get(cart, 'Account')) ? account: get(cart, 'Account');
       this.order.PriceList = get(cart, 'PriceList');
 
     }));
