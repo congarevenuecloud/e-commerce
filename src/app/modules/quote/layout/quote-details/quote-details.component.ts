@@ -43,9 +43,9 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   uploadFileList: any;
 
-  isSupportedFileType:boolean = true;
+  isSupportedFileType: boolean = true;
 
-  supportedFileTypes:string;
+  supportedFileTypes: string;
 
   editLoader = false;
 
@@ -122,9 +122,12 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getQuote();
-    this.quoteSubscription.push(this.attachmentService.getSupportedAttachmentType().pipe(
-      take(1)
-    ).subscribe((data: string)=>{
+    this.quoteSubscription.push(this.userService.isLoggedIn().pipe(switchMap((value: boolean) => {
+      this.isLoggedIn = value;
+      if (this.isLoggedIn)
+        return this.attachmentService.getSupportedAttachmentType();
+    }), take(1)
+    ).subscribe(data => {
       this.supportedFileTypes = data;
     }))
   }
@@ -135,11 +138,10 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
       .pipe(
         filter(params => get(params, 'id') != null),
         map(params => get(params, 'id')),
-        switchMap(quoteId => combineLatest([this.quoteService.getQuoteById(quoteId), this.userService.isLoggedIn()])),
-        switchMap(([quote, isLoggedIn]) => {
+        switchMap(quoteId => this.quoteService.getQuoteById(quoteId)),
+        switchMap((quote) => {
           const quoteLineItems = LineItemService.groupItems(get(quote, 'Items'));
           this.quoteLineItems$.next(quoteLineItems);
-          this.isLoggedIn = isLoggedIn;
           return combineLatest([isEmpty(quoteLineItems) ? of(null) : (this.cartService.fetchCartStatus(get(get(first(this.quoteLineItems$.value), 'MainLine.Configuration'), 'Id'))), of(quote)])
         }),
         take(1),
@@ -338,7 +340,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
       this.uploadFileList = event.target.files;
       this.hasFileSizeExceeded(this.uploadFileList, this.maxFileSizeLimit);
       this.file = fileList[0];
-      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList,this.supportedFileTypes);
+      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList, this.supportedFileTypes);
     }
   }
 
@@ -355,7 +357,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     if (fileList.length > 0) {
       this.uploadFileList = event.dataTransfer.files;
       this.hasFileSizeExceeded(this.uploadFileList, event.target.dataset.maxSize);
-      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList,this.supportedFileTypes);
+      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList, this.supportedFileTypes);
     } else {
       let f = [];
       for (let i = 0; i < itemList.length; i++) {

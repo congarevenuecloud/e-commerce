@@ -102,7 +102,7 @@
         </h5>
       </div>
       <div class="card-body">
-        <table class="table table-responsive" *ngIf="lineItems$ | async as lineItems; else loading">
+        <table class="table" *ngIf="lineItems$ | async as lineItems; else loading">
           <tbody>
             <ng-container *ngFor="let item of lineItems; let i = index">
               <apt-line-item-table-row [index]="i" [parent]="item.MainLine" [options]="item.Options"
