@@ -31,7 +31,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   /**
    * A field name on which one wants to apply sorting.
    */
-  sortField: string = 'Relevance';
+  sortField: string = 'Name';
   /**
    * Value of the product family field filter.
    */

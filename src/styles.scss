@@ -1087,10 +1087,20 @@ div.fixed-top {
   border: none;
 }
 
+span {
+  img {
+    height: 1.5rem;
+  }
+}
 
 .category-list {
   display: flex;
   flex: 1 1 auto;
+}
+
+.logout-section {
+  display: flex;
+  border-radius: 0 !important;
 }
 
 .modal-content-background {
@@ -1109,9 +1119,20 @@ div.fixed-top {
   border: none;
 }
 
+span {
+  img {
+    height: 1.5rem;
+  }
+}
+
 .category-list {
   display: flex;
   flex: 1 1 auto;
+}
+
+.logout-section {
+  display: flex;
+  border-radius: 0 !important;
 }
 
 .custom-checkbox .custom-control-label::before {
@@ -1225,17 +1246,9 @@ apt-line-item-menu {
 }
 
 @media only screen and (max-width: 600px) {
-  
-  ol.breadcrumb li:nth-child(n+3) {
-    display: none;
-  }
 
-  .card-margin {
-    margin-bottom:1rem;
-  }
 
   app-header .sf-label, .wrap-text span dd, ol.breadcrumb li:nth-child(2) {
-    max-width: 3rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

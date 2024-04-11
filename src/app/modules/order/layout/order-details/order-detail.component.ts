@@ -82,11 +82,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   file: File;
 
   uploadFileList: any;
-  
-  isSupportedFileType:boolean = true;
 
-  supportedFileTypes:string;
-  
+  isSupportedFileType: boolean = true;
+
+  supportedFileTypes: string;
+
   lookupOptions: LookupOptions = {
     primaryTextField: 'Name',
     secondaryTextField: 'Email',
@@ -122,9 +122,12 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       this.lookupOptions.sortOrder = null;
       this.lookupOptions.page = 10;
     }));
-    this.subscriptions.push(this.attachmentService.getSupportedAttachmentType().pipe(
-      take(1)
-    ).subscribe((data: string)=>{
+    this.subscriptions.push(this.userService.isLoggedIn().pipe(switchMap((value: boolean) => {
+      this.isLoggedIn = value;
+      if (this.isLoggedIn)
+        return this.attachmentService.getSupportedAttachmentType();
+    }), take(1)
+    ).subscribe(data => {
       this.supportedFileTypes = data;
     }))  }
 
@@ -141,10 +144,9 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
         })
       );
 
-    this.orderSubscription = combineLatest([order$.pipe(startWith(null)), this.userService.isLoggedIn()])
-      .pipe(map(([order, isLoggedIn]) => {
+    this.orderSubscription = order$.pipe(startWith(null))
+      .pipe(map((order) => {
         if (!order) return;
-        this.isLoggedIn = isLoggedIn;
         if (order.Status === 'Partially Fulfilled' && indexOf(this.orderStatusSteps, 'Fulfilled') > 0)
           this.orderStatusSteps[indexOf(this.orderStatusSteps, 'Fulfilled')] = 'Partially Fulfilled';
 
@@ -351,7 +353,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       this.uploadFileList = event.target.files;
       this.hasFileSizeExceeded(this.uploadFileList, this.maxFileSizeLimit);
       this.file = fileList[0];
-      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList,this.supportedFileTypes);
+      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList, this.supportedFileTypes);
     }
   }
 
@@ -366,7 +368,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     if (fileList.length > 0) {
       this.uploadFileList = event.dataTransfer.files;
       this.hasFileSizeExceeded(this.uploadFileList, event.target.dataset.maxSize);
-      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList,this.supportedFileTypes);
+      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList, this.supportedFileTypes);
     } else {
       let f = [];
       for (let i = 0; i < itemList.length; i++) {
