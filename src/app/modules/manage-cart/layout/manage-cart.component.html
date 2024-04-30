@@ -7,7 +7,7 @@
     <apt-constraint-rule-alert></apt-constraint-rule-alert>
   </ng-template>
 
-  <apt-alert message="ERROR.CART.VALIDATE" [showCartError]="true" [autoRun]="false"></apt-alert>
+  <apt-alert message="ERROR.CART.VALIDATE" [showCartError]="true" [autoRun]="false" [showPriceError]="priceError$ | async"></apt-alert>
   <div class="container-fluid" [ngClass]="'py-2'">
     <div class="px-4">
       <div class="detail-header pb-2">
@@ -26,7 +26,7 @@
           <apt-add-to-cart *ngIf="readOnly" [customButtonActions]="customButtonActions" [ngClass]="'d-lg-block d-md-block d-sm-none d-none'"
             [showQuantityControls]="false"></apt-add-to-cart>
           <div class="d-sm-flex d-flex ml-auto d-md-none d-lg-none mt-3 justify-content-end dropdown">
-            <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+            <a class="fa fa-ellipsis-v dropdown-toggle px-1" href="#" role="button" id="dropdownMenuLink"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -73,7 +73,7 @@
                     </apt-output-field>
                   </div>
                   <div class="flex-shrink-1 col-md-4 mb-2">
-                    <apt-output-field [record]="view?.cart" field="PriceList" [showQuickView]="true" [editable]="false">
+                    <apt-output-field [record]="view?.cart" field="PriceList" [editable]="false">
                     </apt-output-field>
                   </div>
                 </div>

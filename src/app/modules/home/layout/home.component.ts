@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { first, get, slice, reverse, sortBy, last, forEach } from 'lodash';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Product, CategoryService, ProductService, Category, UserService, ItemRequest, GuestUserService } from '@congarevenuecloud/ecommerce';
+import { Product, CategoryService, ProductService, Category, UserService, ItemRequest, GuestUserService, CartService } from '@congarevenuecloud/ecommerce';
 
 @Component({
   selector: 'app-home',
@@ -21,12 +21,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   counter: number = 3;
   isInvalidGuest: boolean = false;
   loadData$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  priceError$: Observable<boolean>;
 
   constructor(private userService: UserService, private guestUserService: GuestUserService,
-    private categoryService: CategoryService, private productService: ProductService) {
+    private categoryService: CategoryService, private productService: ProductService, private cartService: CartService) {
   }
 
   ngOnInit() {
+    this.priceError$ = this.cartService.getCartPriceStatus();
     this.subscriptions.push(this.guestUserService.isValidUser().subscribe(isValid => {
       this.loadData$.next(true);
       if (!isValid) {

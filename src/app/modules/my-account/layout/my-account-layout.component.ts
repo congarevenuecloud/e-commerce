@@ -17,6 +17,7 @@ export class MyAccountLayoutComponent implements OnInit {
   /** @ignore */
   userInitials: string = null;
   showFavorites$: Observable<boolean>;
+  priceError$:  Observable<boolean>;
 
   /** @ignore */
   constructor(
@@ -28,6 +29,7 @@ export class MyAccountLayoutComponent implements OnInit {
 
   /** @ignore */
   ngOnInit() {
+    this.priceError$ = this.cartService.getCartPriceStatus();
     this.me$ = this.userService.me().pipe(
       tap((user: User) => {
         this.userInitials = defaultTo(first(user.FirstName), '') + defaultTo(first(user.LastName), '');

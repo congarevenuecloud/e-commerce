@@ -283,6 +283,7 @@
         "LAST": "fr_FR Last"
     },
     "COMMON": {
+        "SELECT_ALL": "fr_FR Select All",
         "ACTIVATE_CART": "fr_FR Activate Cart",
         "PENDING_OPERATIONS": "fr_FR Operations are pending on your cart",
         "REVALIDATING_CART": "fr_FR Cart is being revalidated",
@@ -409,6 +410,7 @@
         "PRICE_NOT_AUTOUPDATED": "fr_FR * Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "fr_FR Update Prices",
         "PRICE_ERROR": "fr_FR Pricing of your cart has failed, please proceed with either of the following.",
+        "PRICE_PROGRESS": "fr_FR Pricing of your cart is in progress, please proceed with either of the following.",
         "RETRY": "fr_FR Retry",
         "RETRY_CART": "fr_FR Retry pricing the cart",
         "ABANDON": "fr_FR Abandon",

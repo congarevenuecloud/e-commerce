@@ -2,7 +2,7 @@ import { Component, OnInit, ViewEncapsulation, OnDestroy, ChangeDetectorRef, Aft
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { filter, map, switchMap, mergeMap, startWith, take } from 'rxjs/operators';
-import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first } from 'lodash';
+import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil } from 'lodash';
 import { ApiService } from '@congarevenuecloud/core';
 import {
   Order, Quote, OrderLineItem, OrderService, UserService,
@@ -95,7 +95,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
 
   isPrivate: boolean = false;
   maxFileSizeLimit = 29360128;
-  cartRecord: Cart;
+  cartRecord: Cart = new Cart();
 
   constructor(private activatedRoute: ActivatedRoute,
     private orderService: OrderService,
@@ -129,7 +129,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     }), take(1)
     ).subscribe(data => {
       this.supportedFileTypes = data;
-    }))  }
+    }))
+  }
 
   getOrder() {
     if (this.orderSubscription) this.orderSubscription.unsubscribe();
@@ -144,22 +145,24 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
         })
       );
 
-    this.orderSubscription = order$.pipe(startWith(null))
-      .pipe(map((order) => {
-        if (!order) return;
-        if (order.Status === 'Partially Fulfilled' && indexOf(this.orderStatusSteps, 'Fulfilled') > 0)
-          this.orderStatusSteps[indexOf(this.orderStatusSteps, 'Fulfilled')] = 'Partially Fulfilled';
+    this.orderSubscription = order$.pipe(switchMap((order) => {
+      if (isNil(order)) return;
+      if (order.Status === 'Partially Fulfilled' && indexOf(this.orderStatusSteps, 'Fulfilled') > 0)
+        this.orderStatusSteps[indexOf(this.orderStatusSteps, 'Fulfilled')] = 'Partially Fulfilled';
 
-        if (order.Status === 'Fulfilled' && indexOf(this.orderStatusSteps, 'Partially Fulfilled') > 0)
-          this.orderStatusSteps[indexOf(this.orderStatusSteps, 'Partially Fulfilled')] = 'Fulfilled';
+      if (order.Status === 'Fulfilled' && indexOf(this.orderStatusSteps, 'Partially Fulfilled') > 0)
+        this.orderStatusSteps[indexOf(this.orderStatusSteps, 'Partially Fulfilled')] = 'Fulfilled';
 
-        order.OrderLineItems = get(order, 'OrderLineItems');
-        this.orderLineItems$.next(LineItemService.groupItems(order.OrderLineItems));
-        this.cartService.fetchCartStatus(get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id')).pipe(take(1)).subscribe(c => {
-          this.cartRecord = c;
-        })
-        return this.updateOrder(order);
-      })).subscribe();
+      order.OrderLineItems = get(order, 'OrderLineItems');
+      this.orderLineItems$.next(LineItemService.groupItems(order.OrderLineItems));
+      set(this.cartRecord, 'Id', get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id'))
+      set(this.cartRecord, 'Id', get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id'));
+      return combineLatest([of(order), this.cartService.addAdjustmentInfoToLineItems(this.cartRecord?.Id)]);
+    }), take(1)).subscribe(([res, items]) => {
+      this.cartRecord.LineItems = items;
+      this.cartRecord.BusinessObjectType = 'Order';
+      this.updateOrder(res);
+    });
     this.getAttachments();
   }
 
