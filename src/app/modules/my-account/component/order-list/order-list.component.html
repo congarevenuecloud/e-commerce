@@ -8,12 +8,12 @@
                 </apt-data-filter>
             </div>
             <div class="d-flex align-items-end">
-                <span class="text-muted">{{'COMMON.TOTAL_ORDERS' | translate}}:</span>
+                <span class="px-2 text-muted">{{'COMMON.TOTAL_ORDERS' | translate}}:</span>
                 <h4 class="my-0 ml-2">{{totalRecords$ | async}}</h4>
             </div>
             <div class="mx-3">&#124;</div>
             <div class="d-flex align-items-end">
-                <span class="text-muted">{{'COMMON.AMOUNT' | translate}}:</span>
+                <span class="px-2 text-muted">{{'COMMON.AMOUNT' | translate}}:</span>
                 <h4 class="my-0 ml-2">{{(totalAmount$ | async) | localCurrency | async}}</h4>
             </div>
         </div>
@@ -30,7 +30,7 @@
     <div class="row d-lg-none d-md-none d-sm-block d-block">
         <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
             <div class="d-flex align-items-end">
-                <span class="text-muted">{{'COMMON.TOTAL_ORDERS' | translate}}:</span>
+                <span class="px-2 text-muted">{{'COMMON.TOTAL_ORDERS' | translate}}:</span>
                 <h4 class="my-0 ml-2">{{totalRecords$ | async}}</h4>
             </div>
         </div>
@@ -38,7 +38,7 @@
     <div class="row d-lg-none d-md-none d-sm-block d-block">
         <div class="col-12 d-flex summary align-items-baseline pl-2 mt-2">
             <div class="d-flex align-items-end">
-                <span class="text-muted">{{'COMMON.AMOUNT' | translate}}:</span>
+                <span class="px-2 text-muted">{{'COMMON.AMOUNT' | translate}}:</span>
                 <h4 class="my-0 ml-2">{{(totalAmount$ | async) | localCurrency | async}}</h4>
             </div>
         </div>

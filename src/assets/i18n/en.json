@@ -288,6 +288,7 @@
         "LAST": "Last"
     },
     "COMMON": {
+        "SELECT_ALL": "Select All",
         "ACTIVATE_CART":"Activate Cart",
         "PLACE_QUOTE": "Place Quote",
         "PENDING_OPERATIONS":"Operations are pending on your cart",
@@ -422,11 +423,9 @@
         "PRICE_NOT_AUTOUPDATED": "* Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "Update Prices",
         "PRICE_ERROR": "Pricing of your cart has failed, please proceed with either of the following.",
+        "PRICE_PROGRESS": "Pricing of your cart has timed out.",
         "RETRY":"Retry",
-        "RETRY_CART":"Retry pricing the cart",
         "ABANDON":"Abandon",
-        "ABANDON_CART":"Abandon the cart",
-        "CLONE_CART":"Create a copy of the cart",
         "FAVORITES": "Favorites",
         "SELECTIONS": "Selections",
         "PRODUCTS": "Products",

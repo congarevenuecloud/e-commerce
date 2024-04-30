@@ -18,7 +18,7 @@
 
   <app-detail-section [title]="'DETAILS.ORDER_SUMMARY' | translate">
     <div class="row">
-      <div class="col-12 col-md-8">
+      <div class="col-12 col-md-8 pl-lg-3 pl-md-3">
         <div class="card">
           <div class="card-header">
             <h5>
@@ -81,7 +81,7 @@
           </div>
         </div>
       </div>
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-4 pt-lg-0 pt-md-0 pt-sm-4 pt-4">
         <apt-price-summary [record]="order" [page]="'orders'" [showStatus]="true"></apt-price-summary>
       </div>
     </div>
@@ -128,7 +128,7 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="d-none d-lg-block d-md-block d-sm-none attachment-container" [ngClass]="isLoggedIn ? 'col-lg-6 col-md-6 border-right' :'col-lg-12 col-md-12'">
+          <div class="d-none d-lg-block d-md-block d-sm-none" [ngClass]="isLoggedIn ? 'col-lg-6 col-md-6 border-right' :'col-lg-12 col-md-12'">
             <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
               <div class="table-container overflow-auto">
                 <table class="table table-sm">
@@ -182,7 +182,7 @@
               </div>
             </ng-template>
           </div>
-          <div class="col-12 d-block d-lg-none d-md-none d-sm-block attachment-container">
+          <div class="col-12 d-block d-lg-none d-md-none d-sm-block">
             <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
               <div class="table-container overflow-auto">
                 <table class="table table-sm">
@@ -190,12 +190,6 @@
                     <tr>
                       <th scope="col">#</th>
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="Name"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileSize"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
                           [labelOnly]="true">
                         </apt-output-field></th>
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="CreatedBy"
@@ -214,8 +208,6 @@
                         <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
                           target="_blank">{{attachment?.DocumentMetadata?.Name}}</a>
                       </td>
-                      <td>{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
-                      <td>{{attachment?.DocumentMetadata?.FileType}}</td>
                       <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
                         {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
                       <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>

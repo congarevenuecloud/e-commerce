@@ -1,13 +1,13 @@
 <app-detail [title]="viewState?.product?.Name" [subtitle]="viewState?.product?.ProductCode"
     [context]="viewState?.product" *ngIf="viewState$ | async as viewState; else loading">
     <div class="constraintAlerts">
-        <apt-alert [record]="activeCart" [autoRun]="false"></apt-alert>
+        <apt-alert [record]="activeCart" [autoRun]="false" [showPriceError]="priceProgress"></apt-alert>
         <apt-constraint-rule-alert></apt-constraint-rule-alert>
     </div>
 
     <div class="primary-actions d-lg-block d-md-block d-sm-none d-none">
         <form class="d-flex">
-            <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-4">
+            <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-4 text-nowrap">
                 <small class="mb-2 d-block"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
                 <h5>
                     <apt-price [record]="viewState?.product" type="list"></apt-price>
@@ -43,7 +43,7 @@
                 <apt-add-to-cart [showQuantityControls]="false" (onAddToCart)="onAddToCart($event)"
                     [configurationEnabled]="false" [quantity]="viewState.quantity" [aboEnabled]="false"
                     [cartItems]="(cartItemList?.length > 0) ? cartItemList : null"
-                    [product]="product ? product: viewState?.product" [btnClass]="'btn-primary btn-raised px-3 py-2'"
+                    [product]="product ? product: viewState?.product" [btnClass]="'btn-primary btn-raised px-3 py-2 text-nowrap'"
                     [disabled]="configurationPending">
                 </apt-add-to-cart>
             </div>
@@ -132,7 +132,7 @@
                 <apt-add-to-cart [showQuantityControls]="false" (onAddToCart)="onAddToCart($event)"
                     [configurationEnabled]="false" [quantity]="viewState.quantity" [aboEnabled]="false"
                     [cartItems]="(cartItemList?.length > 0) ? cartItemList : null"
-                    [product]="product ? product: viewState?.product" [btnClass]="'btn-primary btn-raised px-3 py-2'"
+                    [product]="product ? product: viewState?.product" [btnClass]="'btn-primary btn-raised px-3 py-2 text-nowrap'"
                     [disabled]="configurationPending">
                 </apt-add-to-cart>
             </div>

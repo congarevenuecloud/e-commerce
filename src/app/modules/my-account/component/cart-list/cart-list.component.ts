@@ -87,6 +87,7 @@ export class CartListComponent implements OnInit {
                   validate: (record: Cart) => this.canActivate(record),
                   action: (recordList: Array<Cart>) => this.cartService.setCartActive(first(recordList), true).pipe(map(res => {
                     this.exceptionService.showSuccess('SUCCESS.CART.ACTIVATED');
+                    this.loadView();
                   })),
                   disableReload: true
                 } as TableAction,

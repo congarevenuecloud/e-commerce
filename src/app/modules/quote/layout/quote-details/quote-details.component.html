@@ -8,11 +8,11 @@
         <span class="badge badge-primary mt-1 ml-3 px-3 py-2 border text-uppercase"
           *ngIf="quote?.ApprovalStage">{{quote?.ApprovalStage}}</span>
       </div>
-      <apt-generate-document [record]="quote" *ngIf="quote.ApprovalStage !== 'Accepted'"
+      <apt-generate-document [record]="quote" *ngIf="quote.ApprovalStage !== 'Accepted' && isLoggedIn"
         [ngClass]="quote.ApprovalStage === 'Draft' ?  'pr-2 ml-auto d-lg-block d-md-block d-sm-none d-none ' : 'pr-3 ml-auto d-lg-block d-md-block d-sm-none d-none'"
         (onStatusUpdate)="onGenerateQuote()">
       </apt-generate-document>
-      <div *ngIf="quote?.Items?.length > 0" class="pr-3 d-lg-block d-md-block d-sm-none d-none">
+      <div *ngIf="quote?.Items?.length > 0 && isLoggedIn" class="pr-3 d-lg-block d-md-block d-sm-none d-none">
         <button type="button"
           [ngClass]="quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' ?  'btn btn-outline-primary btn-link text-primary text-primary' :'btn btn-primary btn-raised'"
           [ladda]="acceptLoader"
@@ -29,7 +29,7 @@
         <apt-present-document [record]="quote"></apt-present-document>
       </div> -->
       <div class="d-sm-block d-block ml-auto d-md-none d-lg-none pt-2"
-        *ngIf="quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented' || quote?.ApprovalStage === 'Approved'">
+        *ngIf="(quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented' || quote?.ApprovalStage === 'Approved') && isLoggedIn">
         <div class="dropdown">
           <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -60,7 +60,7 @@
 
   <app-detail-section [title]="'DETAILS.QUOTE_SUMMARY' | translate">
     <div class="row">
-      <div class="col-12 col-md-8">
+      <div class="col-12 col-md-8  pl-lg-3 pl-md-3">
         <div class="card">
           <div class="card-header">
             <h5>{{'DETAILS.QUOTE_SUMMARY' | translate}}</h5>
@@ -127,7 +127,7 @@
           </div>
         </div>
       </div>
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-4 pt-lg-0 pt-md-0 pt-sm-4 pt-4">
         <apt-price-summary [record]="quote" [page]="'quotes'"></apt-price-summary>
       </div>
     </div>
@@ -186,7 +186,7 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="d-none d-lg-block d-md-block d-sm-none attachment-container"  [ngClass]="isLoggedIn ? 'col-lg-6 col-md-6 border-right' :'col-lg-12 col-md-12'">
+          <div class="d-none d-lg-block d-md-block d-sm-none"  [ngClass]="isLoggedIn ? 'col-lg-6 col-md-6 border-right' :'col-lg-12 col-md-12'">
             <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
               <div class="table-container overflow-auto">
                 <table class="table table-sm">
@@ -202,10 +202,10 @@
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
                           [labelOnly]="true">
                         </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="CreatedBy"
+                      <th scope="col" class="d-lg-block d-md-block d-sm-none d-none"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="CreatedBy"
                           [labelOnly]="true">
                         </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
+                      <th scope="col" class="d-lg-block d-md-block d-sm-none d-none"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
                           field="CreatedDate" [labelOnly]="true">
                         </apt-output-field></th>
                       <th></th>
@@ -218,8 +218,8 @@
                         <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
                           target="_self">{{attachment?.DocumentMetadata?.Name}}</a>
                       </td>
-                      <td>{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
-                      <td>{{getFileType(attachment?.DocumentMetadata?.FileType)}}</td>
+                      <td class="d-lg-block d-md-block d-sm-none d-none">{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
+                      <td class="d-lg-block d-md-block d-sm-none d-none">{{getFileType(attachment?.DocumentMetadata?.FileType)}}</td>
                       <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
                         {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
                       <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
@@ -240,7 +240,7 @@
               </div>
             </ng-template>
           </div>
-          <div class="col-12 d-block d-lg-none d-md-none d-sm-block attachment-container">
+          <div class="col-12 d-block d-lg-none d-md-none d-sm-block">
             <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
               <div class="table-container overflow-auto">
                 <table class="table table-sm">
@@ -248,12 +248,6 @@
                     <tr>
                       <th scope="col">#</th>
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="Name"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileSize"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
                           [labelOnly]="true">
                         </apt-output-field></th>
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="CreatedBy"
@@ -272,8 +266,6 @@
                         <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
                           target="_self">{{attachment?.DocumentMetadata?.Name}}</a>
                       </td>
-                      <td>{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
-                      <td>{{getFileType(attachment?.DocumentMetadata?.FileType)}}</td>
                       <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
                         {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
                       <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
@@ -376,7 +368,7 @@
 
 <ng-template #quoteActionButtons>
   <div>
-    <apt-generate-document [record]="quote" [ngClass]="'p-0 m-0'"
+    <apt-generate-document [record]="quote" [ngClass]="'p-0 m-0'" *ngIf="isLoggedIn"
       (onStatusUpdate)="onGenerateQuote()">
     </apt-generate-document>
   </div>
@@ -389,7 +381,7 @@
 </ng-template>
 
 <ng-template #loading>
-  <div class="d-flex justify-content-center pt-5">
+  <div class="d-flex justify-content-center pt-4">
     <apt-dots></apt-dots>
   </div>
 </ng-template>

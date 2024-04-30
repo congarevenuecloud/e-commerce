@@ -1,6 +1,6 @@
 # Digital Commerce Core Reference Template
 
-This is the base reference application for the Conga ecommerce product. Follow below instructions to get started. See the [docs](https://congarevenuecloud.github.io/202403.1.0/) for more detailed instructions on interacting with the underlying SDK.
+This is the base reference application for the Conga ecommerce product. Follow below instructions to get started. See the [docs](https://congarevenuecloud.github.io/202404.1.0/) for more detailed instructions on interacting with the underlying SDK.
 
 ---
 

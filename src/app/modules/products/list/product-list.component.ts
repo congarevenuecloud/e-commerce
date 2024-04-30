@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy, SecurityContext } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { get, isNil, isEmpty, toString, toNumber, set } from 'lodash';
+import { get, isNil, isEmpty, toString, toNumber, set, isEqual, remove } from 'lodash';
 import { Observable, of, BehaviorSubject, Subscription, combineLatest, empty } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { mergeMap } from 'rxjs/operators';
 import { FilterOperator } from '@congarevenuecloud/core';
-import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote } from '@congarevenuecloud/ecommerce';
+import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote, CartService } from '@congarevenuecloud/ecommerce';
 import { DomSanitizer } from '@angular/platform-browser';
 /**
  * Product list component shows all the products in a list for user selection.
@@ -71,6 +71,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   fields: string[];
   object: any;
   businessObjectFields: string[];
+  priceError$: Observable<boolean>;
   /**
    * Array of product families associated with the list of assets.
    */
@@ -81,7 +82,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   constructor(private activatedRoute: ActivatedRoute, private sanitizer: DomSanitizer,
     private router: Router, private categoryService: CategoryService,
-    public productService: ProductService, private translateService: TranslateService, private accountService: AccountService) { }
+    public productService: ProductService, private translateService: TranslateService, private accountService: AccountService, private cartService: CartService) { }
 
   ngOnDestroy() {
     if (!isNil(this.subscription))
@@ -89,6 +90,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.priceError$ = this.cartService.getCartPriceStatus();
     this.router.events.subscribe((eventname: NavigationStart) => {
       if (eventname.navigationTrigger === 'popstate' && eventname instanceof NavigationStart) {
         this.productService.eventback.next(true);
@@ -119,7 +121,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.data$.next(null);
         this.hasSearchError = false;
         this.searchString = get(params, 'query');
-        this.searchString= this.sanitizer.sanitize(
+        this.searchString = this.sanitizer.sanitize(
           SecurityContext.HTML,
           this.searchString
         );
@@ -155,8 +157,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.moveToLast = false;
     });
     this.fields = ['AdjustmentType', 'AdjustmentAmount', 'StartDate', 'EndDate'];
-    this.businessObjectFields=['Description','BillToAccount','Amount','ModifiedDate','AutoActivateOrder','ABOType','DiscountPercent','configurationSyncDate','PONumber']
-    this.object= new Quote();
+    this.businessObjectFields = ['Description', 'BillToAccount', 'Amount', 'ModifiedDate', 'AutoActivateOrder', 'ABOType', 'DiscountPercent', 'configurationSyncDate', 'PONumber']
+    this.object = new Quote();
 
   }
 
@@ -192,6 +194,28 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   onPriceTierChange(evt) {
+    this.page = 1;
+    this.getResults();
+  }
+
+
+  /**
+   * This function is called when adding search filter criteria to product grid.
+   * @param condition Search filter query to filter products.
+   */
+  onFilterAdd(condition: FieldFilter) {
+    this.productFamilyFilter = isNil(this.productFamilyFilter) ? [] : this.productFamilyFilter;
+    this.productFamilyFilter.push(condition);
+    this.page = 1;
+    this.getResults();
+  }
+
+  /**
+   * This function is called when removing search filter criteria to product grid.
+   * @param condition Search filter query to remove from products grid.
+   */
+  onFilterRemove(condition: FieldFilter) {
+    remove(this.productFamilyFilter, (c) => isEqual(c, condition));
     this.page = 1;
     this.getResults();
   }

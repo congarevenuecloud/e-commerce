@@ -7,18 +7,18 @@
     <apt-constraint-rule-alert></apt-constraint-rule-alert>
   </ng-template>
 
-  <apt-alert message="ERROR.CART.VALIDATE" [showCartError]="true" [autoRun]="false"></apt-alert>
+  <apt-alert message="ERROR.CART.VALIDATE" [showCartError]="true" [autoRun]="false" [showPriceError]="priceError$ | async"></apt-alert>
   <div class="container-fluid" [ngClass]="'py-2'">
     <div class="px-4">
       <div class="detail-header pb-2">
         <div class="d-flex justify-content-between">
-          <span class="m-0 d-flex cart-title">
-            <apt-output-field [record]="cart" field="Name" [valueOnly]="true" layout="inline"
-              (onChange)="refreshCart($event.Name, cart, 'Name')">
-            </apt-output-field>
+            <span class="m-0 d-flex cart-title">
+              <apt-output-field [record]="cart" field="Name" [valueOnly]="true" layout="inline"
+                (onChange)="refreshCart($event.Name, cart, 'Name')">
+              </apt-output-field>
 
-            <span class="badge badge-primary ml-2 align-self-center" *ngIf="cart?.Status">{{ cart?.Status }}</span>
-          </span>
+              <span class="badge badge-primary ml-2 align-self-center" *ngIf="cart?.Status">{{ cart?.Status }}</span>
+            </span>
 
           <button *ngIf="!readOnly" class="btn btn-outline-primary align-self-center d-lg-block d-md-block d-sm-none d-none" [routerLink]="['/products']">
             {{ "COMMON.ADD_PRODUCTS" | translate }}
@@ -26,7 +26,7 @@
           <apt-add-to-cart *ngIf="readOnly" [customButtonActions]="customButtonActions" [ngClass]="'d-lg-block d-md-block d-sm-none d-none'"
             [showQuantityControls]="false"></apt-add-to-cart>
           <div class="d-sm-flex d-flex ml-auto d-md-none d-lg-none mt-3 justify-content-end dropdown">
-            <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+            <a class="fa fa-ellipsis-v dropdown-toggle px-1" href="#" role="button" id="dropdownMenuLink"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -43,8 +43,8 @@
         <div class="col-12 col-md-8">
           <div class="d-flex flex-column">
             <div class="card">
-              <div class="card-header border-bottom py-2">
-                <h5 class="m-0">
+              <div class="card-header border-bottom py-2 px-3">
+                <h5 class="m-0 py-1 my-1">
                   {{ "DETAILS.CART_SUMMARY" | translate }}
                 </h5>
               </div>
@@ -73,7 +73,7 @@
                     </apt-output-field>
                   </div>
                   <div class="flex-shrink-1 col-md-4 mb-2">
-                    <apt-output-field [record]="view?.cart" field="PriceList" [showQuickView]="true" [editable]="false">
+                    <apt-output-field [record]="view?.cart" field="PriceList" [editable]="false">
                     </apt-output-field>
                   </div>
                 </div>
@@ -128,7 +128,7 @@
 
                   <span class="d-flex text-primary align-items-center">
                     <apt-line-item-menu></apt-line-item-menu>
-                    <apt-select-all [items]="primaryLI" class="pt-3"></apt-select-all>
+                    <apt-select-all [items]="primaryLI" class="py-3 pl-3"></apt-select-all>
                   </span>
                 </div>
                 <div class="pt-3 pl-3">
