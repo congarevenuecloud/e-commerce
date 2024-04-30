@@ -1,10 +1,9 @@
 import { NgModule } from '@angular/core';
 import { HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AbstractSecurityStorage, AuthInterceptor, AuthModule, OpenIdConfiguration, StsConfigHttpLoader, StsConfigLoader } from 'angular-auth-oidc-client';
+import { AuthInterceptor, AuthModule, OpenIdConfiguration, StsConfigHttpLoader, StsConfigLoader } from 'angular-auth-oidc-client';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthOptions } from '@congarevenuecloud/core';
-import { StorageHandlerService } from '@congarevenuecloud/ecommerce';
 import { config$ } from '../../main';
 import { AuthorizationGuard } from './auth.guard';
 import { AppComponent } from '../app.component';
@@ -13,18 +12,14 @@ export const httpLoaderFactory = () => {
 
   const authOptions$: Observable<OpenIdConfiguration> = config$.pipe(
     map((authOptions: AuthOptions) => {
-      let redirectUri = window.location.origin + window.location.pathname;
-      if(redirectUri.endsWith('/')) {
-        redirectUri = redirectUri.slice(0, -1);
-      }
       return {
         authority: authOptions.authEndpoint,
-        redirectUrl: 'https://localhost:3000',
-        postLogoutRedirectUri: 'https://localhost:3000',
+        redirectUrl: window.location.origin + window.location.pathname,
+        postLogoutRedirectUri: window.location.origin + window.location.pathname,
         clientId: authOptions.spaClientId,
         scope: 'openid profile offline_access',
         responseType: 'code',
-        secureRoutes: [authOptions.apiEndpoint, authOptions.authEndpoint, 'https://conga.mxlab.io'],
+        secureRoutes: [authOptions.apiEndpoint, authOptions.authEndpoint],
         silentRenew: true,
         useRefreshToken: true,
         ignoreNonceAfterRefresh: true,
@@ -48,10 +43,6 @@ export const httpLoaderFactory = () => {
     })
   ],
   providers: [
-    {
-      provide: AbstractSecurityStorage,
-      useClass: StorageHandlerService
-    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
