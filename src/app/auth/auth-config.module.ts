@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor, AuthModule, OpenIdConfiguration, StsConfigHttpLoader, StsConfigLoader } from 'angular-auth-oidc-client';
+import { AbstractSecurityStorage, AuthInterceptor, AuthModule, OpenIdConfiguration, StsConfigHttpLoader, StsConfigLoader } from 'angular-auth-oidc-client';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthOptions } from '@congarevenuecloud/core';
+import { StorageHandlerService } from '@congarevenuecloud/ecommerce';
 import { config$ } from '../../main';
 import { AuthorizationGuard } from './auth.guard';
 import { AppComponent } from '../app.component';
@@ -43,6 +44,10 @@ export const httpLoaderFactory = () => {
     })
   ],
   providers: [
+    {
+      provide: AbstractSecurityStorage,
+      useClass: StorageHandlerService
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
