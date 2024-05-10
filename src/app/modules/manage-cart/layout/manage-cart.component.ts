@@ -94,7 +94,7 @@ export class ManageCartComponent implements OnInit {
           const cartItems = plainToClass(CartItem, get(cartInfo, 'LineItems'));
           return of({
             cart: cartInfo,
-            lineItems: LineItemService.groupItems(cartItems as unknown as CartItem[]),
+            lineItems: LineItemService.groupItems(cartItems as unknown as Array<CartItem>),
             orderOrQuote: isNil(get(cartInfo, 'Order')) ? get(cartInfo, 'Proposald') : get(cartInfo, 'Order'),
             productList: productsInfo
           } as ManageCartState);
