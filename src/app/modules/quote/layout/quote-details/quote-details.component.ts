@@ -96,7 +96,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   isPrivate: boolean = false;
   maxFileSizeLimit = 29360128;
-  cartRecord: Cart;
+  cartRecord: Cart = new Cart();
 
   constructor(private activatedRoute: ActivatedRoute,
     private quoteService: QuoteService,
@@ -142,11 +142,12 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
         switchMap((quote) => {
           const quoteLineItems = LineItemService.groupItems(get(quote, 'Items'));
           this.quoteLineItems$.next(quoteLineItems);
-          return combineLatest([isEmpty(quoteLineItems) ? of(null) : (this.cartService.fetchCartStatus(get(get(first(this.quoteLineItems$.value), 'MainLine.Configuration'), 'Id'))), of(quote)])
+          set(this.cartRecord, 'Id', get(get(first(this.quoteLineItems$.value), 'MainLine.Configuration'), 'Id'));
+          return combineLatest([isEmpty(quoteLineItems) ? of(null) : (this.cartService.addAdjustmentInfoToLineItems(this.cartRecord?.Id)), of(quote)])
         }),
         take(1),
-        switchMap(([cartRecord, quote]) => {
-          this.cartRecord = cartRecord;
+        switchMap(([lineItems, quote]) => {
+          this.cartRecord.LineItems = lineItems;
           return this.updateQuoteValue(quote);
         })
       ).subscribe());

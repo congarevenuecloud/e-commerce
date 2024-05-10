@@ -285,6 +285,7 @@
         "LAST": "es_MX Last"
     },
     "COMMON": {
+        "SELECT_ALL": "ex_MX Select All",
         "ACTIVATE_CART":"es_MX Activate Cart",
         "PENDING_OPERATIONS":"es_MX Operations are pending on your cart",
         "REVALIDATING_CART":"es_MX Cart is being revalidated",
@@ -413,6 +414,7 @@
         "PRICE_NOT_AUTOUPDATED": "es_MX * Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "es_MX Update Prices",
         "PRICE_ERROR": "es_MX Pricing of your cart has failed, please proceed with either of the following.",
+        "PRICE_PROGRESS": "es_MX Pricing of your cart is in progress, please proceed with either of the following.",
         "RETRY":"es_MX Retry",
         "RETRY_CART":"es_MX Retry pricing the cart",
         "ABANDON":"es_MX Abandon",

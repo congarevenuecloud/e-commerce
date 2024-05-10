@@ -128,7 +128,7 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="d-none d-lg-block d-md-block d-sm-none attachment-container" [ngClass]="isLoggedIn ? 'col-lg-6 col-md-6 border-right' :'col-lg-12 col-md-12'">
+          <div class="d-none d-lg-block d-md-block d-sm-none" [ngClass]="isLoggedIn ? 'col-lg-6 col-md-6 border-right' :'col-lg-12 col-md-12'">
             <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
               <div class="table-container overflow-auto">
                 <table class="table table-sm">
@@ -182,7 +182,7 @@
               </div>
             </ng-template>
           </div>
-          <div class="col-12 d-block d-lg-none d-md-none d-sm-block attachment-container">
+          <div class="col-12 d-block d-lg-none d-md-none d-sm-block">
             <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
               <div class="table-container overflow-auto">
                 <table class="table table-sm">
@@ -190,12 +190,6 @@
                     <tr>
                       <th scope="col">#</th>
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="Name"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileSize"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
                           [labelOnly]="true">
                         </apt-output-field></th>
                       <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="CreatedBy"
@@ -214,8 +208,6 @@
                         <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
                           target="_blank">{{attachment?.DocumentMetadata?.Name}}</a>
                       </td>
-                      <td>{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
-                      <td>{{attachment?.DocumentMetadata?.FileType}}</td>
                       <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
                         {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
                       <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
