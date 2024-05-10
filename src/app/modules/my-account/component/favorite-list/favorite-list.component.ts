@@ -51,7 +51,7 @@ export class FavoriteListComponent implements OnInit {
           this.user = user;
           tableOptions = {
             tableOptions: {
-              stickyColumnCount:1,
+              stickyColumnCount: 1,
               stickyColumns: [{
                 prop: 'Name',
                 label: 'Favorite Name'
@@ -159,7 +159,7 @@ export class FavoriteListComponent implements OnInit {
     this.favoriteService.getMyFavorites()
       .pipe(
         rmap((Result) => {
-          this.totalRecords$ = !isNil(Result) ? of(get(Result, 'length')) : of(0);
+          this.totalRecords$ = !isNil(Result) ? of(get(Result, 'TotalRecord')) : of(0);
         }),
         take(1),
         catchError(error => {

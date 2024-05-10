@@ -160,6 +160,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       return combineLatest([of(order), this.cartService.addAdjustmentInfoToLineItems(this.cartRecord?.Id)]);
     }), take(1)).subscribe(([res, items]) => {
       this.cartRecord.LineItems = items;
+      this.cartRecord.BusinessObjectType = 'Order';
       this.updateOrder(res);
     });
     this.getAttachments();

@@ -374,11 +374,7 @@
         "NO": "No",
         "EMPTY": "- Empty -",
         "YOU_MAY_ALSO_LIKE": "You may also like",
-        "RENEW": "Renew",
-        "BUY_MORE": "Buy More",
         "CHANGE_CONFIGURATION": "Change Configuration",
-        "TERMINATE": "Terminate",
-        "TERMINATE_ASSETS": "Terminate Asset(s)",
         "COMPARE": "Compare",
         "QUOTES": "Quotes",
         "TERM": "Term",
@@ -423,13 +419,11 @@
         "PRICE_NOT_AUTOUPDATED": "* Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "Update Prices",
         "PRICE_ERROR": "Pricing of your cart has failed, please proceed with either of the following.",
-        "PRICE_PROGRESS": "Pricing of your cart is in progress, please proceed with either of the following.",
+        "PRICE_PROGRESS": "Pricing of your cart has timed out.",
         "RETRY":"Retry",
-        "RETRY_CART":"Retry pricing the cart",
         "ABANDON":"Abandon",
-        "ABANDON_CART":"Abandon the cart",
-        "CLONE_CART":"Create a copy of the cart",
         "FAVORITES": "Favorites",
+        "INSTALLED_PRODUCTS": "Installed Products",
         "SELECTIONS": "Selections",
         "PRODUCTS": "Products",
         "CARTITEMS": "Cart Items",
@@ -472,7 +466,15 @@
         "PROCESSING_MESSAGE":"Your request is being processed.....",
         "TABLE_ACTION_CONFIRMATION_MESSAGE":"Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
         "NO_MATCHING_ORDERS_FOUND": "No matching orders found",
-        "NO_MATCHING_QUOTES_FOUND": "No matching quotes found"    
+        "NO_MATCHING_QUOTES_FOUND": "No matching quotes found"
+    },
+    "ASSET_ACTIONS":{
+        "AMEND":"Amend",
+        "BUY_ANOTHER":"Buy Another",
+        "RENEW": "Renew",
+        "BUY_MORE": "Buy More",
+        "TERMINATE": "Terminate",
+        "TERMINATE_ASSETS": "Terminate Asset(s)"
     },
     "REVALIDATE_CART": {
         "REVALIDATION_REQUIRED": "Revalidation required",
@@ -520,6 +522,9 @@
         "RENEW_SUCCESS": "The asset renewal has been added to your cart."
     },
     "ASSET_LIST": {
+        "ASSET_NAME":"Asset Name",
+        "ASSET_AMOUNTS_BY_PRICE_TYPE" :"Asset amounts by price type",
+        "ASSETS_BY_PRICE_TYPE" :"Assets by price type",
         "SELECTED_ASSETS": "Selected Assets",
         "CHARGE_TYPE": "Charge Type",
         "PRICE_TYPE": "Price Type",
@@ -960,6 +965,7 @@
         "PRESENT": "Present"
     },
     "TABLE": {
+        "ROWS_PER_PAGE":"Rows per page",
         "SEARCH": "Search",
         "SELECTED": "Selected",
         "OF": "of",

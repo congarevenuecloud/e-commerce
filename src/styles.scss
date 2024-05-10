@@ -830,7 +830,7 @@ cc-page-header {
 
 .card-header {
   font-size: $font-size-lg;
-  padding: 0 1rem !important;
+  padding: 0 1rem;
   margin: 0;
   line-height: $line-height-lg;
   background-color: transparent;
@@ -838,7 +838,6 @@ cc-page-header {
 
 .card-header h5 {
   font-size: $font-size-lg !important;
-  margin-top: 1rem;
   margin-bottom: 0;
 }
 
@@ -1087,20 +1086,10 @@ div.fixed-top {
   border: none;
 }
 
-span {
-  img {
-    height: 1.5rem;
-  }
-}
 
 .category-list {
   display: flex;
   flex: 1 1 auto;
-}
-
-.logout-section {
-  display: flex;
-  border-radius: 0 !important;
 }
 
 .modal-content-background {
@@ -1119,20 +1108,9 @@ div.fixed-top {
   border: none;
 }
 
-span {
-  img {
-    height: 1.5rem;
-  }
-}
-
 .category-list {
   display: flex;
   flex: 1 1 auto;
-}
-
-.logout-section {
-  display: flex;
-  border-radius: 0 !important;
 }
 
 .custom-checkbox .custom-control-label::before {

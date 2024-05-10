@@ -27,6 +27,10 @@ import { AuthenticationGuard } from './services/authentication.guard';
             loadChildren: () => import('./modules/home/home.module').then(m => m.HomeModule),
           },
           {
+            path: 'assets',
+            loadChildren: () => import('./modules/assets/assets.module').then(m => m.AssetsModule)
+          },
+          {
             path: 'my-account',
             loadChildren: () => import('./modules/my-account/my-account.module').then(m => m.MyAccountModule),
             data: { title: 'My Account' },

@@ -371,10 +371,6 @@
         "EMPTY": "fr_FR - Empty -",
         "YOU_MAY_ALSO_LIKE": "fr_FR You may also like",
         "CHANGE_CONFIGURATION": "fr_FR Change Configuration",
-        "RENEW": "fr_FR Renew",
-        "BUY_MORE": "fr_FR Buy More",
-        "TERMINATE": "fr_FR Terminate",
-        "TERMINATE_ASSETS": "fr_FR Terminate Asset(s)",
         "COMPARE": "fr_FR Compare",
         "QUOTES": "fr_FR Quotes",
         "TOTAL_PRICE": "fr_FR Total Price",
@@ -410,13 +406,11 @@
         "PRICE_NOT_AUTOUPDATED": "fr_FR * Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "fr_FR Update Prices",
         "PRICE_ERROR": "fr_FR Pricing of your cart has failed, please proceed with either of the following.",
-        "PRICE_PROGRESS": "fr_FR Pricing of your cart is in progress, please proceed with either of the following.",
+        "PRICE_PROGRESS": "fr_FR Pricing of your cart has timed out",
         "RETRY": "fr_FR Retry",
-        "RETRY_CART": "fr_FR Retry pricing the cart",
         "ABANDON": "fr_FR Abandon",
-        "ABANDON_CART": "fr_FR Abandon the cart",
-        "CLONE_CART": "fr_FR Create a copy of the cart",
         "FAVORITES": "fr_FR Favorites",
+        "INSTALLED_PRODUCTS": "fr_FR Installed Products",
         "SELECTIONS": "fr_FR Selections",
         "PRODUCTS": "fr_FR Products",
         "CARTITEMS": "fr_FR Cart Items",
@@ -458,6 +452,14 @@
         "TABLE_ACTION_CONFIRMATION_MESSAGE": "fr_FR Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
         "NO_MATCHING_ORDERS_FOUND": "fr_FR No matching orders found",
         "NO_MATCHING_QUOTES_FOUND": "fr_FR No matching quotes found"
+    },
+    "ASSET_ACTIONS":{
+        "AMEND":"fr_FR Amend",
+        "BUY_ANOTHER":"fr_FR Buy Another",
+        "RENEW": "fr_FR Renew",
+        "BUY_MORE": "fr_FR Buy More",
+        "TERMINATE": "fr_FR Terminate",
+        "TERMINATE_ASSETS": "fr_FR Terminate Asset(s)"
     },
     "REVALIDATE_CART": {
         "REVALIDATION_REQUIRED": "fr_FR Revalidation required",
@@ -504,6 +506,9 @@
         "RENEW_SUCCESS": "fr_FR The asset renewal has been added to your cart."
     },
     "ASSET_LIST": {
+        "ASSET_NAME":"fr_FR Asset Name",
+        "ASSET_AMOUNTS_BY_PRICE_TYPE" :"fr_FR Asset amounts by price type",
+        "ASSETS_BY_PRICE_TYPE" :"fr_FR Assets by price type",
         "SELECTED_ASSETS": "fr_FR Selected Assets",
         "CHARGE_TYPE": "fr_FR Charge Type",
         "PRICE_TYPE": "fr_FR Price Type",
@@ -928,6 +933,7 @@
         "PRESENT": "fr_FR Present"
     },
     "TABLE": {
+        "ROWS_PER_PAGE":"fr_FR Rows per page",
         "SEARCH": "fr_FR Search",
         "SELECTED": "fr_FR Selected",
         "OF": "fr_FR of",

@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
-import { get, set, isEmpty, forEach } from 'lodash';
+import { get, set, isEmpty, forEach, map as _map, omit } from 'lodash';
 import { Favorite, FavoriteService, LineItemService, ItemGroup, User, UserService, FavoriteScope,Cart,CartItem } from '@congarevenuecloud/ecommerce';
 import { ExceptionService } from '@congarevenuecloud/elements';
 import { plainToClass } from 'class-transformer';
@@ -78,7 +78,11 @@ export class FavoriteDetailsComponent implements OnInit, OnDestroy {
     .subscribe(res => {
       this.cart = res;
       const cartItems = plainToClass(CartItem, get(res,'Items'), { ignoreDecorators: true });
-      const lines = LineItemService.groupItems(cartItems as unknown as Array<CartItem>);
+      let lines = LineItemService.groupItems(cartItems as unknown as Array<CartItem>);
+      /* TODO: Revisit displaying promotions on the favorite details page
+       * This feature will be reinstated once support for adjustment is implemented in the favorite details API [CPQ-81647]
+       */
+      lines = _map(lines, obj => omit(obj, ['MainLine.IncentiveAdjustmentAmount']) as ItemGroup);
       this.lineItems$.next(lines);
     }));
   }
