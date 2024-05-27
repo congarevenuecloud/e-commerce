@@ -39,7 +39,6 @@ export class CreateQuoteComponent implements OnInit {
   quoteRequestObj: Quote;
   quoteBreadCrumbObj$: Observable<Quote>;
   disableSubmit: boolean = true;
-  // TODO: Update the variable names to avoid confusions.
   showCaptcha: boolean=false;
   displayCaptcha: boolean;
   isLoggedIn: boolean;
