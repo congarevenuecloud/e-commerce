@@ -1,18 +1,18 @@
 <app-detail *ngIf="favorite$ | async as favorite; else loading" [context]="favorite" [route]="'favorites'">
-  <div *ngIf="favorite?.IsActive" class="primary-actions d-lg-block d-md-block d-sm-none d-none py-2">
-    <button type="button" class="btn btn-primary btn-raised px-4" (click)="addFavoriteToCart(favorite)"
+  <div *ngIf="favorite?.IsActive" class="primary-actions d-lg-block d-md-block d-sm-none d-none pl-2 pr-3">
+    <button type="button" class="btn btn-primary btn-raised px-4 text-nowrap" (click)="addFavoriteToCart(favorite)"
       [ladda]="isLoading" data-style="zoom-in">
       {{ "COMMON.ADD_TO_CART" | translate }}
     </button>
   </div>
 
   <div class="detail-header">
-    <div class="d-flex align-items-end mb-2 py-2">
+    <div class="d-flex align-items-end mb-2 py-2 pl-2">
       <h3 class="m-0">{{favorite?.Name}}</h3>
       <span class="badge badge-info ml-3 px-3 py-1 border"
         *ngIf="!favorite?.IsActive">{{'MY_ACCOUNT.FAVORITE_DETAIL.INACTIVE' | translate}}</span>
     </div>
-    <div *ngIf="favorite?.IsActive" class="d-lg-none d-md-none d-sm-block d-block d-flex align-items-end">
+    <div *ngIf="favorite?.IsActive" class="d-lg-none d-md-none d-sm-block d-block d-flex align-items-end pl-2">
       <button type="button" class="btn btn-primary btn-raised px-4" (click)="addFavoriteToCart(favorite)"
         [ladda]="isLoading" data-style="zoom-in">
         {{ "COMMON.ADD_TO_CART" | translate }}
@@ -21,7 +21,7 @@
   </div>
 
   <app-detail-section [title]="'DETAILS.FAVORITE_SUMMARY' | translate">
-    <div class="row">
+    <div class="row pb-3">
       <div class="col-12">
         <div class="card">
           <div class="card-header">

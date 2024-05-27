@@ -96,7 +96,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
                     }),
                     distinctUntilChanged((oldCli, newCli) => get(newCli, 'Quantity') === this.currentQty)
                 );
-                // TODO: Needs to be removed when product features are part of get products API call (CPQ-52267)
                 const productFeatureValues$ = this.productService.getProductsWithFeatureValues([get(params, 'id')]).pipe(rmap((products: Array<Product>) => get(first(products), 'ProductFeatureValues')));
                 return combineLatest([product$, cartItem$, this.storefrontService.getStorefront(), this.revalidateCartService.revalidateFlag, productFeatureValues$]);
             }),

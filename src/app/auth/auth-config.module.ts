@@ -13,14 +13,18 @@ export const httpLoaderFactory = () => {
 
   const authOptions$: Observable<OpenIdConfiguration> = config$.pipe(
     map((authOptions: AuthOptions) => {
+      let redirectUri = window.location.origin + window.location.pathname;
+      if(redirectUri.endsWith('/')) {
+        redirectUri = redirectUri.slice(0, -1);
+      }
       return {
         authority: authOptions.authEndpoint,
-        redirectUrl: window.location.origin + window.location.pathname,
-        postLogoutRedirectUri: window.location.origin + window.location.pathname,
+        redirectUrl: redirectUri,
+        postLogoutRedirectUri: redirectUri,
         clientId: authOptions.spaClientId,
         scope: 'openid profile offline_access',
         responseType: 'code',
-        secureRoutes: [authOptions.apiEndpoint, authOptions.authEndpoint],
+        secureRoutes: [authOptions.apiEndpoint, authOptions.authEndpoint, 'https://conga.mxlab.io'],
         silentRenew: true,
         useRefreshToken: true,
         ignoreNonceAfterRefresh: true,
