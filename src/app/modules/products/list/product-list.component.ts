@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, SecurityContext } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { get, isNil, isEmpty, toString, toNumber, set } from 'lodash';
+import { get, isNil, isEmpty, toString, toNumber, set, isEqual, remove } from 'lodash';
 import { Observable, of, BehaviorSubject, Subscription, combineLatest, empty } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { mergeMap } from 'rxjs/operators';
@@ -121,7 +121,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.data$.next(null);
         this.hasSearchError = false;
         this.searchString = get(params, 'query');
-        this.searchString= this.sanitizer.sanitize(
+        this.searchString = this.sanitizer.sanitize(
           SecurityContext.HTML,
           this.searchString
         );
@@ -157,8 +157,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.moveToLast = false;
     });
     this.fields = ['AdjustmentType', 'AdjustmentAmount', 'StartDate', 'EndDate'];
-    this.businessObjectFields=['Description','BillToAccount','Amount','ModifiedDate','AutoActivateOrder','ABOType','DiscountPercent','configurationSyncDate','PONumber']
-    this.object= new Quote();
+    this.businessObjectFields = ['Description', 'BillToAccount', 'Amount', 'ModifiedDate', 'AutoActivateOrder', 'ABOType', 'DiscountPercent', 'configurationSyncDate', 'PONumber']
+    this.object = new Quote();
 
   }
 
@@ -194,6 +194,28 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   onPriceTierChange(evt) {
+    this.page = 1;
+    this.getResults();
+  }
+
+
+  /**
+   * This function is called when adding search filter criteria to product grid.
+   * @param condition Search filter query to filter products.
+   */
+  onFilterAdd(condition: FieldFilter) {
+    this.productFamilyFilter = isNil(this.productFamilyFilter) ? [] : this.productFamilyFilter;
+    this.productFamilyFilter.push(condition);
+    this.page = 1;
+    this.getResults();
+  }
+
+  /**
+   * This function is called when removing search filter criteria to product grid.
+   * @param condition Search filter query to remove from products grid.
+   */
+  onFilterRemove(condition: FieldFilter) {
+    remove(this.productFamilyFilter, (c) => isEqual(c, condition));
     this.page = 1;
     this.getResults();
   }

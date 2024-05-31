@@ -9,7 +9,7 @@
                 <li class="group-item d-flex justify-content-between lh-condensed"  *ngIf="item.LineType === 'Product/Service'" >
                     <div class="details">
                         <h6 class="my-0">
-                            {{item.Product.Name}}
+                            {{item.Product.Name}} 
                         </h6>
                         <small *ngIf="item?.Product?.ProductCode" class="text-muted" [translate]="'CART.CART_SUMMARY.PRODUCT_ID'" [translateParams]="{productCode: item?.Product?.ProductCode}"></small>
                         <small class="text-muted">{{ 'CART.CART_SUMMARY.QUANTITY' | translate }} {{item.Quantity}}</small>

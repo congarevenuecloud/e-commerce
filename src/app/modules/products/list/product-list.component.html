@@ -18,9 +18,8 @@
     <div class="col-12 col-lg-3">
       <div>
 
-        <!-- Product type filter will be added back when assets feature is available in RLP -->
-        <!-- <apt-product-type-filter (onFilterAdd)="onFilterAdd($event)" (onFilterRemove)="onFilterRemove($event)">
-                </apt-product-type-filter> -->
+        <apt-product-type-filter (onFilterAdd)="onFilterAdd($event)" (onFilterRemove)="onFilterRemove($event)">
+        </apt-product-type-filter>
 
         <apt-category-filter [category]="category" title="{{'PRODUCT_LIST.RELATED_CATEGORIES' | translate}}" limit="10"
           relationship="peers" class="mb-2" (onChange)="onCategory($event)"></apt-category-filter>
@@ -48,8 +47,9 @@
               </pl-results>
             </nav>
 
-            <div class="d-flex justify-content-center position-relative pagination pb-3 pt-0" *ngIf="data?.TotalCount > 0">
-              <!-- For normal screens -->
+            <!-- For large screens -->
+            <div class="d-lg-flex d-md-none d-sm-none d-none justify-content-center position-relative"
+              *ngIf="data?.TotalCount > 0">
               <span class="d-lg-flex d-md-none d-sm-none d-none">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
                   [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="5"
@@ -58,6 +58,15 @@
                   [lastText]="paginationButtonLabels.last">
                 </pagination>
               </span>
+
+              <div class="d-none d-sm-none d-md-none d-lg-flex position-absolute mt-2 col-12 flex-row-reverse px-1">
+                <apt-select-all [items]="data.Products"></apt-select-all>
+              </div>
+            </div>
+
+            <!-- For medium and small screens -->
+            <div class="d-lg-none d-md-flex d-sm-flex d-flex justify-content-center position-relative flex-column"
+              *ngIf="data?.TotalCount > 0">
 
               <span class="d-lg-none d-md-flex d-sm-none d-none justify-content-center">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
@@ -68,7 +77,7 @@
                 </pagination>
               </span>
 
-              <!-- For small screens -->
+
               <span class="d-block d-md-none d-flex justify-content-center">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
                   [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="0"
@@ -77,10 +86,7 @@
                   [lastText]="paginationButtonLabels.last">
                 </pagination>
               </span>
-              <div class="select-all d-none d-sm-none d-md-none d-lg-block">
-                <apt-select-all [items]="data.Products"></apt-select-all>
-              </div>
-              <div class="select-all d-none d-sm-none d-lg-none d-md-flex justify-content-end">
+              <div class="select-all d-block d-sm-block d-lg-none d-md-block mb-4 pl-3 position-relative">
                 <apt-select-all [items]="data.Products"></apt-select-all>
               </div>
             </div>
@@ -103,7 +109,7 @@
             </div>
 
             <div class="d-flex justify-content-center pagination" *ngIf="data?.TotalCount > 0">
-              <!-- For normal screens -->
+              <!-- For large screens -->
               <span class="d-lg-flex d-md-none d-sm-none d-none">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
                   [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="5"
@@ -113,7 +119,7 @@
                 </pagination>
               </span>
 
-              <span class="d-lg-none d-md-flex d-sm-none d-none justify-content-center">
+              <span class="d-lg-none d-md-flex flex-row d-sm-none d-none justify-content-center">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
                   [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="5"
                   [firstText]="paginationButtonLabels.first" [previousText]="paginationButtonLabels.previous"
@@ -122,7 +128,7 @@
                 </pagination>
               </span>
 
-              <!-- For small screens -->
+              <!-- For medium and small screens -->
               <span class="d-block d-md-none d-flex justify-content-center">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
                   [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="0"
