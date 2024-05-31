@@ -79,9 +79,6 @@ export class FavoriteDetailsComponent implements OnInit, OnDestroy {
       this.cart = res;
       const cartItems = plainToClass(CartItem, get(res,'Items'), { ignoreDecorators: true });
       let lines = LineItemService.groupItems(cartItems as unknown as Array<CartItem>);
-      /* TODO: Revisit displaying promotions on the favorite details page
-       * This feature will be reinstated once support for adjustment is implemented in the favorite details API [CPQ-81647]
-       */
       lines = _map(lines, obj => omit(obj, ['MainLine.IncentiveAdjustmentAmount']) as ItemGroup);
       this.lineItems$.next(lines);
     }));

@@ -1344,7 +1344,7 @@ $tooltip-border-radius: $border-radius !default;
 $tooltip-opacity: 0.9 !default;
 $tooltip-padding-y: $spacer * 0.25 !default;
 $tooltip-padding-x: $spacer * 0.5 !default;
-$tooltip-margin: null !default; // TODO: remove this in v6
+$tooltip-margin: null !default;
 
 $tooltip-arrow-width: 0.8rem !default;
 $tooltip-arrow-height: 0.4rem !default;
