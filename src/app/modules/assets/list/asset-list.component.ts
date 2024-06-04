@@ -290,7 +290,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
     return [
       {
         icon: 'fa-sync',
-        massAction: false,
+        massAction: true,
         label: 'ASSET_ACTIONS.RENEW',
         theme: 'primary',
         validate(record: AssetLineItemExtended, childRecords: Array<AssetLineItemExtended>): boolean {
@@ -350,7 +350,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
           );
           return of(null);
         }
-      }
+      },
     ];
   }
 

@@ -129,8 +129,8 @@ address {
 /**
  * Dropdown fixes
  */
-.dropdown-toggle::after {
-  display: none;
+ .dropdown-toggle::after {
+  display: none !important;
 }
 
 .dropdown-menu {
@@ -1074,9 +1074,6 @@ apt-table {
   }
 }
 
-.dropdown-toggle::after {
-  display: none;
-}
 
 div.fixed-top {
   padding-bottom: 0.5rem;
@@ -1094,10 +1091,6 @@ div.fixed-top {
 
 .modal-content-background {
   background-color: white !important;
-}
-
-.dropdown-toggle::after {
-  display: none !important;
 }
 
 div.fixed-top {

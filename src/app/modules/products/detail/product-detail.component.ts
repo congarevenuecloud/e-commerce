@@ -168,7 +168,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     onAddToCart(cartItems: Array<CartItem>): void {
         this.productConfigurationService.unsavedConfiguration.next(false);
         this.configurationChanged = false;
-        const primaryItem = find(cartItems, i => get(i, 'IsPrimaryLine') === true && isNil(get(i, 'Option')));
+        const primaryItem = find(cartItems, i => get(i, 'IsPrimaryLine') === true && get(i, 'LineType')== 'Product/Service');
         if (!isNil(primaryItem) && (get(primaryItem, 'Product.HasOptions') || get(primaryItem, 'Product.HasAttributes'))) {
             this.router.navigate(['/products', get(this, 'product.Id'), get(primaryItem, 'Id')]);
         }
@@ -201,7 +201,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
             forEach(this.cartItemList, c => {
                 c.IsOptional = event;
             });
-        this.productConfigurationService.changeItemToOptional(this.cartItemList);
+        this.productConfigurationService.changeItemToOptional(this.cartItemList).pipe(take(1)).subscribe(()=>{});
     }
     /**
      * Changes the quantity of the cart item passed to this method.

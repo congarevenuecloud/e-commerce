@@ -411,6 +411,7 @@
         "UPDATE_PRICE": "es_MX Update Prices",
         "PRICE_ERROR": "es_MX Pricing of your cart has failed, please proceed with either of the following.",
         "PRICE_PROGRESS": "es_MX Pricing of your cart has timed out.",
+        "PRICE_TAKINGTIME": "es_MX Pricing of your cart is taking more time than expected.",
         "RETRY":"es_MX Retry",
         "ABANDON":"es_MX Abandon",
         "FAVORITES": "es_MX Favorites",
@@ -420,6 +421,8 @@
         "CARTITEMS": "es_MX Cart Items",
         "SAVE_FAVORITE": "es_MX Save as favorite",
         "CLONE": "es_MX Clone",
+        "CONTINUE": "es_MX Continue",
+        "CREATE_NEW_CART":" es_MX Create new cart",
         "SELECT_ACTION": "es_MX Select action",
         "CONFIRM": "es_MX Confirm",
         "EDIT_LAYOUT": "es_MX Edit Layout",
@@ -507,6 +510,7 @@
     "BUYMORE": {
         "TERM": "es_MX Term",
         "ADDITIONAL_QUANTITY": "es_MX Additional Quantity",
+        "Quantity":"es_MX Quantity",
         "UPDATED_QUANTITY": "es_MX Updated Quantity",
         "RENEW_SUCCESS": "es_MX The asset renewal has been added to your cart."
     },
