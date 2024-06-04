@@ -322,7 +322,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
       {
         icon: 'fa-dollar-sign',
         massAction: false,
-        label: 'Buy More',
+        label: 'ASSET_ACTIONS.BUY_MORE',
         theme: 'primary',
         validate(record: AssetLineItemExtended): boolean {
           return record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItemId') === record.Id).length > 0);
@@ -338,7 +338,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
       {
         icon: 'fa-ban',
         massAction: false,
-        label: 'Terminate',
+        label: 'ASSET_ACTIONS.TERMINATE',
         theme: 'danger',
         validate(record: AssetLineItemExtended, childRecords: Array<AssetLineItemExtended>): boolean {
           return record.canTerminate(childRecords) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItemId') === record.Id).length > 0);
