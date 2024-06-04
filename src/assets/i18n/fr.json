@@ -407,6 +407,7 @@
         "UPDATE_PRICE": "fr_FR Update Prices",
         "PRICE_ERROR": "fr_FR Pricing of your cart has failed, please proceed with either of the following.",
         "PRICE_PROGRESS": "fr_FR Pricing of your cart has timed out",
+        "PRICE_TAKINGTIME": "fr_FR Pricing of your cart is taking more time than expected.",
         "RETRY": "fr_FR Retry",
         "ABANDON": "fr_FR Abandon",
         "FAVORITES": "fr_FR Favorites",
@@ -416,6 +417,8 @@
         "CARTITEMS": "fr_FR Cart Items",
         "SAVE_FAVORITE": "fr_FR Save as favorite",
         "CLONE": "fr_FR Clone",
+        "CONTINUE": "fr_FR Continue",
+        "CREATE_NEW_CART":"fr_FR Create new cart",
         "SELECT_ACTION": "fr_FR Select action",
         "CONFIRM": "fr_FR Confirm",
         "EDIT_LAYOUT": "fr_FR Edit Layout",
@@ -502,6 +505,7 @@
     "BUYMORE": {
         "TERM": "fr_FR Term",
         "ADDITIONAL_QUANTITY": "fr_FR Additional Quantity",
+        "Quantity":"fr_FR Quantity",
         "UPDATED_QUANTITY": "fr_FR Updated Quantity",
         "RENEW_SUCCESS": "fr_FR The asset renewal has been added to your cart."
     },

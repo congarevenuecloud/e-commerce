@@ -3,7 +3,7 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { TranslateService } from '@ngx-translate/core';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { Observable, of } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { catchError, map, take } from 'rxjs/operators';
 import { ClassType } from 'class-transformer/ClassTransformer';
 import { find, first, get, isNil } from 'lodash';
 import { AObject, FilterOperator } from '@congarevenuecloud/core';
@@ -64,7 +64,7 @@ export class CartListComponent implements OnInit {
                   prop: 'IsActive',
                   label: 'CUSTOM_LABELS.IS_ACTIVE',
                   sortable: false,
-                  value: (record: Cart) => (CartService.getCurrentCartId() === record.Id && !isNil(record.ActivationDate)) ? of('Yes') : of('No')
+                  value: (record: Cart) => (this.cartService.getCurrentCartId() === record.Id && !isNil(record.ActivationDate)) ? of('Yes') : of('No')
                 },
                 {
                   prop: 'TotalAmount',
@@ -85,10 +85,17 @@ export class CartListComponent implements OnInit {
                   label: 'Set Active',
                   theme: 'primary',
                   validate: (record: Cart) => this.canActivate(record),
-                  action: (recordList: Array<Cart>) => this.cartService.setCartActive(first(recordList), true).pipe(map(res => {
-                    this.exceptionService.showSuccess('SUCCESS.CART.ACTIVATED');
-                    this.loadView();
-                  })),
+                  action: (recordList: Array<Cart>) => this.cartService.setCartActive(first(recordList), true)
+                  .pipe(
+                    catchError(err => {
+                        this.loadView();
+                        throw err;
+                      }),
+                      map(res => {
+                        this.exceptionService.showSuccess('SUCCESS.CART.ACTIVATED');
+                        this.loadView();
+                      })
+                  ),
                   disableReload: true
                 } as TableAction,
                 {
@@ -126,7 +133,7 @@ export class CartListComponent implements OnInit {
                   disableReload: true
                 } as TableAction,
               ],
-              highlightRow: (record: Cart) => of(CartService.getCurrentCartId() === record.Id && !isNil(record.ActivationDate)),
+              highlightRow: (record: Cart) => of(this.cartService.getCurrentCartId() === record.Id && !isNil(record.ActivationDate)),
               filters: this.getFilters(),
               routingLabel: 'carts'
             },
@@ -218,7 +225,7 @@ export class CartListComponent implements OnInit {
 
 
   canActivate(cartToActivate: Cart) {
-    return (CartService.getCurrentCartId() !== cartToActivate.Id && cartToActivate.Status !== 'Finalized');
+    value: (record: Cart) => (this.cartService.getCurrentCartId() === record.Id && !isNil(record.ActivationDate)) ? of('Yes') : of('No');
   }
 
   showEffectiveDateModal(cart: Cart, template: TemplateRef<any>) {

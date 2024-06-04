@@ -61,22 +61,6 @@ import { Component, EventEmitter, Output, Input } from '@angular/core';
           <li class="pt-1">
             <div class="custom-control custom-radio">
               <input
-                #buyMore
-                type="radio"
-                id="buyMore"
-                class="custom-control-input"
-                name="assetAction"
-                value="Buy More"
-                (change)="handleChange($event)"
-                [checked]="value === 'Buy More'">
-              <label class="custom-control-label pt-1" for="buyMore">
-                {{'ASSET_ACTIONS.BUY_MORE' | translate}}
-              </label>
-            </div>
-          </li>
-          <li class="pt-1">
-            <div class="custom-control custom-radio">
-              <input
                 #terminate
                 type="radio"
                 id="terminate"
@@ -87,6 +71,22 @@ import { Component, EventEmitter, Output, Input } from '@angular/core';
                 [checked]="value === 'Terminate'" >
               <label class="custom-control-label pt-1" for="terminate">
                 {{'ASSET_ACTIONS.TERMINATE' | translate}}
+              </label>
+            </div>
+          </li>
+          <li class="pt-1">
+            <div class="custom-control custom-radio">
+              <input
+                #buyMore
+                type="radio"
+                id="buyMore"
+                class="custom-control-input"
+                name="assetAction"
+                value="Buy More"
+                (change)="handleChange($event)"
+                [checked]="value === 'Buy More'">
+              <label class="custom-control-label pt-1" for="buyMore">
+                {{'ASSET_ACTIONS.BUY_MORE' | translate}}
               </label>
             </div>
           </li>

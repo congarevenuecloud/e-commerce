@@ -45,7 +45,6 @@ export class ManageCartComponent implements OnInit {
     },
   ]
   showSideNav: boolean = false;
-  priceError$: Observable<boolean>;
   constructor(private cartService: CartService,
     private cartItemService: CartItemService,
     private orderService: OrderService,
@@ -61,7 +60,6 @@ export class ManageCartComponent implements OnInit {
     private exceptionService: ExceptionService) { }
 
   ngOnInit() {
-    this.priceError$ = this.cartService.getCartPriceStatus();
     this.subscriptions.push(combineLatest([
       this.cartService.getMyCart(),
       this.crService.getRecommendationsForCart(),

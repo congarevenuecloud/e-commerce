@@ -21,14 +21,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   counter: number = 3;
   isInvalidGuest: boolean = false;
   loadData$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  priceError$: Observable<boolean>;
 
   constructor(private userService: UserService, private guestUserService: GuestUserService,
     private categoryService: CategoryService, private productService: ProductService, private cartService: CartService) {
   }
 
   ngOnInit() {
-    this.priceError$ = this.cartService.getCartPriceStatus();
     this.subscriptions.push(this.guestUserService.isValidUser().subscribe(isValid => {
       this.loadData$.next(true);
       if (!isValid) {

@@ -71,7 +71,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
   fields: string[];
   object: any;
   businessObjectFields: string[];
-  priceError$: Observable<boolean>;
   /**
    * Array of product families associated with the list of assets.
    */
@@ -90,7 +89,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.priceError$ = this.cartService.getCartPriceStatus();
     this.router.events.subscribe((eventname: NavigationStart) => {
       if (eventname.navigationTrigger === 'popstate' && eventname instanceof NavigationStart) {
         this.productService.eventback.next(true);
