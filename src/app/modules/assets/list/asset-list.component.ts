@@ -6,10 +6,10 @@ import {
   AssetLineItemExtended,
   AssetLineItem,
   AccountService, Account,
-  Cart, FieldFilter, GroupByAggregateResponse, AggregateFields
+  Cart, FieldFilter, GroupByAggregateResponse, AggregateFields, AssetActionLabels,StorefrontService
 } from '@congarevenuecloud/ecommerce';
 import { Observable, of, Subscription, take, map, combineLatest } from 'rxjs';
-import { isNil, set, get, filter, omit, concat, mapValues, groupBy, sumBy, first, last } from 'lodash';
+import { isNil, set, get, filter, omit, concat, mapValues, groupBy, sumBy, first, last, isEmpty } from 'lodash';
 import {
   AssetModalService,
   TableOptions,
@@ -19,6 +19,7 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import { DatePipe } from '@angular/common';
 import { ClassType } from 'class-transformer/ClassTransformer';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-asset-list',
@@ -53,6 +54,21 @@ export class AssetListComponent implements OnInit, OnDestroy {
    * Value of the advanced filter component.
    */
   advancedFilters: Array<FieldFilter> = [];
+  
+  /**
+   *Asset action selected for filtering assets in the component
+   */
+  assetAction: string = 'All';
+  /**
+   * Labels for asset actions
+   */
+  labels:AssetActionLabels;
+
+  /**
+   * Flag to check if enableOneTime is true or false
+   */
+  enableOneTime:boolean;
+  
   /**
    * cart record
    */
@@ -172,13 +188,42 @@ export class AssetListComponent implements OnInit, OnDestroy {
     private assetModalService: AssetModalService,
     protected cartService: CartService,
     protected toastr: ToastrService,
-    protected accountService: AccountService
+    protected accountService: AccountService,
+    private storefrontService:StorefrontService,
+    private route: ActivatedRoute
   ) { }
 
   /**
    * @ignore
    */
   ngOnInit() {
+    this.subscription = this.storefrontService.isOneTimeChangeEnabled().subscribe(enableOneTime => {
+      this.enableOneTime = enableOneTime; 
+    });
+    
+    if (!isEmpty(get(this.route, 'snapshot.queryParams'))) {
+      this.preselectItemsInGroups = true;
+      this.assetAction = isEmpty(get(this.route, 'snapshot.queryParams.action'))? null
+      : get(this.route, 'snapshot.queryParams.action');
+      let assetMap = this.assetActionMap[
+        this.assetAction
+        ];
+      this.assetActionFilter = !isNil(assetMap) ? assetMap: [];
+      let productIds = decodeURIComponent(
+        get(this.route, 'snapshot.queryParams.productIds')
+      );
+      let filterConditions = [];
+      if(productIds){
+        filterConditions = 
+           [{
+            field: 'Product.Id',
+            value: productIds,
+            filterOperator: FilterOperator.EQUAL
+          }]
+        
+      }
+      this.advancedFilters = filterConditions;
+    }
     this.loadView();
   }
 
@@ -192,9 +237,10 @@ export class AssetListComponent implements OnInit, OnDestroy {
    */
   loadView() {
     let tableOptions = {} as AssetListView;
-    this.view$ = combineLatest([this.cartService.getMyCart(), this.accountService.getCurrentAccount()])
+    this.view$ = combineLatest([this.cartService.getMyCart(), this.accountService.getCurrentAccount(), this.assetService.getAssetsActionLabels()])
       .pipe(
-        map(([cart, account]) => {
+        map(([cart, account, labels]) => {
+          this.labels = labels;
           tableOptions = {
             tableOptions: {
               groupBy: 'Name',
@@ -269,6 +315,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
    * @param event The event that was fired.
    */
   onAssetActionChange(event: string) {
+    this.assetAction = event;
     this.assetActionFilter = this.assetActionMap[event];
     this.loadView();
   }
@@ -287,11 +334,12 @@ export class AssetListComponent implements OnInit, OnDestroy {
   }
 
   private getActions(cart: Cart): Array<TableAction> {
+    let enableOneTime = this.enableOneTime;
     return [
       {
         icon: 'fa-sync',
         massAction: true,
-        label: 'ASSET_ACTIONS.RENEW',
+        label: get(this.labels,'renewLabel'),
         theme: 'primary',
         validate(record: AssetLineItemExtended, childRecords: Array<AssetLineItemExtended>): boolean {
           return record.canRenew() && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
@@ -306,10 +354,10 @@ export class AssetListComponent implements OnInit, OnDestroy {
       },
       {
         icon: 'fa-wrench',
-        label: 'ASSET_ACTIONS.AMEND',
+        label: get(this.labels,'amendLabel'),
         theme: 'primary',
         validate(record: AssetLineItemExtended): boolean {
-          return record.canChangeConfiguration() && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
+          return record.canChangeConfiguration(null, enableOneTime) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
           this.assetModalService.openChangeConfigurationModal(
@@ -322,10 +370,10 @@ export class AssetListComponent implements OnInit, OnDestroy {
       {
         icon: 'fa-dollar-sign',
         massAction: false,
-        label: 'ASSET_ACTIONS.BUY_MORE',
+        label: get(this.labels,'buyMoreLabel'),
         theme: 'primary',
-        validate(record: AssetLineItemExtended): boolean {
-          return record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItemId') === record.Id).length > 0);
+        validate(record: AssetLineItemExtended,childRecords: Array<AssetLineItemExtended>): boolean {
+          return record.canBuyMore(null,childRecords) &&  record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItemId') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
           this.assetModalService.openBuyMoreModal(
@@ -338,7 +386,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
       {
         icon: 'fa-ban',
         massAction: false,
-        label: 'ASSET_ACTIONS.TERMINATE',
+        label: get(this.labels,'terminateLabel'),
         theme: 'danger',
         validate(record: AssetLineItemExtended, childRecords: Array<AssetLineItemExtended>): boolean {
           return record.canTerminate(childRecords) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItemId') === record.Id).length > 0);

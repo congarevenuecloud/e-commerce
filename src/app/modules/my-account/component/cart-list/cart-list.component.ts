@@ -224,8 +224,8 @@ export class CartListComponent implements OnInit {
   }
 
 
-  canActivate(cartToActivate: Cart) {
-    value: (record: Cart) => (this.cartService.getCurrentCartId() === record.Id && !isNil(record.ActivationDate)) ? of('Yes') : of('No');
+ canActivate(cartToActivate: Cart) {
+    return (this.cartService.getCurrentCartId() !== cartToActivate.Id && cartToActivate.Status !== 'Finalized');
   }
 
   showEffectiveDateModal(cart: Cart, template: TemplateRef<any>) {
