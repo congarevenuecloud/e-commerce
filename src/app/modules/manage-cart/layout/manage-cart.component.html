@@ -152,7 +152,7 @@
                     ">
                         <apt-line-item-table-row *ngIf="!item.MainLine?._metadata?.hide" [index]="i" [cart]="view?.cart"
                           [parent]="item.MainLine" [children]="item.SecondaryLines" [readOnly]="readOnly"
-                          [editableFields]="false">
+                          [editableFields]="false" [showCheckbox]="!item?.MainLine?.AssetLineItem">
                         </apt-line-item-table-row>
                       </ng-container>
                     </tbody>

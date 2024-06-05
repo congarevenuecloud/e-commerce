@@ -3,9 +3,9 @@ import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { get, isNil, isEmpty, toString, toNumber, set, isEqual, remove } from 'lodash';
 import { Observable, of, BehaviorSubject, Subscription, combineLatest, empty } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, take } from 'rxjs/operators';
 import { FilterOperator } from '@congarevenuecloud/core';
-import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote, CartService } from '@congarevenuecloud/ecommerce';
+import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote, CartService, StorefrontService } from '@congarevenuecloud/ecommerce';
 import { DomSanitizer } from '@angular/platform-browser';
 /**
  * Product list component shows all the products in a list for user selection.
@@ -44,6 +44,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
    */
   subCategories: Array<Category> = [];
   /**
+   * Flag to check if enableOneTime is true or false
+   */
+  enableOneTime$:Observable<boolean>;
+  /**
    * Search query to filter products list from grid.
    */
   searchString: string = null;
@@ -81,7 +85,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   constructor(private activatedRoute: ActivatedRoute, private sanitizer: DomSanitizer,
     private router: Router, private categoryService: CategoryService,
-    public productService: ProductService, private translateService: TranslateService, private accountService: AccountService, private cartService: CartService) { }
+    public productService: ProductService, private translateService: TranslateService, private accountService: AccountService, private cartService: CartService,
+    private storefrontService:StorefrontService) { }
 
   ngOnDestroy() {
     if (!isNil(this.subscription))
@@ -102,6 +107,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.paginationButtonLabels.next = val['NEXT'];
       this.paginationButtonLabels.last = val['LAST'];
     });
+    this.enableOneTime$ = this.storefrontService.isOneTimeChangeEnabled();
   }
 
   getResults() {
