@@ -32,7 +32,8 @@ import {
   ConstraintRuleModule,
   QuickAddModule,
   AlertModule,
-  SelectAllModule
+  SelectAllModule,
+  PipesModule
 } from '@congarevenuecloud/elements';
 import { TranslateModule } from '@ngx-translate/core';
 import { DetailsModule } from '../details/details.module';
@@ -65,7 +66,8 @@ import { ProductListComponent } from './list/product-list.component';
     FilterModule,
     ConstraintRuleModule,
     AlertModule,
-    SelectAllModule
+    SelectAllModule,
+    PipesModule
   ],
   providers : [],
   declarations: [ProductDetailComponent,
