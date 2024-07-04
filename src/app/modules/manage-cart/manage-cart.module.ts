@@ -15,7 +15,7 @@ import { DatepickerModule, BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import {
   ProductCarouselModule, ConfigurationSummaryModule, PriceModule, PromotionModule, InputDateModule,
   LineItemTableRowModule, BreadcrumbModule, IconModule, PriceSummaryModule, OutputFieldModule,
-  AlertModule, ConstraintRuleModule, SelectAllModule, ButtonModule, InputFieldModule
+  AlertModule, ConstraintRuleModule, SelectAllModule, ButtonModule, InputFieldModule, PipesModule
 } from '@congarevenuecloud/elements';
 import { TranslateModule } from '@ngx-translate/core';
 import { QuoteModule } from '../quote/quote.module';
@@ -50,7 +50,8 @@ import { QuoteModule } from '../quote/quote.module';
     ConstraintRuleModule,
     SelectAllModule,
     ButtonModule,
-    InputFieldModule
+    InputFieldModule,
+    PipesModule
   ],
   declarations: [ManageCartComponent, CartTableComponent, CartSummaryComponent]
 })

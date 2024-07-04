@@ -7,6 +7,7 @@ import { mergeMap, take } from 'rxjs/operators';
 import { FilterOperator } from '@congarevenuecloud/core';
 import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote, CartService, StorefrontService } from '@congarevenuecloud/ecommerce';
 import { DomSanitizer } from '@angular/platform-browser';
+import {BatchSelectionService} from '@congarevenuecloud/elements'
 /**
  * Product list component shows all the products in a list for user selection.
  */
@@ -75,6 +76,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   fields: string[];
   object: any;
   businessObjectFields: string[];
+  selectedCount:number = 0; 
   /**
    * Array of product families associated with the list of assets.
    */
@@ -84,7 +86,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
    */
 
   constructor(private activatedRoute: ActivatedRoute, private sanitizer: DomSanitizer,
-    private router: Router, private categoryService: CategoryService,
+    private router: Router, private categoryService: CategoryService, public batchSelectionService: BatchSelectionService,
     public productService: ProductService, private translateService: TranslateService, private accountService: AccountService, private cartService: CartService,
     private storefrontService:StorefrontService) { }
 
@@ -126,7 +128,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.hasSearchError = false;
         this.searchString = get(params, 'query');
         this.searchString = this.sanitizer.sanitize(
-          SecurityContext.HTML,
+          SecurityContext.URL,
           this.searchString
         );
         let categories = null;
@@ -163,6 +165,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.fields = ['AdjustmentType', 'AdjustmentAmount', 'StartDate', 'EndDate'];
     this.businessObjectFields = ['Description', 'BillToAccount', 'Amount', 'ModifiedDate', 'AutoActivateOrder', 'ABOType', 'DiscountPercent', 'configurationSyncDate', 'PONumber']
     this.object = new Quote();
+    this.subscription =(this.batchSelectionService.getSelectedProducts().subscribe((data)=>{
+      this.selectedCount = data?.length ? data.length : 0;
+    }));
 
   }
 

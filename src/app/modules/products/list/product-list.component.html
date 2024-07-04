@@ -59,8 +59,11 @@
                 </pagination>
               </span>
 
-              <div class="d-none d-sm-none d-md-none d-lg-flex position-absolute mt-2 col-12 flex-row-reverse px-1">
-                <apt-select-all [items]="data.Products"></apt-select-all>
+              <div class="d-none d-sm-none d-md-none d-lg-flex position-absolute mt-1 col-12 flex-row-reverse px-1">
+                  <apt-select-all class="justify-content-end"[items]="data.Products"></apt-select-all>
+                  <label class = "pr-2 mt-1 pb-0 mb-0  align-items-center d-flex" *ngIf="selectedCount > 0">
+                     <span [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'" [translateParams] = "{selectedCount: selectedCount, totalCount: data?.TotalCount | digitFormatter}"></span>
+                  </label>
               </div>
             </div>
 
@@ -87,7 +90,13 @@
                 </pagination>
               </span>
               <div class="select-all d-block d-sm-block d-lg-none d-md-block mb-4 pl-3 position-relative">
-                <apt-select-all [items]="data.Products"></apt-select-all>
+                <div class="row">
+                  <apt-select-all class="justify-content-end"[items]="data.Products"></apt-select-all>
+                  <label class = "pl-2 mt-1 pb-0 mb-0 align-items-center d-flex " *ngIf="selectedCount > 0">
+                     <span [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'" [translateParams] = "{selectedCount: selectedCount, totalCount: data?.TotalCount}"></span>
+                  </label>
+                </div>
+                
               </div>
             </div>
 

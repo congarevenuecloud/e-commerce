@@ -271,7 +271,8 @@
         "SUGGESTIONS_3": "Try fewer keywords",
         "SUGGESTIONS_4": "Try more general keywords",
         "SUGGESTIONS_5": "You can search with <em>product id</em> as well",
-        "SUGGESTIONS_6": "Make sure your search string is not empty"
+        "SUGGESTIONS_6": "Make sure your search string is not empty",
+        "SELECT_ALL_MSG": "{{selectedCount}} of {{totalCount}} products selected"
     },
     "PRODUCT_CARD": {
         "INSTALLED_PRODUCT": "Installed Product",
@@ -419,10 +420,12 @@
         "PRICE_NOT_AUTOUPDATED": "* Prices shown in this page are not auto-updated.",
         "UPDATE_PRICE": "Update Prices",
         "PRICE_ERROR": "Pricing of your cart has failed, please proceed with either of the following.",
-        "PRICE_PROGRESS": "Pricing of your cart has timed out.",
+        "PRICE_PROGRESS": "Pricing of your cart is taking more time than expected.",
         "PRICE_TAKINGTIME": "Pricing of your cart is taking more time than expected.",
         "RETRY":"Retry",
+        "CHECK_STATUS":"Check status",
         "ABANDON":"Abandon",
+        "ABANDON_CART":"Abandon cart",
         "FAVORITES": "Favorites",
         "INSTALLED_PRODUCTS": "Installed Products",
         "SELECTIONS": "Selections",
@@ -706,7 +709,8 @@
             "PRODUCT_CONFIGURATION": "Product Configuration",
             "CART_EMPTY": "Your shopping cart is empty",
             "ALL_PRODUCTS": "View All Products",
-            "HOMEPAGE": "Go To Homepage"
+            "HOMEPAGE": "Go To Homepage",
+            "SELECT_ALL_MSG": "{{selectedCount}} of {{totalCount}} selected"
         },
         "DISCARD_CHANGES_MODAL": {
             "DISCARD_CHANGES_TITLE": "Discard your changes",
