@@ -978,7 +978,8 @@
         "SELECTED": "Selected",
         "OF": "of",
         "PER_PAGE": "per page",
-        "NO_DATA_TO_DISPLAY": "No data to display"
+        "NO_DATA_TO_DISPLAY": "No records found",
+        "NO_FILTERS_MATCHED":"No records match the filter criteria applied"
     },
     "AOBJECTS": {
         "PROPOSALS": "Proposals",
