@@ -109,7 +109,7 @@
             <div class="row" *ngIf="view == 'list' && data?.Products">
               <div class="col-12">
                 <ul class="list-unstyled list-group">
-                  <li *ngFor="let product of data?.Products let i = index; let last = last" class="list-group-item"
+                  <li *ngFor="let product of data?.Products let i = index; let last = last"
                     [class.mb-3]="last">
                     <apt-product-card [product]="product" type="media"></apt-product-card>
                   </li>

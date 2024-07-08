@@ -950,7 +950,8 @@
         "SELECTED": "es_MX Selected",
         "OF": "es_MX of",
         "PER_PAGE": "es_MX per page",
-        "NO_DATA_TO_DISPLAY": "es_MX No data to display"
+        "NO_DATA_TO_DISPLAY": "es_MX No records found",
+        "NO_FILTERS_MATCHED":"es_MX No records match the filter criteria applied"
     },
     "AOBJECTS": {
         "PROPOSALS": "es_MX Proposals",
