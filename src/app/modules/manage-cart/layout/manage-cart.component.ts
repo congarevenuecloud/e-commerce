@@ -93,7 +93,7 @@ export class ManageCartComponent implements OnInit {
             set(cartInfo, 'LineItems', lineItemsWithIncentives);
           }
           isEqual(get(cartInfo, 'BusinessObjectType'), 'Proposal') ? set(cartInfo, 'Proposald', businessObjectInfo) : set(cartInfo, 'Order', businessObjectInfo);
-          const cartItems = plainToClass(CartItem, get(cartInfo, 'LineItems'));
+          const cartItems = this.readOnly ? plainToClass(CartItem, get(cartInfo, 'LineItems')): get(cartInfo, 'LineItems'); 
           return of({
             cart: cartInfo,
             lineItems: LineItemService.groupItems(cartItems as unknown as Array<CartItem>),

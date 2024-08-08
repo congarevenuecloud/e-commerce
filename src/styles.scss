@@ -98,7 +98,6 @@ button {
 }
 
 main {
-  margin-top: $navbar-brand-height + $breadcrumb-height;
   max-width: 100vw;
   overflow-x: hidden;
 }
@@ -1075,10 +1074,6 @@ apt-table {
 }
 
 
-div.fixed-top {
-  padding-bottom: 0.5rem;
-}
-
 .navbar-toggler {
   border: none;
 }
@@ -1093,9 +1088,6 @@ div.fixed-top {
   background-color: white !important;
 }
 
-div.fixed-top {
-  padding-bottom: 0.5rem;
-}
 
 .navbar-toggler {
   border: none;
