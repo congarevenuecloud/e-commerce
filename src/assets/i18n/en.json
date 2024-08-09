@@ -819,7 +819,8 @@
         "INFORMATION_TYPE": "Information Type",
         "FEATURE": "Feature",
         "VALUE": "Value",
-        "UPDATE_QUANTITY": "Update Quantity"
+        "UPDATE_QUANTITY": "Update Quantity",
+        "SELECT_ONE_OPTION": "Select one option"
     },
     "INSTALLED_PRODUCTS": {
         "PRODUCT_FAMILY": "Product Family",

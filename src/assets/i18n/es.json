@@ -803,7 +803,8 @@
         "INFORMATION_TYPE": "es_MX Information Type",
         "FEATURE": "es_MX Feature",
         "VALUE": "es_MX Value",
-        "UPDATE_QUANTITY": "es_MX Update Quantity"
+        "UPDATE_QUANTITY": "es_MX Update Quantity",
+        "SELECT_ONE_OPTION": "es_MX Select one option"
     },
     "INSTALLED_PRODUCTS": {
         "PRODUCT_FAMILY": "es_MX Product Family",

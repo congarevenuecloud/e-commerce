@@ -797,7 +797,8 @@
         "INFORMATION_TYPE": "fr_FR Information Type",
         "FEATURE": "fr_FR Feature",
         "VALUE": "fr_FR Value",
-        "UPDATE_QUANTITY": "fr_FR Update Quantity"
+        "UPDATE_QUANTITY": "fr_FR Update Quantity",
+        "SELECT_ONE_OPTION": "fr_FR Select one option"
     },
     "INSTALLED_PRODUCTS": {
         "PRODUCT_FAMILY": "fr_FR Product Family",

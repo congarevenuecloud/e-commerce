@@ -243,7 +243,7 @@
     <div class="form-group">
       <div class="mt-2" *ngIf="uploadFileList && !hasSizeError && isSupportedFileType">
         <div class="d-flex justify-content-between" *ngFor="let file of uploadFileList">
-          <div class="w-40">
+          <div class="w-40 d-flex justify-content-between align-items-center">
             <input type="checkbox" [(ngModel)]="isPrivate" name="attachmentVisibilityScope"
               id="attachmentScope">
             <label class="mx-2" for="attachmentScope">{{'COMMON.ATTACHMENT_DETAILS.MAKE_VISIBILITY_PRIVATE'

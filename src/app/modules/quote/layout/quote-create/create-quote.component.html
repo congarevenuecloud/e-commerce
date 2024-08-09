@@ -1,6 +1,6 @@
 <ng-container *ngIf="cart$ | async as cart; else loadingTemplate">
-    <apt-breadcrumb *ngIf="!cart?.Proposald?.Id" [label]="'COMMON.CREATE_QUOTE' | translate" class="border-bottom py-2"></apt-breadcrumb>
-    <apt-breadcrumb *ngIf="cart?.Proposald?.Id" [sobject]="quoteRequestObj" [label]="'CREATE_QUOTE.FINALIZE_AND_SUBMIT' | translate" class="border-bottom py-2">
+    <apt-breadcrumb *ngIf="!cart?.Proposald?.Id" [label]="'COMMON.CREATE_QUOTE' | translate" class="border-bottom"></apt-breadcrumb>
+    <apt-breadcrumb *ngIf="cart?.Proposald?.Id" [sobject]="quoteRequestObj" [label]="'CREATE_QUOTE.FINALIZE_AND_SUBMIT' | translate" class="border-bottom">
     </apt-breadcrumb>
     <div class="container-fluid animated fadeIn p-0">
         

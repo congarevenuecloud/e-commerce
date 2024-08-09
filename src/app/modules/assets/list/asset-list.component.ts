@@ -338,7 +338,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
     return [
       {
         icon: 'fa-sync',
-        massAction: true,
+        massAction: false,
         label: get(this.labels,'renewLabel'),
         theme: 'primary',
         validate(record: AssetLineItemExtended, childRecords: Array<AssetLineItemExtended>): boolean {
