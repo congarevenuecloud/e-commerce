@@ -157,12 +157,12 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       this.orderLineItems$.next(LineItemService.groupItems(order.OrderLineItems));
       set(this.cartRecord, 'Id', get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id'))
       set(this.cartRecord, 'Id', get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id'));
-      return combineLatest([of(order), this.cartService.addAdjustmentInfoToLineItems(this.cartRecord?.Id)]);
-    }), take(1)).subscribe(([res, items]) => {
-      this.cartRecord.LineItems = items;
-      this.cartRecord.BusinessObjectType = 'Order';
-      this.updateOrder(res);
-    });
+      this.updateOrder(order);
+          return this.cartService.addAdjustmentInfoToLineItems(this.cartRecord?.Id);
+        }),take(1)).subscribe((items) => {
+          this.cartRecord.LineItems = items;
+          this.cartRecord.BusinessObjectType = 'Order';
+        });
     this.getAttachments();
   }
 
