@@ -453,6 +453,7 @@
         "GUEST_WELCOME_MESSAGE": "Hello, sign in!",
         "PAGES":"Pages",
         "ADD_PRODUCTS": "Add Products",
+        "REPLACE":"Replace",
         "ATTACHMENT_DETAILS": {
             "TITLE": "Attach new file(s)",
             "INPUT_LABEL": "Drop files to Attach or",
@@ -584,7 +585,9 @@
         "PRODUCT_GROUP_MESSAGE": "Product group <strong>{{productGroupName}}</strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
         "PRODUCT_FAMILY_MESSAGE": "Product family <strong>{{productFamily}}</strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
         "OPTIONS": "option(s)",
-        "PRODUCT_OPTION_GROUP_MESSAGE": "Product Option Group <strong></strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>"
+        "PRODUCT_OPTION_GROUP_MESSAGE": "Product Option Group <strong></strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
+        "REPLACEMENT_RULE_HEADING":"Constraint Rule Message",
+        "STATUS_MSG":"To be replaced"
     },
     "CONSTRAINT_SIDE_MENU": {
         "VALIDATION_MESSAGES": "Validation Messages",

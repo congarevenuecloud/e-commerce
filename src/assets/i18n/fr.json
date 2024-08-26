@@ -438,7 +438,8 @@
         "WELCOME_MESSAGE": "fr_FR Hello, {{userName}}!",
         "GUEST_WELCOME_MESSAGE": "fr_FR Hello, sign in!",
         "PAGES":"fr_FR Pages",
-        "ADD_PRODUCTS": "Add Products",
+        "ADD_PRODUCTS": "fr_FR Add Products",
+        "REPLACE":"fr_FR Replace",
         "ATTACHMENT_DETAILS": {
             "TITLE": "fr_FR Attach new file(s)",
             "INPUT_LABEL": "fr_FR Drop files to Attach or",
@@ -565,7 +566,9 @@
         "PRODUCT_GROUP_MESSAGE": "fr_FR Product group <strong>{{productGroupName}}</strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
         "PRODUCT_FAMILY_MESSAGE": "fr_FR Product family <strong>{{productFamily}}</strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
         "OPTIONS": "fr_FR option(s)",
-        "PRODUCT_OPTION_GROUP_MESSAGE": "fr_FR Product Option Group <strong></strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>"
+        "PRODUCT_OPTION_GROUP_MESSAGE": "fr_FR Product Option Group <strong></strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
+        "REPLACEMENT_RULE_HEADING":"fr_FR Constraint Rule Message",
+        "STATUS_MSG":"fr_FR To be replaced"
     },
     "CONSTRAINT_SIDE_MENU": {
         "VALIDATION_MESSAGES": "fr_FR Validation Messages",
