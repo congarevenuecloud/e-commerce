@@ -2,11 +2,11 @@ import { Component, OnInit, ViewEncapsulation, OnDestroy, ChangeDetectorRef, Aft
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { filter, map, switchMap, mergeMap, startWith, take } from 'rxjs/operators';
-import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil } from 'lodash';
+import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil, last } from 'lodash';
 import { ApiService } from '@congarevenuecloud/core';
 import {
   Order, Quote, OrderLineItem, OrderService, UserService,
-  ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService, QuoteService,
+  ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService, QuoteService, CartItem,
   Contact, CartService, Cart, OrderLineItemService, Account, ContactService, AttachmentService, ProductInformationService, AttachmentDetails
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, RevalidateCartService } from '@congarevenuecloud/elements';
@@ -140,8 +140,13 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
         filter(params => get(params, 'id') != null),
         map(params => get(params, 'id')),
         mergeMap(orderId => this.orderService.getOrder(orderId)),
-        switchMap((order: Order) => {
-          return this.updateOrderValue(order)
+        switchMap((order: Order)=>{
+          return combineLatest([this.cartService.addAdjustmentInfoToLineItems(get(get(first(order.OrderLineItems),'Configuration'),'Id')), of(order)])
+        }),
+        switchMap((res) => {
+          this.cartRecord.LineItems = first(res) as CartItem[];
+          this.cartRecord.BusinessObjectType = 'Order';
+          return this.updateOrderValue(last(res))
         })
       );
 
@@ -155,14 +160,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
 
       order.OrderLineItems = get(order, 'OrderLineItems');
       this.orderLineItems$.next(LineItemService.groupItems(order.OrderLineItems));
-      set(this.cartRecord, 'Id', get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id'))
       set(this.cartRecord, 'Id', get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id'));
-      this.updateOrder(order);
-          return this.cartService.addAdjustmentInfoToLineItems(this.cartRecord?.Id);
-        }),take(1)).subscribe((items) => {
-          this.cartRecord.LineItems = items;
-          this.cartRecord.BusinessObjectType = 'Order';
-        });
+      return of(order);
+    }),take(1)).subscribe(order => {
+      this.updateOrder(order)
+    });
     this.getAttachments();
   }
 

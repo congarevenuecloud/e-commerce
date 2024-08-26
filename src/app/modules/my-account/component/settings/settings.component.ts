@@ -38,7 +38,6 @@ export class SettingsComponent implements OnInit {
   }
 
   updateUser(user: User) {
-    user.ExternalId = get(user, 'UserName');
     this.userService.updateCurrentUser(user).subscribe(() => {
     }, err => {
       this.exceptionService.showError(err);
