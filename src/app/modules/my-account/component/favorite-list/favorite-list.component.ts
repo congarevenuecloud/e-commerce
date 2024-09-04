@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { of, Observable, combineLatest } from 'rxjs';
 import { switchMap, take, map as rmap, catchError, tap } from 'rxjs/operators';
 import { first, get, isNil } from 'lodash';
-import { Router } from '@angular/router';
 import { FavoriteService, Favorite, UserService, User, AccountService, DateFormatPipe } from '@congarevenuecloud/ecommerce';
 import { TableOptions, ExceptionService, TableAction } from '@congarevenuecloud/elements';
-/**
- * Favorite list component loads and shows all the favorite configurations for logged in user.
- */
+
+/** Favorite list component loads and shows all the favorite configurations for logged in user. */
 
 @Component({
   selector: 'app-favorite-list',
@@ -18,14 +17,10 @@ export class FavoriteListComponent implements OnInit {
 
   type = Favorite;
 
-  /**
-   * An observable with the aggregate count of favorites.
-   */
+  // An observable with the aggregate count of favorites.
   totalRecords$: Observable<number>;
 
-  /**
-   * Options passed to table component to render the favorites in a grid view.
-   */
+  // Options passed to table component to render the favorites in a grid view.
   tableOptions$: Observable<TableOptions>;
   view$: Observable<FavoriteListView>;
   user: User;
@@ -109,8 +104,10 @@ export class FavoriteListComponent implements OnInit {
                   theme: 'danger',
                   validate: (record: Favorite) => this.canDelete(record),
                   action: (recordList: Array<Favorite>) => this.favoriteService.removeFavorites(recordList).pipe(rmap(res => {
-                    this.exceptionService.showSuccess('SUCCESS.FAVORITE.DELETED')
-                    this.loadData();
+                    if (res) {
+                      this.exceptionService.showSuccess('SUCCESS.FAVORITE.DELETED');
+                      this.loadData();
+                    }
                   })),
                   disableReload: true
                 } as TableAction
@@ -158,8 +155,8 @@ export class FavoriteListComponent implements OnInit {
   private fetchFavoriteTotals() {
     this.favoriteService.getMyFavorites()
       .pipe(
-        rmap((Result) => {
-          this.totalRecords$ = !isNil(Result) ? of(get(Result, 'TotalRecord')) : of(0);
+        rmap((result) => {
+          this.totalRecords$ = !isNil(result) ? of(get(result, 'TotalRecord')) : of(0);
         }),
         take(1),
         catchError(error => {

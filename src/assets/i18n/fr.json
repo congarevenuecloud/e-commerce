@@ -79,7 +79,8 @@
             "TITLE": "fr_FR Favorite items added!",
             "ADD_FAVORITE": "fr_FR Added new {{name}} Favorite.",
             "UPDATE_FAVORITE": "fr_FR Updated existing {{name}} Favorite",
-            "ADD_FAVORITE_TO_CART": "fr_FR Items from {{name}} were added to the cart."
+            "ADD_FAVORITE_TO_CART": "fr_FR Items from {{name}} were added to the cart.",
+            "DELETED": "fr_FR Successfully deleted"
         }
     },
     "WARNING": {
