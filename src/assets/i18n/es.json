@@ -79,7 +79,8 @@
             "TITLE": "es_MX Favorite items added!",
             "ADD_FAVORITE": "es_MX Added new {{name}} Favorite.",
             "UPDATE_FAVORITE": "es_MX Updated existing {{name}} Favorite",
-            "ADD_FAVORITE_TO_CART": "es_MX Items from {{name}} were added to the cart."
+            "ADD_FAVORITE_TO_CART": "es_MX Items from {{name}} were added to the cart.",
+            "DELETED": "es_MX Successfully deleted"
         }
     },
     "WARNING": {
