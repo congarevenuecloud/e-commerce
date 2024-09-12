@@ -141,12 +141,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
         map(params => get(params, 'id')),
         mergeMap(orderId => this.orderService.getOrder(orderId)),
         switchMap((order: Order)=>{
-          return combineLatest([this.cartService.addAdjustmentInfoToLineItems(get(get(first(order.OrderLineItems),'Configuration'),'Id')), of(order)])
-        }),
-        switchMap((res) => {
-          this.cartRecord.LineItems = first(res) as CartItem[];
-          this.cartRecord.BusinessObjectType = 'Order';
-          return this.updateOrderValue(last(res))
+          return this.updateOrderValue(order)
         })
       );
 
@@ -161,6 +156,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       order.OrderLineItems = get(order, 'OrderLineItems');
       this.orderLineItems$.next(LineItemService.groupItems(order.OrderLineItems));
       set(this.cartRecord, 'Id', get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id'));
+      this.cartRecord.BusinessObjectType = 'Order';
       return of(order);
     }),take(1)).subscribe(order => {
       this.updateOrder(order)

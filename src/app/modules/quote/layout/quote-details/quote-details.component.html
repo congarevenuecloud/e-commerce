@@ -132,122 +132,127 @@
       </div>
     </div>
   </app-detail-section>
-  
+
   <div class="pt-4">
     <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-4">
-    <div class="card">
-      <div *ngIf="quoteLineItems$ | async as quoteLineItems">
-        <div class="card-header">
-          <h5>
-            {{'DETAILS.LINE_ITEMS' | translate}}
-            <button class="btn text-primary px-2 ml-1"
-              *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented')"
-              [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black" (click)="editQuoteItems(quote)">{{
-              (quoteLineItems?.length > 0 ? 'COMMON.EDIT' : 'COMMON.ADD' ) | translate }}</button>
-          </h5>
-        </div>
-        <div class="card-body">
-          <ng-container *ngIf="quoteLineItems?.length >0; else showMessage">
-            <table class="table border-bottom">
-              <tbody>
-                <ng-container *ngFor="let item of quoteLineItems; let i = index">
-                  <apt-line-item-table-row [cart]="cartRecord" [index]="i" [parent]="item.MainLine"
-                    [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false">
-                  </apt-line-item-table-row>
-                </ng-container>
-              </tbody>
-            </table>
-          </ng-container>
-          <ng-template #showMessage>
-            <div class="d-flex align-items-center justify-content-center">
-              <h6 class="text-muted mr-2 mb-0">
-                {{ 'COMMON.NO_LINE_ITEMS_MESSAGE' | translate: { record: 'quote' } }}
-              </h6>
-              <button class="btn text-primary p-0" [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black"
-                (click)="editQuoteItems(quote)">
-                {{ 'COMMON.ADD' | translate }}
-              </button>
-            </div>
-          </ng-template>
+      <div class="card">
+        <div *ngIf="quoteLineItems$ | async as quoteLineItems">
+          <div class="card-header">
+            <h5>
+              {{'DETAILS.LINE_ITEMS' | translate}}
+              <button class="btn text-primary px-2 ml-1"
+                *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented')"
+                [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black" (click)="editQuoteItems(quote)">{{
+                (quoteLineItems?.length > 0 ? 'COMMON.EDIT' : 'COMMON.ADD' ) | translate }}</button>
+            </h5>
+          </div>
+          <div class="card-body">
+            <ng-container *ngIf="quoteLineItems?.length >0; else showMessage">
+              <table class="table border-bottom">
+                <tbody>
+                  <ng-container *ngFor="let item of quoteLineItems; let i = index">
+                    <apt-line-item-table-row [cart]="cartRecord" [index]="i" [parent]="item.MainLine"
+                      [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false">
+                    </apt-line-item-table-row>
+                  </ng-container>
+                </tbody>
+              </table>
+            </ng-container>
+            <ng-template #showMessage>
+              <div class="d-flex align-items-center justify-content-center">
+                <h6 class="text-muted mr-2 mb-0">
+                  {{ 'COMMON.NO_LINE_ITEMS_MESSAGE' | translate: { record: 'quote' } }}
+                </h6>
+                <button class="btn text-primary p-0" [ladda]="editLoader" data-style="zoom-in"
+                  data-spinner-color="black" (click)="editQuoteItems(quote)">
+                  {{ 'COMMON.ADD' | translate }}
+                </button>
+              </div>
+            </ng-template>
+          </div>
         </div>
       </div>
-    </div>
-     </app-detail-section>
+    </app-detail-section>
   </div>
 
   <div class="pt-4">
     <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-4">
-    <div class="card" #attachmentSection *ngIf="attachmentList$ | async as attachmentList; else loading">
-      <div class="card-header">
-        <h5>
-          {{'DETAILS.ATTACHMENTS' | translate}}
-          <span *ngIf="attachmentList?.length > 0">({{attachmentList?.length}})</span>
-        </h5>
-      </div>
-      <div class="card-body">
-        <div class="row d-flex justify-content-between">
-          <div [ngClass]="isLoggedIn ? 'col-lg-6 col-md-6' :'col-lg-12 col-md-12'">
-            <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
-              <div class="table-container overflow-auto">
-                <table class="table table-sm">
-                  <thead>
-                    <tr>
-                      <th scope="col">#</th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="Name"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col" class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileSize"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col" class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="CreatedBy"
-                          [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
-                          field="CreatedDate" [labelOnly]="true">
-                        </apt-output-field></th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let attachment of attachmentList; let i = index">
-                      <th scope="row">{{i + 1}}</th>
-                      <td>
-                        <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
-                          target="_self">{{attachment?.DocumentMetadata?.Name}}</a>
-                      </td>
-                      <td class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">{{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
-                      <td class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">{{getFileType(attachment?.DocumentMetadata?.FileType)}}</td>
-                      <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
-                        {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
-                      <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
-                      <td><button *ngIf="isLoggedIn" class="btn btn-link p-0 m-0" (click)="deleteAttachment(attachment)"
-                          [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
-                          data-spinner-color="black">
-                          <span class="fa fa-trash"></span>
-                        </button></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </ng-container>
-            <ng-template #emptyAttachments>
-              <div class="d-flex align-items-center justify-content-center flex-column h-100 text-muted">
-                <i class="fa fa-4x fa-file-o mb-2"></i>
-                {{'COMMON.ATTACHMENT_DETAILS.NO_ATTACHMENTS' | translate}}
-              </div>
-            </ng-template>
-          </div>
-          <span class="d-lg-block d-md-block d-sm-none d-none border-left" *ngIf="isLoggedIn"></span>
-          <div class="col-12 col-md-5 pt-lg-0 pt-md-0 pt-sm-3 pt-3" *ngIf="isLoggedIn">
-            <ng-container *ngTemplateOutlet="uploadAttachments"></ng-container>
+      <div class="card" #attachmentSection *ngIf="attachmentList$ | async as attachmentList; else loading">
+        <div class="card-header">
+          <h5>
+            {{'DETAILS.ATTACHMENTS' | translate}}
+            <span *ngIf="attachmentList?.length > 0">({{attachmentList?.length}})</span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row d-flex justify-content-between">
+            <div [ngClass]="isLoggedIn ? 'col-lg-6 col-md-6' :'col-lg-12 col-md-12'">
+              <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
+                <div class="table-container overflow-auto">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="Name"
+                            [labelOnly]="true">
+                          </apt-output-field></th>
+                        <th scope="col" class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">
+                          <apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileSize"
+                            [labelOnly]="true">
+                          </apt-output-field></th>
+                        <th scope="col" class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">
+                          <apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
+                            [labelOnly]="true">
+                          </apt-output-field></th>
+                        <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
+                            field="CreatedBy" [labelOnly]="true">
+                          </apt-output-field></th>
+                        <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
+                            field="CreatedDate" [labelOnly]="true">
+                          </apt-output-field></th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let attachment of attachmentList; let i = index">
+                        <th scope="row">{{i + 1}}</th>
+                        <td>
+                          <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
+                            target="_self">{{attachment?.DocumentMetadata?.Name}}</a>
+                        </td>
+                        <td class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">
+                          {{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
+                        <td class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">
+                          {{getFileType(attachment?.DocumentMetadata?.FileType)}}</td>
+                        <td>{{'COMMON.ATTACHMENT_DETAILS.BY' | translate}}
+                          {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
+                        <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
+                        <td><button *ngIf="isLoggedIn" class="btn btn-link p-0 m-0"
+                            (click)="deleteAttachment(attachment)"
+                            [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
+                            data-spinner-color="black">
+                            <span class="fa fa-trash"></span>
+                          </button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </ng-container>
+              <ng-template #emptyAttachments>
+                <div class="d-flex align-items-center justify-content-center flex-column h-100 text-muted">
+                  <i class="fa fa-4x fa-file-o mb-2"></i>
+                  {{'COMMON.ATTACHMENT_DETAILS.NO_ATTACHMENTS' | translate}}
+                </div>
+              </ng-template>
+            </div>
+            <span class="d-lg-block d-md-block d-sm-none d-none border-left" *ngIf="isLoggedIn"></span>
+            <div class="col-12 col-md-5 pt-lg-0 pt-md-0 pt-sm-3 pt-3" *ngIf="isLoggedIn">
+              <ng-container *ngTemplateOutlet="uploadAttachments"></ng-container>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-     </app-detail-section>
+    </app-detail-section>
   </div>
   <ng-template #intimationTemplate>
     <div class="modal-header align-items-center d-flex flex-row-reverse pb-0 border-bottom border-secondary">
@@ -303,30 +308,29 @@
         {{'COMMON.ATTACHMENT_DETAILS.FILE_SIZE_EXCEEDED_ERROR' | translate}}
       </p>
     </div>
-    
+
     <div class="mt-2" *ngIf="file==null && isSupportedFileType && supportedFileTypes?.length">
       <p>
         {{
-          "COMMON.ATTACHMENT_DETAILS.SUPPORTED_FILE_TYPES"
-          | translate:{supportedFileTypes:supportedFileTypes}
-          }}
+        "COMMON.ATTACHMENT_DETAILS.SUPPORTED_FILE_TYPES"
+        | translate:{supportedFileTypes:supportedFileTypes}
+        }}
       </p>
     </div>
 
     <div class="mt-2" *ngIf="!isSupportedFileType && file != null && supportedFileTypes?.length">
       <p class="text-danger">
         {{
-          "COMMON.ATTACHMENT_DETAILS.UNSUPPORTED_FILE_TYPE_ERROR"
-          | translate:{supportedFileTypes:supportedFileTypes}
-          }}
+        "COMMON.ATTACHMENT_DETAILS.UNSUPPORTED_FILE_TYPE_ERROR"
+        | translate:{supportedFileTypes:supportedFileTypes}
+        }}
       </p>
     </div>
     <div class="form-group">
       <div class="mt-2" *ngIf="uploadFileList && !hasSizeError && isSupportedFileType">
         <div class="d-flex justify-content-between" *ngFor="let file of uploadFileList">
           <div class="w-40 d-flex justify-content-between align-items-center">
-            <input type="checkbox" [(ngModel)]="isPrivate" name="attachmentVisibilityScope"
-              id="attachmentScope">
+            <input type="checkbox" [(ngModel)]="isPrivate" name="attachmentVisibilityScope" id="attachmentScope">
             <label class="mx-2" for="attachmentScope">{{'COMMON.ATTACHMENT_DETAILS.MAKE_VISIBILITY_PRIVATE' |
               translate}}</label>
           </div>
@@ -339,7 +343,8 @@
       <button class="btn btn-link" (click)="clearFiles()" type="button">{{'COMMON.CLEAR' |
         translate}}</button>
       <button class="btn btn-primary btn-primary" type="submit"
-        [disabled]="(!isSupportedFileType ||hasSizeError && file != null) || !file" [ladda]="attachmentsLoader">{{'COMMON.UPLOAD' |
+        [disabled]="(!isSupportedFileType ||hasSizeError && file != null) || !file"
+        [ladda]="attachmentsLoader">{{'COMMON.UPLOAD' |
         translate }}</button>
     </div>
   </form>

@@ -80,7 +80,10 @@ export class ManageCartComponent implements OnInit {
           cart = this.readOnly ? nonactive : cart;
           this.cart = cart;
           this.primaryLI = filter((get(cart, 'LineItems')), (i) => i.IsPrimaryLine && i.LineType === 'Product/Service');
-          if (!isNil(get(cart, 'BusinessObjectId'))) {
+          const businessObjectId = get(cart, 'BusinessObjectId');
+          const isProposal = isEqual(get(cart, 'BusinessObjectType'), 'Proposal');
+          const businessObject = isProposal ? get(cart, 'Proposald') : get(cart, 'Order');
+          if (!isNil(businessObjectId) && isNil(businessObject)) {
             this.businessObject$ = isEqual(get(cart, 'BusinessObjectType'), 'Proposal') ?
               this.quoteService.getQuoteById(get(cart, 'BusinessObjectId'), false) : this.orderService.getOrder(get(cart, 'BusinessObjectId'));
           } else {
@@ -92,11 +95,18 @@ export class ManageCartComponent implements OnInit {
           if (this.readOnly && !isNil(lineItemsWithIncentives)) {
             set(cartInfo, 'LineItems', lineItemsWithIncentives);
           }
-          isEqual(get(cartInfo, 'BusinessObjectType'), 'Proposal') ? set(cartInfo, 'Proposald', businessObjectInfo) : set(cartInfo, 'Order', businessObjectInfo);
-          const cartItems = this.readOnly ? plainToClass(CartItem, get(cartInfo, 'LineItems')): get(cartInfo, 'LineItems'); 
+          const businessObjectType = get(cartInfo, 'BusinessObjectType');
+          const proposalId = get(cartInfo, 'Proposald');
+          const orderId = get(cartInfo, 'Order');
+          if (isEqual(businessObjectType, 'Proposal') && isNil(proposalId)) {
+            set(cartInfo, 'Proposald', businessObjectInfo);
+          } else if (isNil(orderId)) {
+            set(cartInfo, 'Order', businessObjectInfo);
+          }
+          const cartItems = this.readOnly ? plainToClass(CartItem, get(cartInfo, 'LineItems')): get(cartInfo, 'LineItems'); // plainToClass is added as the pricing, which internally does the operation, is not performed for nonactive carts
           return of({
             cart: cartInfo,
-            lineItems: LineItemService.groupItems(cartItems as unknown as Array<CartItem>),
+            lineItems: LineItemService.groupItems(cartItems),
             orderOrQuote: isNil(get(cartInfo, 'Order')) ? get(cartInfo, 'Proposald') : get(cartInfo, 'Order'),
             productList: productsInfo
           } as ManageCartState);
