@@ -444,7 +444,8 @@
         "GUEST_WELCOME_MESSAGE": "es_MX Hello, sign in!",
         "PAGES":"es_MX Pages",
         "ADD_PRODUCTS": "es_MX Add Products",
-        "REPLACE":"es_MX Replace",
+        "REPLACE":"es_MX Replace Product",
+        "ACTION":"es_MX Action",
         "ATTACHMENT_DETAILS": {
             "TITLE": "es_MX Attach new file(s)",
             "INPUT_LABEL": "es_MX Drop files to Attach or",
@@ -573,7 +574,7 @@
         "PRODUCT_FAMILY_MESSAGE": "es_MX Product family <strong>{{productFamily}}</strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
         "OPTIONS": "es_MX option(s)",
         "PRODUCT_OPTION_GROUP_MESSAGE": "es_MX Product Option Group <strong></strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
-        "REPLACEMENT_RULE_HEADING":"es_MX Constraint Rule Message",
+        "REPLACEMENT_RULE_HEADING":"es_MX Replacement products available",
         "STATUS_MSG":"es_MX To be replaced"
     },
     "CONSTRAINT_SIDE_MENU": {

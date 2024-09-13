@@ -440,7 +440,8 @@
         "GUEST_WELCOME_MESSAGE": "fr_FR Hello, sign in!",
         "PAGES":"fr_FR Pages",
         "ADD_PRODUCTS": "fr_FR Add Products",
-        "REPLACE":"fr_FR Replace",
+        "REPLACE":"fr_FR Replace Product",
+        "ACTION":"fr_FR Action",
         "ATTACHMENT_DETAILS": {
             "TITLE": "fr_FR Attach new file(s)",
             "INPUT_LABEL": "fr_FR Drop files to Attach or",
@@ -568,7 +569,7 @@
         "PRODUCT_FAMILY_MESSAGE": "fr_FR Product family <strong>{{productFamily}}</strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
         "OPTIONS": "fr_FR option(s)",
         "PRODUCT_OPTION_GROUP_MESSAGE": "fr_FR Product Option Group <strong></strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
-        "REPLACEMENT_RULE_HEADING":"fr_FR Constraint Rule Message",
+        "REPLACEMENT_RULE_HEADING":"fr_FR Replacement products available",
         "STATUS_MSG":"fr_FR To be replaced"
     },
     "CONSTRAINT_SIDE_MENU": {
