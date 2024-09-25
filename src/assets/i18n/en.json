@@ -44,7 +44,7 @@
         "FAVORITE": {
             "ADD_FAVORITE_TO_CART_FAILED": "Adding items to favorite failed.",
             "CREATION_FAILED_TITLE": "Favorite creation failed",
-            "TRY_AGAIN_MSG":"Your favorite {{name}} could not be created. Please try again."
+            "TRY_AGAIN_MSG": "Your favorite {{name}} could not be created. Please try again."
         },
         "INVALID_GUEST_MESSAGE": "You need to login to continue to this store. Redirecting to login screen…",
         "GENERATE_DOCUMENT_ERROR": "Document generation has failed"
@@ -59,7 +59,7 @@
             "DELETED": "Successfully deleted",
             "NEW_CART_CREATED": "New cart created successfully",
             "ACTIVATED": "Cart activated successfully",
-            "VIEW_UPDATED":"View updated successfully",
+            "VIEW_UPDATED": "View updated successfully",
             "LINE_ITEM_CLONE": "Cloning of selected line item(s) is successful",
             "BULK_ADD": "{{data}} item(s) added successfully.",
             "BULK_DELETE": "{{data}} item(s) deleted successfully.",
@@ -112,8 +112,8 @@
         "CHANGECONFIGURATION_END_DATE": "Configuration End Date"
     },
     "COMPARE": {
-      "NO_COMPARABLE_FEATURE": "{{products }} does not have comparable features to the selected products",
-      "OTHER_FEATURES": "Other Features"
+        "NO_COMPARABLE_FEATURE": "{{products }} does not have comparable features to the selected products",
+        "OTHER_FEATURES": "Other Features"
     },
     "MY_ACCOUNT": {
         "LAST_LOGIN_DATE": "Last Login Date",
@@ -264,7 +264,7 @@
         "SORT_BY": "Sort By",
         "SORT_BY_RELEVANCE": "Relevance",
         "YOUR_SEARCH": "Your search \t",
-        "NO_MATCH":"did not match any products",
+        "NO_MATCH": "did not match any products",
         "NO_RESULT": "There are no products to display",
         "SUGGESTIONS": "Suggestions",
         "SUGGESTIONS_1": "Make sure that all words are spelled correctly",
@@ -291,13 +291,13 @@
     },
     "COMMON": {
         "SELECT_ALL": "Select All",
-        "ACTIVATE_CART":"Activate Cart",
+        "ACTIVATE_CART": "Activate Cart",
         "PLACE_QUOTE": "Place Quote",
-        "PENDING_OPERATIONS":"Operations are pending on your cart",
-        "REVALIDATING_CART":"Cart is being revalidated",
-        "PRICING_CART":"Cart is being priced",
+        "PENDING_OPERATIONS": "Operations are pending on your cart",
+        "REVALIDATING_CART": "Cart is being revalidated",
+        "PRICING_CART": "Cart is being priced",
         "ADD": "Add",
-        "NO_ITEMS_FOUND":"No lineitems to display",
+        "NO_ITEMS_FOUND": "No lineitems to display",
         "REMOVE": "Remove",
         "LAST_WEEK": "Last week",
         "INCLUDED": "Included",
@@ -322,14 +322,15 @@
         "QUICKADD": "Quick-Add",
         "CART_TOTALS": "Cart Totals",
         "ADD_PRODUCT": "Add Product",
+        "NO_PRODUCT": "No product found",
         "TOTAL_AMOUNT": "Total Amount",
         "STATUS": "Status",
         "NAME": "Name",
         "DELETE": "Delete",
         "EDIT": "Edit",
         "CANCEL": "Cancel",
-        "DEFAULT_VIEW":"Default View",
-        "MY_VIEW":"My View",
+        "DEFAULT_VIEW": "Default View",
+        "MY_VIEW": "My View",
         "UPDATE": "Update",
         "SAVE": "Save",
         "USERNAME": "Username",
@@ -423,10 +424,10 @@
         "PRICE_ERROR": "Pricing of your cart has failed, please proceed with either of the following.",
         "PRICE_PROGRESS": "Pricing of your cart is taking more time than expected.",
         "PRICE_TAKINGTIME": "Pricing of your cart is taking more time than expected.",
-        "RETRY":"Retry",
-        "CHECK_STATUS":"Check status",
-        "ABANDON":"Abandon",
-        "ABANDON_CART":"Abandon cart",
+        "RETRY": "Retry",
+        "CHECK_STATUS": "Check status",
+        "ABANDON": "Abandon",
+        "ABANDON_CART": "Abandon cart",
         "FAVORITES": "Favorites",
         "INSTALLED_PRODUCTS": "Installed Products",
         "SELECTIONS": "Selections",
@@ -435,7 +436,7 @@
         "SAVE_FAVORITE": "Save as favorite",
         "CLONE": "Clone",
         "CONTINUE": "Continue",
-        "CREATE_NEW_CART":"Create new cart",
+        "CREATE_NEW_CART": "Create new cart",
         "SELECT_ACTION": "Select action",
         "CONFIRM": "Confirm",
         "EDIT_LAYOUT": "Edit Layout",
@@ -452,34 +453,34 @@
         "MY_CARTS": "My Carts",
         "WELCOME_MESSAGE": "Hello, {{userName}}!",
         "GUEST_WELCOME_MESSAGE": "Hello, sign in!",
-        "PAGES":"Pages",
+        "PAGES": "Pages",
         "ADD_PRODUCTS": "Add Products",
-        "REPLACE":"Replace Product",
-        "ACTION":"Action",
+        "REPLACE": "Replace Product",
+        "ACTION": "Action",
         "ATTACHMENT_DETAILS": {
             "TITLE": "Attach new file(s)",
             "INPUT_LABEL": "Drop files to Attach or",
             "BROWSE": "browse",
             "FILE_SIZE_EXCEEDED_ERROR": "Size exceeds 28MB",
-            "UNSUPPORTED_FILE_TYPE_ERROR":"Unsupported file type. [Supported file types are {{supportedFileTypes}}]",
-            "SUPPORTED_FILE_TYPES":"Supported file types are {{supportedFileTypes}}",
+            "UNSUPPORTED_FILE_TYPE_ERROR": "Unsupported file type. [Supported file types are {{supportedFileTypes}}]",
+            "SUPPORTED_FILE_TYPES": "Supported file types are {{supportedFileTypes}}",
             "NO_ATTACHMENTS": "No attachments have been added yet",
             "REMOVE_ATTACHMENT": "Remove Attachment",
             "BY": "by",
             "MAKE_VISIBILITY_PRIVATE": "Make visibility private",
             "INVALID_FILE": "Invalid file extension"
         },
-        "ALT_TEXT_IMAGE":"Generic placeholder image",
+        "ALT_TEXT_IMAGE": "Generic placeholder image",
         "NO_LINE_ITEMS_MESSAGE": "No line items yet on this {{record}}",
-        "PROCESSING_TITLE":"Please wait",
-        "PROCESSING_MESSAGE":"Your request is being processed.....",
-        "TABLE_ACTION_CONFIRMATION_MESSAGE":"Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
+        "PROCESSING_TITLE": "Please wait",
+        "PROCESSING_MESSAGE": "Your request is being processed.....",
+        "TABLE_ACTION_CONFIRMATION_MESSAGE": "Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
         "NO_MATCHING_ORDERS_FOUND": "No matching orders found",
         "NO_MATCHING_QUOTES_FOUND": "No matching quotes found"
     },
-    "ASSET_ACTIONS":{
-        "AMEND":"Amend",
-        "BUY_ANOTHER":"Buy Another",
+    "ASSET_ACTIONS": {
+        "AMEND": "Amend",
+        "BUY_ANOTHER": "Buy Another",
         "RENEW": "Renew",
         "BUY_MORE": "Buy More",
         "TERMINATE": "Terminate",
@@ -527,14 +528,14 @@
         "ASSET_NET_UNIT_PRICE": "Asset Net Unit Price",
         "ASSET_TERM": "Asset Term",
         "ADDITIONAL_QUANTITY": "Additional Quantity",
-        "Quantity":"Quantity",
+        "Quantity": "Quantity",
         "UPDATED_QUANTITY": "Updated Quantity",
         "RENEW_SUCCESS": "The asset renewal has been added to your cart."
     },
     "ASSET_LIST": {
-        "ASSET_NAME":"Asset Name",
-        "ASSET_AMOUNTS_BY_PRICE_TYPE" :"Asset amounts by price type",
-        "ASSETS_BY_PRICE_TYPE" :"Assets by price type",
+        "ASSET_NAME": "Asset Name",
+        "ASSET_AMOUNTS_BY_PRICE_TYPE": "Asset amounts by price type",
+        "ASSETS_BY_PRICE_TYPE": "Assets by price type",
         "SELECTED_ASSETS": "Selected Assets",
         "CHARGE_TYPE": "Charge Type",
         "PRICE_TYPE": "Price Type",
@@ -588,8 +589,8 @@
         "PRODUCT_FAMILY_MESSAGE": "Product family <strong>{{productFamily}}</strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
         "OPTIONS": "option(s)",
         "PRODUCT_OPTION_GROUP_MESSAGE": "Product Option Group <strong></strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
-        "REPLACEMENT_RULE_HEADING":"Replacement products available",
-        "STATUS_MSG":"To be replaced"
+        "REPLACEMENT_RULE_HEADING": "Replacement products available",
+        "STATUS_MSG": "To be replaced"
     },
     "CONSTRAINT_SIDE_MENU": {
         "VALIDATION_MESSAGES": "Validation Messages",
@@ -787,9 +788,9 @@
         "PROMOTION_AMOUNT": "Promotion Amount",
         "PROMOTION_APPLIED": "Following promotions are applied with the product",
         "PROMOTION_APPLIED_TO": "Promotions Applied",
-        "APPLY_PROMOTION":"Apply Promotion",
+        "APPLY_PROMOTION": "Apply Promotion",
         "APPLIED_PROMOTIONS": "Applied Promotions",
-        "PROMOTIONS":"Promotions",
+        "PROMOTIONS": "Promotions",
         "TOTAL_PROMOTION_AMOUNT": "Total Promotion Amount",
         "PROMOTION_APPLIEDTO": "Promotions Applied To",
         "APPLIED_PROMOTION": "applied to the following items in the cart.",
@@ -809,7 +810,7 @@
         "WRONG_CREDENTIALS": "Please check your username and password. If you still can't log in, contact your administrator."
     },
     "PRODUCT_DETAILS": {
-        "IS_OPTIONAL":"Is Optional",
+        "IS_OPTIONAL": "Is Optional",
         "PRODUCT_DETAIL": "Product Details",
         "PRODUCT_CODE": "Product ID: {{value}}",
         "STANDARD_PRICE": "Standard Price",
@@ -979,13 +980,13 @@
         "PRESENT": "Present"
     },
     "TABLE": {
-        "ROWS_PER_PAGE":"Rows per page",
+        "ROWS_PER_PAGE": "Rows per page",
         "SEARCH": "Search",
         "SELECTED": "Selected",
         "OF": "of",
         "PER_PAGE": "per page",
         "NO_DATA_TO_DISPLAY": "No records found",
-        "NO_FILTERS_MATCHED":"No records match the filter criteria applied"
+        "NO_FILTERS_MATCHED": "No records match the filter criteria applied"
     },
     "AOBJECTS": {
         "PROPOSALS": "Proposals",
@@ -1006,6 +1007,18 @@
             "ENTER_FAVORITE_NAME": "Enter favorite name...",
             "ADD_TO_EXISTING": "Add to existing"
         }
+    },
+    "QUICK_ADD": {
+        "BULK_UPLOAD": "Bulk Upload Products",
+        "BULK_UPLOAD_TOOLTIP": "Bulk upload will clear the items added in the above list",
+        "UPLOAD_CSV": "Upload CSV",
+        "DRAG_DROP_LABEL": "or Drag and drop your CSV file here",
+        "NEED_TEMPLATE": "Need a template?",
+        "DOWNLOAD_TEMPLATE": "Download CSV template",
+        "TEMPLATE_INSTRUCTION": "to fill in the required product details and upload it here.",
+        "INVALID_FILE_TYPE": "Invalid file type. Please upload a CSV file",
+        "FAILED_TO_READ": "Error reading file",
+        "FAILED_TO_PARSE": "Failed to parse the CSV file or file is empty"
     },
     "CUSTOM_LABELS": {
         "ORDER_NUMBER": "Order Number",
