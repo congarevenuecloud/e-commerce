@@ -314,6 +314,7 @@
         "QUICKADD": "fr_FR Quick-Add",
         "CART_TOTALS": "fr_FR Cart Totals",
         "ADD_PRODUCT": "fr_FR Add Product",
+        "NO_PRODUCT": "fr_FR No product found",
         "CARTS": "fr_FR Carts",
         "ADDRESS_BOOK": "fr_FR Address Book",
         "AMOUNT": "fr_FR Amount",
@@ -411,9 +412,9 @@
         "PRICE_PROGRESS": "fr_FR Pricing of your cart is taking more time than expected",
         "PRICE_TAKINGTIME": "fr_FR Pricing of your cart is taking more time than expected.",
         "RETRY": "fr_FR Retry",
-        "CHECK_STATUS":"fr_FR Check status",
+        "CHECK_STATUS": "fr_FR Check status",
         "ABANDON": "fr_FR Abandon",
-        "ABANDON_CART":"fr_FR Abandon cart",
+        "ABANDON_CART": "fr_FR Abandon cart",
         "FAVORITES": "fr_FR Favorites",
         "INSTALLED_PRODUCTS": "fr_FR Installed Products",
         "SELECTIONS": "fr_FR Selections",
@@ -422,7 +423,7 @@
         "SAVE_FAVORITE": "fr_FR Save as favorite",
         "CLONE": "fr_FR Clone",
         "CONTINUE": "fr_FR Continue",
-        "CREATE_NEW_CART":"fr_FR Create new cart",
+        "CREATE_NEW_CART": "fr_FR Create new cart",
         "SELECT_ACTION": "fr_FR Select action",
         "CONFIRM": "fr_FR Confirm",
         "EDIT_LAYOUT": "fr_FR Edit Layout",
@@ -438,17 +439,17 @@
         "MY_CARTS": "fr_FR My Carts",
         "WELCOME_MESSAGE": "fr_FR Hello, {{userName}}!",
         "GUEST_WELCOME_MESSAGE": "fr_FR Hello, sign in!",
-        "PAGES":"fr_FR Pages",
+        "PAGES": "fr_FR Pages",
         "ADD_PRODUCTS": "fr_FR Add Products",
-        "REPLACE":"fr_FR Replace Product",
-        "ACTION":"fr_FR Action",
+        "REPLACE": "fr_FR Replace Product",
+        "ACTION": "fr_FR Action",
         "ATTACHMENT_DETAILS": {
             "TITLE": "fr_FR Attach new file(s)",
             "INPUT_LABEL": "fr_FR Drop files to Attach or",
             "BROWSE": "fr_FR browse",
             "FILE_SIZE_EXCEEDED_ERROR": "fr_FR Size exceeds 28MB",
-            "UNSUPPORTED_FILE_TYPE_ERROR":"fr_FR Unsupported file type. [Supported file types are {{supportedFileTypes}}]",
-            "SUPPORTED_FILE_TYPES":"fr_FR Supported file types are {{supportedFileTypes}}",
+            "UNSUPPORTED_FILE_TYPE_ERROR": "fr_FR Unsupported file type. [Supported file types are {{supportedFileTypes}}]",
+            "SUPPORTED_FILE_TYPES": "fr_FR Supported file types are {{supportedFileTypes}}",
             "NO_ATTACHMENTS": "fr_FR No attachments have been added yet",
             "REMOVE_ATTACHMENT": "fr_FR Remove Attachment",
             "BY": "fr_FR by",
@@ -462,9 +463,9 @@
         "NO_MATCHING_ORDERS_FOUND": "fr_FR No matching orders found",
         "NO_MATCHING_QUOTES_FOUND": "fr_FR No matching quotes found"
     },
-    "ASSET_ACTIONS":{
-        "AMEND":"fr_FR Amend",
-        "BUY_ANOTHER":"fr_FR Buy Another",
+    "ASSET_ACTIONS": {
+        "AMEND": "fr_FR Amend",
+        "BUY_ANOTHER": "fr_FR Buy Another",
         "RENEW": "fr_FR Renew",
         "BUY_MORE": "fr_FR Buy More",
         "TERMINATE": "fr_FR Terminate",
@@ -511,14 +512,14 @@
     "BUYMORE": {
         "TERM": "fr_FR Term",
         "ADDITIONAL_QUANTITY": "fr_FR Additional Quantity",
-        "Quantity":"fr_FR Quantity",
+        "Quantity": "fr_FR Quantity",
         "UPDATED_QUANTITY": "fr_FR Updated Quantity",
         "RENEW_SUCCESS": "fr_FR The asset renewal has been added to your cart."
     },
     "ASSET_LIST": {
-        "ASSET_NAME":"fr_FR Asset Name",
-        "ASSET_AMOUNTS_BY_PRICE_TYPE" :"fr_FR Asset amounts by price type",
-        "ASSETS_BY_PRICE_TYPE" :"fr_FR Assets by price type",
+        "ASSET_NAME": "fr_FR Asset Name",
+        "ASSET_AMOUNTS_BY_PRICE_TYPE": "fr_FR Asset amounts by price type",
+        "ASSETS_BY_PRICE_TYPE": "fr_FR Assets by price type",
         "SELECTED_ASSETS": "fr_FR Selected Assets",
         "CHARGE_TYPE": "fr_FR Charge Type",
         "PRICE_TYPE": "fr_FR Price Type",
@@ -569,8 +570,8 @@
         "PRODUCT_FAMILY_MESSAGE": "fr_FR Product family <strong>{{productFamily}}</strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
         "OPTIONS": "fr_FR option(s)",
         "PRODUCT_OPTION_GROUP_MESSAGE": "fr_FR Product Option Group <strong></strong> option(s) <span>{{message}}</span> <strong>{{productName}}</strong>",
-        "REPLACEMENT_RULE_HEADING":"fr_FR Replacement products available",
-        "STATUS_MSG":"fr_FR To be replaced"
+        "REPLACEMENT_RULE_HEADING": "fr_FR Replacement products available",
+        "STATUS_MSG": "fr_FR To be replaced"
     },
     "CONSTRAINT_SIDE_MENU": {
         "VALIDATION_MESSAGES": "fr_FR Validation Messages",
@@ -947,13 +948,13 @@
         "PRESENT": "fr_FR Present"
     },
     "TABLE": {
-        "ROWS_PER_PAGE":"fr_FR Rows per page",
+        "ROWS_PER_PAGE": "fr_FR Rows per page",
         "SEARCH": "fr_FR Search",
         "SELECTED": "fr_FR Selected",
         "OF": "fr_FR of",
         "PER_PAGE": "fr_FR per page",
         "NO_DATA_TO_DISPLAY": "fr_FR No records found",
-        "NO_FILTERS_MATCHED":"fr_FR No records match the filter criteria applied"
+        "NO_FILTERS_MATCHED": "fr_FR No records match the filter criteria applied"
     },
     "AOBJECTS": {
         "PROPOSALS": "fr_FR Proposals",
@@ -974,6 +975,18 @@
             "ENTER_FAVORITE_NAME": "fr_FR Enter favorite name...",
             "ADD_TO_EXISTING": "fr_FR Add to existing"
         }
+    },
+    "QUICK_ADD": {
+        "BULK_UPLOAD": "fr_FR Bulk Upload Products",
+        "BULK_UPLOAD_TOOLTIP": "fr_FR Bulk upload will clear the items added in the above list",
+        "UPLOAD_CSV": "fr_FR Upload CSV",
+        "DRAG_DROP_LABEL": "fr_FR or Drag and drop your CSV file here",
+        "NEED_TEMPLATE": "fr_FR Need a template?",
+        "DOWNLOAD_TEMPLATE": "fr_FR Download CSV template",
+        "TEMPLATE_INSTRUCTION": "fr_FR to fill in the required product details and upload it here.",
+        "INVALID_FILE_TYPE": "fr_FR Invalid file type. Please upload a CSV file",
+        "FAILED_TO_READ": "fr_FR Error reading file",
+        "FAILED_TO_PARSE": "fr_FR Failed to parse the CSV file or file is empty"
     },
     "CUSTOM_LABELS": {
         "ORDER_NUMBER": "fr_FR Order Number",
