@@ -164,7 +164,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
       filterOperator: FilterOperator.NOT_EQUAL
     },
     'Buy More': [],
-    'Change Configuration': [ 
+    'Change Configuration': [
       {
         field: 'AssetStatus',
         value: 'Cancelled',
