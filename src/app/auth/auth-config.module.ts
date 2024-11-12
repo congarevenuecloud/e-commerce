@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClient, HTTP_INTERCEPTORS, HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 import { AbstractSecurityStorage, AuthInterceptor, AuthModule, OpenIdConfiguration, StsConfigHttpLoader, StsConfigLoader } from 'angular-auth-oidc-client';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -14,7 +14,7 @@ export const httpLoaderFactory = () => {
   const authOptions$: Observable<OpenIdConfiguration> = config$.pipe(
     map((authOptions: AuthOptions) => {
       let redirectUri = window.location.origin + window.location.pathname;
-      if(redirectUri.endsWith('/')) {
+      if (redirectUri.endsWith('/')) {
         redirectUri = redirectUri.slice(0, -1);
       }
       return {
@@ -55,6 +55,24 @@ export const httpLoaderFactory = () => {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: class implements HttpInterceptor {
+        intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+          // Exclude Authorization header for /assets/i18n/ requests.
+          if (request.url.includes('/assets/i18n/')) {
+            // Clone the request without the Authorization header.
+            const clonedRequest = request.clone({
+              setHeaders: { Authorization: '' }
+            });
+            return next.handle(clonedRequest);
+          }
+          // Otherwise, pass the request through unchanged.
+          return next.handle(request);
+        }
+      },
       multi: true
     }, AuthorizationGuard
   ],

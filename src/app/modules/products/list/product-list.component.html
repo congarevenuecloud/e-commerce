@@ -48,22 +48,24 @@
             </nav>
 
             <!-- For large screens -->
-            <div class="d-lg-flex d-md-none d-sm-none d-none justify-content-center position-relative"
+            <div class="row d-lg-flex d-md-none d-sm-none d-none justify-content-center position-relative"
               *ngIf="data?.TotalCount > 0">
-              <span class="d-lg-flex d-md-none d-sm-none d-none">
+              <div class="col-12 d-lg-flex d-md-none d-sm-none d-none">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
                   [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="5"
                   [firstText]="paginationButtonLabels.first" [previousText]="paginationButtonLabels.previous"
                   [responsive]="'true'" [nextText]="paginationButtonLabels.next"
                   [lastText]="paginationButtonLabels.last">
                 </pagination>
-              </span>
-
-              <div class="d-none d-sm-none d-md-none d-lg-flex position-absolute mt-1 col-12 flex-row-reverse px-1">
-                  <apt-select-all class="justify-content-end"[items]="data.Products"></apt-select-all>
-                  <label class = "pr-2 mt-1 pb-0 mb-0  align-items-center d-flex" *ngIf="selectedCount > 0">
-                     <span [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'" [translateParams] = "{selectedCount: selectedCount, totalCount: data?.TotalCount | digitFormatter}"></span>
-                  </label>
+              </div>
+            
+              <div class="col-12 d-lg-flex justify-content-start mb-3">
+                <apt-select-all [items]="data.Products"></apt-select-all>
+                <label class="pl-2 mt-1 pb-0 mb-0 align-items-center d-flex" *ngIf="selectedCount > 0">&#124;
+                  <span class="pl-1" [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'"
+                    [translateParams]="{selectedCount: selectedCount, totalCount: data?.TotalCount | digitFormatter}">
+                  </span>
+                </label>
               </div>
             </div>
 
@@ -83,7 +85,7 @@
 
               <span class="d-block d-md-none d-flex justify-content-center">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
-                  [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="0"
+                  [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="1"
                   [firstText]="paginationButtonLabels.first" [previousText]="paginationButtonLabels.previous"
                   [responsive]="'true'" [nextText]="paginationButtonLabels.next"
                   [lastText]="paginationButtonLabels.last">
@@ -92,8 +94,8 @@
               <div class="select-all d-block d-sm-block d-lg-none d-md-block mb-4 pl-3 position-relative">
                 <div class="row">
                   <apt-select-all class="justify-content-end"[items]="data.Products"></apt-select-all>
-                  <label class = "pl-2 mt-1 pb-0 mb-0 align-items-center d-flex " *ngIf="selectedCount > 0">
-                     <span [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'" [translateParams] = "{selectedCount: selectedCount, totalCount: data?.TotalCount}"></span>
+                  <label class = "pl-2 mt-1 pb-0 mb-0 align-items-center d-flex " *ngIf="selectedCount > 0">&#124;
+                     <span class="pl-1" [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'" [translateParams] = "{selectedCount: selectedCount, totalCount: data?.TotalCount}"></span>
                   </label>
                 </div>
                 
@@ -140,7 +142,7 @@
               <!-- For medium and small screens -->
               <span class="d-block d-md-none d-flex justify-content-center">
                 <pagination (pageChanged)="onPage($event)" [totalItems]="data?.TotalCount" [(ngModel)]="page"
-                  [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="0"
+                  [boundaryLinks]="true" [itemsPerPage]="pageSize" [maxSize]="1"
                   [firstText]="paginationButtonLabels.first" [previousText]="paginationButtonLabels.previous"
                   [responsive]="'true'" [nextText]="paginationButtonLabels.next"
                   [lastText]="paginationButtonLabels.last">

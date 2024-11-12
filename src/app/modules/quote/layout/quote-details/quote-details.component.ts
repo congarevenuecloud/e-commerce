@@ -1,17 +1,16 @@
-import { Component, OnInit, ViewChild, TemplateRef, NgZone, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, ViewEncapsulation, ElementRef, Inject, Renderer2 } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, NgZone, ChangeDetectorRef, OnDestroy, ViewEncapsulation, ElementRef, Inject, Renderer2 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { filter, map, take, mergeMap, switchMap, startWith, tap } from 'rxjs/operators';
-import { get, set, compact, uniq, find, cloneDeep, sum, defaultTo, first, map as _map, isEmpty } from 'lodash';
+import { filter, map, take, switchMap } from 'rxjs/operators';
+import { get, set, find, defaultTo, first, map as _map, isEmpty } from 'lodash';
 import { Observable, of, BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import { ApiService } from '@congarevenuecloud/core';
 import {
-  UserService, QuoteService, Quote, Order, OrderService, Note, NoteService, AttachmentService,
-  AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService, QuoteLineItemService, Account, AccountService, Contact, ContactService, LineItem, QuoteLineItem,
+  UserService, QuoteService, Quote, Order, OrderService, Note, AttachmentService,
+  AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService, AccountService, Contact, ContactService,
   CartService, Cart
 } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, LookupOptions, RevalidateCartService, ToasterPosition } from '@congarevenuecloud/elements';
+import { ExceptionService, LookupOptions, ToasterPosition } from '@congarevenuecloud/elements';
 import { DOCUMENT } from '@angular/common';
 @Component({
   selector: 'app-quote-details',
@@ -100,7 +99,6 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   constructor(private activatedRoute: ActivatedRoute,
     private quoteService: QuoteService,
-    private noteService: NoteService,
     private exceptionService: ExceptionService,
     private modalService: BsModalService,
     private orderService: OrderService,
@@ -110,12 +108,9 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
     private userService: UserService,
-    private apiService: ApiService,
-    private quoteLineItemService: QuoteLineItemService,
     private accountService: AccountService,
     private contactService: ContactService,
     private router: Router,
-    private revalidateCartService: RevalidateCartService,
     private cartService: CartService,
     @Inject(DOCUMENT) private document: Document,
     private renderer: Renderer2) { }
@@ -158,10 +153,12 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   // TO DO:: output field need to handle update of buisnessObject
   refreshQuote(fieldValue, quote, fieldName) {
     set(quote, fieldName, fieldValue);
+    const quoteItems = get(quote, 'Items');
     const payload = quote.strip(['Owner', 'Items', 'TotalCount', 'ResponseStatus']);
     this.quoteSubscription.push(this.quoteService.updateQuote(quote.Id, payload).pipe(switchMap(c => this.updateQuoteValue(c))).subscribe(r => {
       this.quote = r;
-    }))
+      set(this.quote, 'Items', quoteItems);
+    }));
   }
 
   updateQuoteValue(quote): Observable<Quote> {

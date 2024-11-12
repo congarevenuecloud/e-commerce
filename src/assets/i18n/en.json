@@ -457,6 +457,7 @@
         "ADD_PRODUCTS": "Add Products",
         "REPLACE": "Replace Product",
         "ACTION": "Action",
+        "MANAGE_VIEW":"Manage View",
         "ATTACHMENT_DETAILS": {
             "TITLE": "Attach new file(s)",
             "INPUT_LABEL": "Drop files to Attach or",

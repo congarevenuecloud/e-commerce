@@ -1,13 +1,13 @@
-import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy, NgZone, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
-import { Cart, CartItem, CartService, Product, ConstraintRuleService, CartItemService, ItemGroup, LineItemService, OrderLineItem, QuoteLineItem, QuoteService, Quote, Order, OrderService, ItemRequest } from '@congarevenuecloud/ecommerce';
+import { Component, OnInit, TemplateRef, ViewChild, NgZone, ViewEncapsulation } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { plainToClass } from 'class-transformer';
 import { Observable, combineLatest, of, Subscription, BehaviorSubject } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 import { get, filter, isNil, isEqual, set, isNull, forEach, lowerCase, pick } from 'lodash';
-import { ActivatedRoute, Router } from '@angular/router';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import { Cart, CartItem, CartService, ConstraintRuleService, ItemGroup, LineItemService, QuoteService, Quote, Order, OrderService, ItemRequest } from '@congarevenuecloud/ecommerce';
 import { BatchActionService, RevalidateCartService, ExceptionService, ButtonAction, BatchSelectionService } from '@congarevenuecloud/elements';
-import { BsModalService } from 'ngx-bootstrap/modal';
-import { plainToClass } from 'class-transformer';
 
 @Component({
   selector: 'app-manage-cart',
@@ -33,11 +33,12 @@ export class ManageCartComponent implements OnInit {
   readOnly: boolean = false;
   cart: Cart;
   disabled: boolean;
+  isCartFinalized: boolean = false;
   subscriptions: Array<Subscription> = new Array();
 
   searchText: string;
   cartName: string;
-  selectedCount:number = 0; 
+  selectedCount: number = 0;
   customButtonActions: Array<ButtonAction> = [
     {
       label: 'MY_ACCOUNT.CART_LIST.CLONE_CART',
@@ -47,7 +48,6 @@ export class ManageCartComponent implements OnInit {
   ]
   showSideNav: boolean = false;
   constructor(private cartService: CartService,
-    private cartItemService: CartItemService,
     private orderService: OrderService,
     private crService: ConstraintRuleService,
     private quoteService: QuoteService,
@@ -56,7 +56,6 @@ export class ManageCartComponent implements OnInit {
     private revalidateCartService: RevalidateCartService,
     private router: Router,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef,
     private modalService: BsModalService,
     private exceptionService: ExceptionService,
     public batchSelectionService: BatchSelectionService) { }
@@ -68,24 +67,25 @@ export class ManageCartComponent implements OnInit {
       this.cartService.isCartActive(get(this.activatedRoute.params, "_value.id")) ? of(null) : this.cartService.getCartWithId(get(this.activatedRoute.params, "_value.id")),
       this.revalidateCartService.revalidateFlag,
       this.batchSelectionService.getSelectedLineItems()]).pipe(
-        switchMap(([cart, products, nonactive, revalidateFlag, selectedCount]) => {
+        switchMap(([cart, products, nonActiveCart, revalidateFlag, selectedCount]) => {
           this.selectedCount = selectedCount?.length ? selectedCount.length : 0;
           this.disabled = revalidateFlag;
-          this.readOnly = get(cart, 'Id') === get(nonactive, 'Id') || isNull(nonactive) ? false : true;
+          this.readOnly = get(cart, 'Id') === get(nonActiveCart, 'Id') || isNull(nonActiveCart) ? false : true;
           if (this.readOnly) {
             this.batchActionService.setShowCloneAction(true);
           } else {
             this.batchActionService.setShowCloneAction(false);
           }
-          cart = this.readOnly ? nonactive : cart;
+          cart = this.readOnly ? nonActiveCart : cart;
+          this.isCartFinalized = get(cart, 'Status') === 'Finalized';
           this.cart = cart;
           this.primaryLI = filter((get(cart, 'LineItems')), (i) => i.IsPrimaryLine && i.LineType === 'Product/Service');
           const businessObjectId = get(cart, 'BusinessObjectId');
           const isProposal = isEqual(get(cart, 'BusinessObjectType'), 'Proposal');
           const businessObject = isProposal ? get(cart, 'Proposald') : get(cart, 'Order');
-          if (!isNil(businessObjectId) && isNil(businessObject)) {
+          if (this.isCartFinalized || (!isNil(businessObjectId) && isNil(businessObject))) {
             this.businessObject$ = isEqual(get(cart, 'BusinessObjectType'), 'Proposal') ?
-              this.quoteService.getQuoteById(get(cart, 'BusinessObjectId'), false) : this.orderService.getOrder(get(cart, 'BusinessObjectId'));
+              this.quoteService.getQuoteById(get(cart, 'BusinessObjectId'), false) : this.orderService.getOrder(get(cart, 'BusinessObjectId'), null);
           } else {
             this.businessObject$ = of(null);
           }
@@ -98,17 +98,22 @@ export class ManageCartComponent implements OnInit {
           const businessObjectType = get(cartInfo, 'BusinessObjectType');
           const proposalId = get(cartInfo, 'Proposald');
           const orderId = get(cartInfo, 'Order');
-          if (isEqual(businessObjectType, 'Proposal') && isNil(proposalId)) {
-            set(cartInfo, 'Proposald', businessObjectInfo);
-          } else if (isNil(orderId)) {
+          if (isEqual(businessObjectType, 'Proposal')) {
+            if (isNil(proposalId) || this.isCartFinalized) set(cartInfo, 'Proposald', businessObjectInfo);
+          }
+          else if (isNil(orderId) || this.isCartFinalized) {
             set(cartInfo, 'Order', businessObjectInfo);
           }
-          const cartItems = this.readOnly ? plainToClass(CartItem, get(cartInfo, 'LineItems')): get(cartInfo, 'LineItems'); // plainToClass is added as the pricing, which internally does the operation, is not performed for nonactive carts
+          const cartItems = this.readOnly ? plainToClass(CartItem, get(cartInfo, 'LineItems')) : get(cartInfo, 'LineItems'); // plainToClass is added as the pricing, which internally does the operation, is not performed for nonactive carts
           return of({
             cart: cartInfo,
             lineItems: LineItemService.groupItems(cartItems),
             orderOrQuote: isNil(get(cartInfo, 'Order')) ? get(cartInfo, 'Proposald') : get(cartInfo, 'Order'),
-            productList: productsInfo
+            productList: productsInfo,
+            headerInfo: Object.assign(new Cart(), {
+              Id: this.cart.Id,
+              Name: this.cart.Name
+            })
           } as ManageCartState);
         })
       ).subscribe(cartState => this.view$.next(cartState)))
@@ -125,7 +130,11 @@ export class ManageCartComponent implements OnInit {
     }
 
     this.subscriptions.push(this.cartService.updateCartById(cart.Id, payload).subscribe(r => {
-      this.cart = r;
+      if(!isNil(r)) this.cart = r;
+      this.view$.value.headerInfo = Object.assign(new Cart(), {
+        Id: this.cart.Id,
+        Name: this.cart.Name
+      });
     }))
   }
   createQuote(cart: Cart) {
@@ -221,4 +230,5 @@ export interface ManageCartState {
   cart: Cart;
   lineItems: Array<ItemGroup>;
   productList: Array<ItemRequest>;
+  headerInfo: Cart;
 }

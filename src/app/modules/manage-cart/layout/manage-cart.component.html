@@ -13,7 +13,7 @@
       <div class="detail-header pb-2">
         <div class="d-flex justify-content-between">
             <span class="m-0 d-flex cart-title">
-              <apt-output-field [record]="cart" field="Name" [valueOnly]="true" layout="inline"
+              <apt-output-field [record]="view?.headerInfo" field="Name" [valueOnly]="true" layout="inline"
                 (onChange)="refreshCart($event.Name, cart, 'Name')">
               </apt-output-field>
 
@@ -79,21 +79,17 @@
                 </div>
                 <div class="row header-section d-flex-justify-content-between">
                   <div class="flex-shrink-1 col-md-4 mb-2">
-                    <apt-output-field [labelClass]="'w-50'" [valueClass]="'w-50'" [record]="view?.cart" *ngIf="
-                    view?.cart.Status === 'Finalized' &&
-                        view?.cart.BusinessObjectType === 'Order'
-                      " [label]="'MY_ACCOUNT.CART_DETAIL.ASSOCIATED_TO' | translate"
-                      [routerLink]="['/orders/', cart.Order.Id]" field="BusinessObjectId" [showQuickView]="true"
-                      [editable]="false">
+                    <apt-output-field [labelClass]="'w-50'" [valueClass]="'w-50'" [record]="view?.cart?.Order"
+                      *ngIf="view?.cart.Status === 'Finalized' && view?.cart.BusinessObjectType === 'Order'"
+                      [label]="'MY_ACCOUNT.CART_DETAIL.ASSOCIATED_TO' | translate"
+                      field="Name" [showQuickView]="true" [editable]="false">
                     </apt-output-field>
                   </div>
                   <div class="flex-shrink-1 col-md-4 mb-2">
-                    <apt-output-field [labelClass]="'w-50'" [valueClass]="'w-50'" [record]="view?.cart" *ngIf="
-                        view?.cart.Status === 'Finalized' &&
-                        view?.cart.BusinessObjectType === 'Proposal'
-                      " [label]="'MY_ACCOUNT.CART_DETAIL.ASSOCIATED_TO' | translate"
-                      [routerLink]="['/proposals/', cart.BusinessObjectId]" field="BusinessObjectId"
-                      [showQuickView]="true" [editable]="false">
+                    <apt-output-field [labelClass]="'w-50'" [valueClass]="'w-50'" [record]="view?.cart?.Proposald"
+                      *ngIf="view?.cart.Status === 'Finalized' && view?.cart.BusinessObjectType === 'Proposal'"
+                      [label]="'MY_ACCOUNT.CART_DETAIL.ASSOCIATED_TO' | translate"
+                      field="Name" [showQuickView]="true" [editable]="false">
                     </apt-output-field>
                   </div>
                 </div>
