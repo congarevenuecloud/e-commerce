@@ -1,15 +1,14 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy, ChangeDetectorRef, AfterViewChecked, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest, of } from 'rxjs';
-import { filter, map, switchMap, mergeMap, startWith, take } from 'rxjs/operators';
-import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil, last } from 'lodash';
-import { ApiService } from '@congarevenuecloud/core';
+import { filter, map, switchMap, mergeMap, take } from 'rxjs/operators';
+import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil } from 'lodash';
 import {
-  Order, Quote, OrderLineItem, OrderService, UserService,
-  ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService, QuoteService, CartItem,
-  Contact, CartService, Cart, OrderLineItemService, Account, ContactService, AttachmentService, ProductInformationService, AttachmentDetails
+  Order, OrderLineItem, OrderService, UserService,
+  ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService, QuoteService,
+  Contact, Cart, ContactService, AttachmentService, ProductInformationService, AttachmentDetails
 } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, LookupOptions, RevalidateCartService } from '@congarevenuecloud/elements';
+import { ExceptionService, LookupOptions } from '@congarevenuecloud/elements';
 @Component({
   selector: 'app-order-detail',
   templateUrl: './order-detail.component.html',
@@ -110,8 +109,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     private contactService: ContactService,
     private attachmentService: AttachmentService,
     private quoteService: QuoteService,
-    private productInformationService: ProductInformationService,
-    private cartService: CartService
+    private productInformationService: ProductInformationService
   ) { }
 
   ngOnInit() {
@@ -140,7 +138,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
         filter(params => get(params, 'id') != null),
         map(params => get(params, 'id')),
         mergeMap(orderId => this.orderService.getOrder(orderId)),
-        switchMap((order: Order)=>{
+        switchMap((order: Order) => {
           return this.updateOrderValue(order)
         })
       );
@@ -158,7 +156,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       set(this.cartRecord, 'Id', get(get(first(this.orderLineItems$.value), 'MainLine.Configuration'), 'Id'));
       this.cartRecord.BusinessObjectType = 'Order';
       return of(order);
-    }),take(1)).subscribe(order => {
+    }), take(1)).subscribe(order => {
       this.updateOrder(order)
     });
     this.getAttachments();
@@ -166,6 +164,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
 
   refreshOrder(fieldValue, order, fieldName) {
     set(order, fieldName, fieldValue);
+    const orderItems = get(order, 'OrderLineItems');
     const payload: Order = {
       'PrimaryContact': order.PrimaryContact,
       'Description': order.Description,
@@ -173,6 +172,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       'BillToAccount': order.BillToAccount
     } as Order;
     this.subscriptions.push(this.orderService.updateOrder(order.Id, payload).pipe(switchMap(c => this.updateOrderValue(c))).subscribe(r => {
+      set(r, 'OrderLineItems', orderItems);
       this.updateOrder(r);
     }));
   }

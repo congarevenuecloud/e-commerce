@@ -45,16 +45,16 @@ import {AssetActionLabels} from '@congarevenuecloud/ecommerce';
           <li class="pt-1">
             <div class="custom-control custom-radio">
               <input
-                #changeConfiguration
+                #amend
                 type="radio"
-                id="changeConfiguration"
+                id="amend"
                 class="custom-control-input"
                 name="assetAction"
-                value="Change Configuration"
+                value="Amend"
                 (change)="handleChange($event)"
-                [checked]="value === 'Change Configuration'"
+                [checked]="value === 'Amend'"
               >
-              <label class="custom-control-label pt-1" for="changeConfiguration">
+              <label class="custom-control-label pt-1" for="amend">
                 {{labels?.amendLabel | translate}}
               </label>
             </div>

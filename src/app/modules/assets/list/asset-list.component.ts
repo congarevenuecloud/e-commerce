@@ -67,7 +67,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
   /**
    * Flag to check if enableOneTime is true or false
    */
-  enableOneTime:boolean;
+  enableOneTime:boolean=false;
   
   /**
    * cart record
@@ -112,22 +112,6 @@ export class AssetListComponent implements OnInit, OnDestroy {
   };
 
   /**
-   * Default filters that will be applied to the table and chart components.
-   */
-  defaultFilters: Array<FieldFilter> = [
-    {
-      field: 'LineType',
-      value: 'Option',
-      filterOperator: FilterOperator.NOT_EQUAL
-    },
-    {
-      field: 'IsPrimaryLine',
-      value: true,
-      filterOperator: FilterOperator.EQUAL
-    }
-  ];
-
-  /**
    * Flag to pre-select items in the table component.
    */
   preselectItemsInGroups: boolean = false;
@@ -153,27 +137,38 @@ export class AssetListComponent implements OnInit, OnDestroy {
    */
   private assetActionMap = {
     'All': [],
-    'Renew': {
-      field: 'PriceType',
-      value: 'One Time',
-      filterOperator: FilterOperator.NOT_EQUAL
-    },
-    'Terminate': {
-      field: 'PriceType',
-      value: 'One Time',
-      filterOperator: FilterOperator.NOT_EQUAL
-    },
-    'Buy More': [],
-    'Change Configuration': [
+    'Renew': this.createAssetActionFilters(),
+    'Terminate': this.createAssetActionFilters(),
+    'Buy More': this.createAssetActionFilters(),
+    'Amend': this.createChangeConfigFilters()
+  };
+  
+  private createAssetActionFilters() { //Added the filter to ensure the asset meets the specified criteria.
+    return [
+      {
+        field: 'PriceType',
+        value: 'One Time',
+        filterOperator: FilterOperator.NOT_EQUAL
+      },
+      {
+        field: 'AssetStatus',
+        value: 'Activated',
+        filterOperator: FilterOperator.EQUAL
+      }
+    ]
+  };
+  
+  private createChangeConfigFilters() { //Added the filter to ensure the asset meets the specified criteria.
+    return [
       {
         field: 'AssetStatus',
         value: 'Cancelled',
         filterOperator: FilterOperator.NOT_EQUAL
       },
       {
-        field: 'PriceType',
-        value: 'One Time',
-        filterOperator: FilterOperator.NOT_EQUAL
+        field: 'AssetStatus',
+        value: 'Activated',
+        filterOperator: FilterOperator.EQUAL
       },
       {
         field: 'HasAttributes',
@@ -247,7 +242,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
               filters: this.getFilters(),
               defaultSort: {
                 column: 'CreatedDate',
-                direction: 'ASC'
+                direction: 'DESC'
               },
               stickyColumnCount: 1,
               stickyColumns: [{
@@ -256,9 +251,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
                 showPopover: true
               }],
               columns: [
-                {
-                  prop: 'Name'
-                },
+                { prop: 'Name' },
                 { prop: 'SellingFrequency' },
                 { prop: 'StartDate' },
                 { prop: 'EndDate' },
@@ -317,6 +310,12 @@ export class AssetListComponent implements OnInit, OnDestroy {
   onAssetActionChange(event: string) {
     this.assetAction = event;
     this.assetActionFilter = this.assetActionMap[event];
+    let priceTypeFilter: FieldFilter={ // filter will be applied when enableonetime flag is false
+      field: 'PriceType',
+      value: 'One Time',
+      filterOperator: FilterOperator.NOT_EQUAL
+    }
+    if(event==='Amend' && !this.enableOneTime) this.assetActionFilter.push(priceTypeFilter);
     this.loadView();
   }
 
@@ -325,7 +324,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
    */
   private getFilters() {
     return concat(
-      this.defaultFilters,
+      this.assetService.getAssetFilters(),
       this.advancedFilters,
       this.renewFilter,
       this.priceTypeFilter,
@@ -357,10 +356,10 @@ export class AssetListComponent implements OnInit, OnDestroy {
         label: get(this.labels,'amendLabel'),
         theme: 'primary',
         validate(record: AssetLineItemExtended): boolean {
-          return record.canChangeConfiguration(null, enableOneTime) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
+          return record.canChangeConfiguration(enableOneTime) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
-          this.assetModalService.openChangeConfigurationModal(
+          this.assetModalService.openAmendModal(
             <AssetLineItem>recordList[0],
             <Array<AssetLineItem>>recordList
           );
@@ -373,7 +372,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
         label: get(this.labels,'buyMoreLabel'),
         theme: 'primary',
         validate(record: AssetLineItemExtended,childRecords: Array<AssetLineItemExtended>): boolean {
-          return record.canBuyMore(null,childRecords) &&  record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItemId') === record.Id).length > 0);
+          return record.canBuyMore(childRecords) &&  record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
           this.assetModalService.openBuyMoreModal(
@@ -389,7 +388,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
         label: get(this.labels,'terminateLabel'),
         theme: 'danger',
         validate(record: AssetLineItemExtended, childRecords: Array<AssetLineItemExtended>): boolean {
-          return record.canTerminate(childRecords) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItemId') === record.Id).length > 0);
+          return record.canTerminate(childRecords) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
           this.assetModalService.openTerminateModal(

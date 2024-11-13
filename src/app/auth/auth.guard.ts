@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable, combineLatest, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiService } from '@congarevenuecloud/core';
@@ -9,7 +9,7 @@ import { AuthService } from './auth.service';
 @Injectable({
   providedIn: 'root'
 })
-export class AuthorizationGuard implements CanActivate {
+export class AuthorizationGuard {
 
   constructor(private authService: AuthService, private apiService: ApiService, private guestUserService: GuestUserService) { }
 

@@ -447,6 +447,7 @@
         "ADD_PRODUCTS": "es_MX Add Products",
         "REPLACE": "es_MX Replace Product",
         "ACTION": "es_MX Action",
+        "MANAGE_VIEW":"es_MX Manage View",
         "ATTACHMENT_DETAILS": {
             "TITLE": "es_MX Attach new file(s)",
             "INPUT_LABEL": "es_MX Drop files to Attach or",
