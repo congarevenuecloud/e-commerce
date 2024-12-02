@@ -12,7 +12,7 @@ import { CongaModule } from '@congarevenuecloud/core';
 import { PricingModule } from '@congarevenuecloud/ecommerce';
 import {
   PriceModule, BreadcrumbModule, InputFieldModule, AddressModule, IconModule, LineItemTableRowModule,
-  PriceSummaryModule, ButtonModule, CaptchaModule, OutputFieldModule
+  PriceSummaryModule, ButtonModule, CaptchaModule, OutputFieldModule, FileUploaderModule
 } from '@congarevenuecloud/elements';
 
 import { DetailsModule } from '../details/details.module';
@@ -46,7 +46,8 @@ import { QuoteDetailsComponent } from './layout/quote-details/quote-details.comp
     NgScrollbarModule,
     PriceSummaryModule,
     CartModule,
-    ButtonModule
+    ButtonModule,
+    FileUploaderModule
   ],
   declarations: [CreateQuoteComponent, RequestQuoteFormComponent, QuoteDetailsComponent]
 })

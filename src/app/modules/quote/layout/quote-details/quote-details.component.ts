@@ -10,7 +10,7 @@ import {
   AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService, AccountService, Contact, ContactService,
   CartService, Cart
 } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, LookupOptions, ToasterPosition } from '@congarevenuecloud/elements';
+import { ExceptionService, LookupOptions, ToasterPosition, FileOutput } from '@congarevenuecloud/elements';
 import { DOCUMENT } from '@angular/common';
 @Component({
   selector: 'app-quote-details',
@@ -36,14 +36,6 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   intimationModal: BsModalRef;
 
-  hasSizeError: boolean;
-
-  file: File;
-
-  uploadFileList: any;
-
-  isSupportedFileType: boolean = true;
-
   supportedFileTypes: string;
 
   editLoader = false;
@@ -63,6 +55,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   attachemntSubscription: Subscription;
 
   quoteSubscription: Subscription[] = [];
+
+  showPresentTemplate = false;
 
   quoteStatusSteps = [
     'Draft',
@@ -272,14 +266,25 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     this.quoteGenerated = true;
   }
 
+  showPresentTemplateFun() {
+    this.showPresentTemplate = true;
+  }
 
-  clearFiles() {
-    this.file = null;
-    this.uploadFileList = null;
-    this.attachmentsLoader = false;
-    this.isPrivate = false;
-    this.fileInput.nativeElement.value = null;
-    this.isSupportedFileType = true;
+  onPresentDoc(obj: any) {
+    this.showPresentTemplate = !(obj.onDocumentPage);
+
+    if (obj.isPresentDocCompleted) {
+      let obsv$;
+      if (get(this.quote, 'ApprovalStage') != 'Presented') {
+        const payload = { 'ApprovalStage': 'Presented' };
+        obsv$ = this.quoteService.updateQuote(this.quote.Id, payload as Quote);
+      } else {
+        obsv$ = of(null);
+      }
+      obsv$.pipe(take(1)).subscribe(() => {
+        this.getQuote();
+      })
+    }
   }
 
 
@@ -296,15 +301,19 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   }
 
 
-  uploadAttachment(parentId: string) {
+  uploadAttachments(fileInput: FileOutput) {
     this.attachmentsLoader = true;
-    this.attachmentService.uploadAttachment(this.file, this.isPrivate, parentId, 'proposal').pipe(take(1)).subscribe(res => {
+    const fileList = fileInput.files;
+    this.isPrivate = fileInput.visibility;
+    // To control the visibility of files, pass the additional field "IsPrivate_c" as part of the customProperties when calling uploadMultipleAttachments.
+    // You must include "IsPrivate_c" or any other custom fields passed as method parameters to the DocumentMetadata object. For more details, please refer to SDK/product documentation.
+    this.attachmentService.uploadMultipleAttachments(fileList, this.quote.Id, 'Proposal', {
+      IsPrivate_c: this.isPrivate
+    }).pipe(take(1)).subscribe(res => {
       this.getAttachments();
       this.attachmentsLoader = false;
-      this.clearFiles();
       this.cdr.detectChanges();
     }, err => {
-      this.clearFiles();
       this.exceptionService.showError(err);
     });
   }
@@ -318,57 +327,9 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   }
 
   downloadAttachment(attachmentId: string) {
-    this.productInformationService.getAttachmentUrl(attachmentId).subscribe((url: string) => {
+    this.productInformationService.getAttachmentUrl(attachmentId).pipe(take(1)).subscribe((url: string) => {
       window.open(url, '_blank');
     });
-  }
-
-
-  hasFileSizeExceeded(fileList, maxSize) {
-    let totalFileSize = 0;
-    for (let i = 0; i < fileList.length; i++) {
-      totalFileSize = totalFileSize + fileList[i].size;
-    }
-    this.hasSizeError = totalFileSize > maxSize;
-  }
-
-
-  fileChange(event) {
-    const fileList: FileList = event.target.files;
-    if (fileList.length > 0) {
-      this.uploadFileList = event.target.files;
-      this.hasFileSizeExceeded(this.uploadFileList, this.maxFileSizeLimit);
-      this.file = fileList[0];
-      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList, this.supportedFileTypes);
-    }
-  }
-
-
-  onDragFile(event) {
-    event.preventDefault();
-  }
-
-
-  onDropFile(event) {
-    event.preventDefault();
-    const itemList: DataTransferItemList = event.dataTransfer.items;
-    const fileList: FileList = event.dataTransfer.files;
-    if (fileList.length > 0) {
-      this.uploadFileList = event.dataTransfer.files;
-      this.hasFileSizeExceeded(this.uploadFileList, event.target.dataset.maxSize);
-      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList, this.supportedFileTypes);
-    } else {
-      let f = [];
-      for (let i = 0; i < itemList.length; i++) {
-        if (itemList[i].kind === 'file') {
-          let file: File = itemList[i].getAsFile();
-          f.push(file);
-        }
-        this.uploadFileList = f;
-      }
-      this.hasFileSizeExceeded(fileList, event.target.dataset.maxSize);
-    }
-    this.file = this.uploadFileList[0];
   }
 
   showProcessingOverlay() {
