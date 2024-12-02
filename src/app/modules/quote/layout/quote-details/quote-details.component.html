@@ -29,14 +29,6 @@
           (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">{{'COMMON.ACCEPT_QUOTE'
           |translate}}</button>
       </div>
-      <!-- TO do : remove comment add back the changes when we integrate the functionality -->
-      <!-- <button type="button" class="btn btn-primary btn-raised py-2" [ladda]="finalizeLoader"
-        *ngIf="quote?.ApprovalStage === 'Draft'" (click)="finalizeQuote(quote?.Id)"
-        [disabled]="true">{{'MY_ACCOUNT.QUOTE_DETAIL.FINALIZE'
-        |translate}}</button>
-      <div class="align-items-stretch d-flex" *ngIf="quote?.ApprovalStage === 'Generated'">
-        <apt-present-document [record]="quote"></apt-present-document>
-      </div> -->
       <div class="d-sm-block d-block ml-auto d-md-none d-lg-none pt-2"
         *ngIf="(quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented' || quote?.ApprovalStage === 'Approved') && isLoggedIn">
         <div class="dropdown pr-4">

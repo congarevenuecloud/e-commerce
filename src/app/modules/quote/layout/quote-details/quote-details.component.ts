@@ -144,7 +144,6 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     this.getAttachments();
   }
 
-  // TO DO:: output field need to handle update of buisnessObject
   refreshQuote(fieldValue, quote, fieldName) {
     set(quote, fieldName, fieldValue);
     const quoteItems = get(quote, 'Items');
