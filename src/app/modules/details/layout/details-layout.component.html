@@ -1,10 +1,12 @@
 <apt-breadcrumb [sobject]="context" [label]="title" [route]="route" class="border-bottom"></apt-breadcrumb>
 <ng-content select=".constraintAlerts"></ng-content>
-<div class="pb-5">
+<div>
   <div class="headerContainer">
-    <nav class="navbar d-block border-left-0 border-right-0 p-0 nav-tabs bg-white border-top" [ngClass]="headerClass" #headerNav>
+    <nav class="navbar d-block border-left-0 border-right-0 p-0 nav-tabs bg-white border-top" [ngClass]="headerClass"
+      #headerNav>
       <div class="d-flex border-bottom">
-        <div class="flex-grow-1 pl-4 justify-content-center d-flex flex-column w-100 pt-lg-0 pt-md-0 pt-sm-2 pt-2 pb-lg-0 pb-md-0 pb-sm-3 pb-3">
+        <div
+          class="flex-grow-1 px-4 justify-content-center d-flex flex-column w-100 pt-lg-0 pt-md-0 pt-sm-2 pt-2 pb-lg-0 pb-md-0 pb-sm-3 pb-3">
           <h3 [innerHTML]="title" *ngIf="title" class="overflow-hidden "></h3>
           <span [innerHTML]="subtitle" *ngIf="subtitle" class="pb-lg-0 pb-md-0 pb-sm-2 pb-2"></span>
           <ng-content select=".detail-header"></ng-content>
@@ -16,16 +18,11 @@
         </div>
       </div>
 
-      <div class="d-flex align-items-end px-3">
+      <div class="d-flex align-items-end px-3" *ngIf="sections.length > 0">
         <div *ngFor="let tab of sections; let i = index;" (click)="scrollTo(tab)">
-          <a class="nav-link text-capitalize border-0 mb-0"
-            [class.active]="tab.active"
-            href="javascript:void(0)"
-            *ngIf="tab?.element?.nativeElement?.offsetTop > 0"
-            [class.d-none]="i > 2"
-            [class.d-md-block]="i === 2"
-            [class.d-lg-block]="i === 3"
-            [class.d-xl-block]="i === 4">
+          <a class="nav-link text-capitalize border-0 mb-0" [class.active]="tab.active" href="javascript:void(0)"
+            *ngIf="tab?.element?.nativeElement?.offsetTop > 0" [class.d-none]="i > 2" [class.d-md-block]="i === 2"
+            [class.d-lg-block]="i === 3" [class.d-xl-block]="i === 4">
             {{tab.title}}
           </a>
         </div>
@@ -50,7 +47,7 @@
       </div>
     </nav>
   </div>
-  <div class="container-fluid pt-3">
+  <div class="container-fluid">
     <ng-content #content></ng-content>
   </div>
 </div>

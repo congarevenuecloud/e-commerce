@@ -15,13 +15,14 @@ import {
   AlertModule,
   TableModule,
   ChartModule,
-  FilesModule
+  FilesModule,
+  FileUploaderModule
 } from '@congarevenuecloud/elements';
 import { OrderRoutingModule } from './order-routing.module';
 import { DetailsModule } from '../details/details.module';
 import { PricingModule } from '@congarevenuecloud/ecommerce';
 
-import { TranslateModule }from'@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { ComponentModule } from '../../components/component.module';
 import { LaddaModule } from 'angular2-ladda';
@@ -56,7 +57,8 @@ import { OrderDetailComponent } from './layout/order-details/order-detail.compon
     DataFilterModule,
     IconModule,
     AlertModule,
-    FilesModule
+    FilesModule,
+    FileUploaderModule
   ]
 })
 export class OrderModule { }

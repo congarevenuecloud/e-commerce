@@ -6,7 +6,10 @@ import { Observable, of, combineLatest } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { get, lowerCase } from 'lodash';
 import { TabsetComponent } from 'ngx-bootstrap/tabs';
-import { AccountService, ContactService, UserService, Quote, QuoteService, PriceListService, Cart, Note, Account, Contact, PriceList } from '@congarevenuecloud/ecommerce';
+import {
+  AccountService, ContactService, UserService, Quote, QuoteService, PriceListService, Cart,
+  Note, Account, Contact, PriceList, StorefrontService
+} from '@congarevenuecloud/ecommerce';
 import { LookupOptions } from '@congarevenuecloud/elements';
 
 import moment from 'moment';
@@ -64,12 +67,16 @@ export class RequestQuoteFormComponent implements OnInit {
     private userService: UserService,
     private plservice: PriceListService,
     private translateService: TranslateService,
-    private contactService: ContactService) { }
+    private contactService: ContactService,
+    private storefrontService: StorefrontService) { }
 
   ngOnInit() {
     this.quote.Name = 'Test';
-    combineLatest(this.accountService.getCurrentAccount(), this.userService.me(), (this.cart.Proposald ? this.quoteService.getQuoteById(get(this.cart, 'Proposald.Id')) : of(null)))
-      .pipe(take(1)).subscribe(([account, user, quote]) => {
+    combineLatest(this.accountService.getCurrentAccount(),
+      this.userService.me(),
+      (this.cart.Proposald ? this.quoteService.getQuoteById(get(this.cart, 'Proposald.Id')) : of(null)),
+      this.storefrontService.getStorefront())
+      .pipe(take(1)).subscribe(([account, user, quote, storefront]) => {
         this.isGuest = lowerCase(user.Alias) === 'guest';
         this.primaryContact = new Contact();
         this.quote.ShipToAccount = account;
@@ -81,7 +88,9 @@ export class RequestQuoteFormComponent implements OnInit {
         if (get(this.cart, 'Proposald.Id')) {
           this.quote = get(this.cart, 'Proposald');
           this.quote.ProposalName = quote.Name;
-        }
+        };
+        this.quote.Requestor = account?.Owner || user;
+        this.quote.SourceChannel = get(storefront, 'ChannelType');
         this.quoteChange();
         this.getPriceList
       });

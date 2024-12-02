@@ -1103,6 +1103,11 @@ apt-table {
   border-radius: 0.2rem;
 }
 
+.btn:focus {
+  outline: 0 !important; 
+  box-shadow:none !important;
+}
+
 apt-promotion {
   div {
     div.card {

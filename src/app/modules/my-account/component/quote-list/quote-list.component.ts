@@ -78,7 +78,7 @@ export class QuoteListComponent implements OnInit {
 
   ngOnInit() {
     this.loadView();
-    this.businessObjectFields = ['Description', 'BillToAccount', 'ShipToAccount'];
+    this.businessObjectFields = ['Description', 'BillToAccount', 'ShipToAccount', 'SourceChannel'];
   }
 
   loadView() {

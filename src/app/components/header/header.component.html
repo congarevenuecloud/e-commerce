@@ -25,7 +25,7 @@
     <apt-mini-cart></apt-mini-cart>
     <apt-cr-constraint-icon class="d-block position-relative"></apt-cr-constraint-icon>
     <ng-container *ngIf="user$ | async as user">
-      <div class="d-flex user-action flex-column text-primary align-items-flex-start exclude-border pl-3">
+      <div class="d-flex user-action flex-column text-primary align-items-flex-start exclude-border pl-2">
         <strong>
           <font size="1" *ngIf="user?.Alias !== 'guest'">{{ 'COMMON.WELCOME_MESSAGE' | translate: {userName:
             user?.FirstName} }}</font>

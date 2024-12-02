@@ -115,6 +115,22 @@
         "NO_COMPARABLE_FEATURE": "{{products }} does not have comparable features to the selected products",
         "OTHER_FEATURES": "Other Features"
     },
+    "PRESENT":{
+        "ORDER":"Present Order",
+        "QUOTE":"Present Quote"
+    },
+    "EMAIL":{
+        "FROM":"From",
+        "TO":"To",
+        "CC":"Cc",
+        "BCC":"Bcc",
+        "SUBJECT":"Email Subject",
+        "SUBJECT_VALIDATION_MSG":"Please enter email subject",
+        "MESSAGE":"Email Message",
+        "TEMPLATE":"Email Template",
+        "VALID_EMAIL":"Please enter valid email ids.",
+        "INVALID_TO_FIELD":"To is required"
+    },
     "MY_ACCOUNT": {
         "LAST_LOGIN_DATE": "Last Login Date",
         "OVERVIEW": "Overview",
@@ -392,7 +408,7 @@
         "ADD_NEW_COMMENT": "Add new comment",
         "CLEAR": "Clear",
         "NO_COMMENTS_TO_DISPLAY": "There has not been any comments yet",
-        "ACCEPT_QUOTE": "Accept Quote",
+        "ACCEPT_QUOTE": "Accept",
         "VIEW_ORDER": "View Order",
         "VIEW_QUOTE": "View Quote",
         "CHANGE_SHIPPING_ADDRESS": "Change Shipping Address",
@@ -458,18 +474,33 @@
         "REPLACE": "Replace Product",
         "ACTION": "Action",
         "MANAGE_VIEW":"Manage View",
+        "SEND":"Send",
+        "DISCARD":"Discard",
+        "NEXT":"Next",
         "ATTACHMENT_DETAILS": {
             "TITLE": "Attach new file(s)",
             "INPUT_LABEL": "Drop files to Attach or",
             "BROWSE": "browse",
-            "FILE_SIZE_EXCEEDED_ERROR": "Size exceeds 28MB",
-            "UNSUPPORTED_FILE_TYPE_ERROR": "Unsupported file type. [Supported file types are {{supportedFileTypes}}]",
+            "FILE_SIZE_EXCEEDED_ERROR": "Max file size exceeded: {{maxFileSize}}MB",
+            "UNSUPPORTED_FILE_TYPE_ERROR": "Unsupported file type.",
             "SUPPORTED_FILE_TYPES": "Supported file types are {{supportedFileTypes}}",
             "NO_ATTACHMENTS": "No attachments have been added yet",
             "REMOVE_ATTACHMENT": "Remove Attachment",
             "BY": "by",
             "MAKE_VISIBILITY_PRIVATE": "Make visibility private",
-            "INVALID_FILE": "Invalid file extension"
+            "INVALID_FILE": "Invalid file extension",
+            "UPLOAD_FILES":"Upload files",
+            "ADD_ATTACHMENT":"Add attachment",
+            "ADDITIONAL_ATTACHMENT":"Additional attachments",
+            "DOCUMENTS":"Documents",
+            "NO_DOC_MATCH_MESSAGE":"No documents match the search criteria",
+            "AVAILABLE_DOCUMENTS":"Available documents",
+            "DOC_SELECTED":"Selected documents ({{number}})",
+            "NO_DOC_SELECTED":"No documents selected",
+            "SEARCH_DOCUMENTS":"Search documents",
+            "SEARCH_TEMPLATE_PLACEHOLDER":"Type to search email templates",
+            "REVIEW_AND_SEND":"Review and Send",
+            "MAX_FILE_UPLOAD_ERROR":"Maximum files allowed {{number}}"
         },
         "ALT_TEXT_IMAGE": "Generic placeholder image",
         "NO_LINE_ITEMS_MESSAGE": "No line items yet on this {{record}}",
@@ -903,16 +934,17 @@
         "COMMENTS": "Comments",
         "ATTACHMENTS": "Attachments",
         "PRICE_SUMMARY": "Price Summary",
-        "GENERATE_ORDER": "Generate Order",
+        "GENERATE_ORDER": "Generate",
         "GENERATE": "Generate",
         "INCLUDE_WATERMARK": "Include Watermark",
         "TEMPLATE": "Template",
         "FILE_FORMAT": "File Format",
-        "GENERATE_QUOTE": "Generate Quote",
+        "GENERATE_QUOTE": "Generate",
         "SUMMARY": "Summary",
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "Your Order Is: {{orderName}}",
-        "VIEW_YOUR_ORDER": "View Your Order"
+        "VIEW_YOUR_ORDER": "View Your Order",
+        "PRESENT_QUOTE":"Present"
     },
     "SERVICES": {
         "SELECTION_OF_ASSETS_MUST_TOOLTIP": "Must select multiple assets to perform batch action.",
@@ -987,7 +1019,8 @@
         "OF": "of",
         "PER_PAGE": "per page",
         "NO_DATA_TO_DISPLAY": "No records found",
-        "NO_FILTERS_MATCHED": "No records match the filter criteria applied"
+        "NO_FILTERS_MATCHED": "No records match the filter criteria applied",
+        "SEQUENCE":"Sequence"
     },
     "AOBJECTS": {
         "PROPOSALS": "Proposals",
