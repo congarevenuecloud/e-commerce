@@ -1,11 +1,11 @@
 <app-detail *ngIf="quote; else loading" [context]="quote" [route]="'proposals'">
-  <div class="detail-header py-2">
-    <div class="d-flex align-items-center justify-content-between">
+  <div class="detail-header">
+    <div [ngClass]="quote.ApprovalStage !== 'Accepted' ?  'd-flex justify-content-between' :' d-flex flex-column flex-sm-row justify-content-between'" >
       <div class="d-flex align-items-center">
         <span class="page-header d-lg-block d-md-block d-sm-none d-none">{{quote?.Name}}</span>
         <span tooltip="{{quote?.Name}}" class="page-header d-block d-sm-block d-md-none d-lg-none">{{quote?.Name |
           truncate:13}}</span>
-        <span class="badge badge-primary mt-1 ml-3 px-3 py-2 border text-uppercase"
+        <span class="badge badge-light mt-1 ml-1 px-2 py-2 text-uppercase"
           *ngIf="quote?.ApprovalStage">{{quote?.ApprovalStage}}</span>
       </div>
       <apt-generate-document [record]="quote" *ngIf="quote.ApprovalStage !== 'Accepted' && isLoggedIn"
@@ -30,7 +30,7 @@
       </div> -->
       <div class="d-sm-block d-block ml-auto d-md-none d-lg-none pt-2"
         *ngIf="(quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented' || quote?.ApprovalStage === 'Approved') && isLoggedIn">
-        <div class="dropdown">
+        <div class="dropdown pr-4">
           <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           </a>
@@ -44,7 +44,7 @@
         <span class="d-flex align-items-baseline">
           <apt-output-field [record]="order" field="Name" [label]="'MY_ACCOUNT.ORDER_DETAIL.ORDER_ID' | translate"
             layout="inline" [editable]="false" [showQuickView]="true"></apt-output-field>
-          <span class="badge badge-primary ml-1">{{order?.Status}}</span>
+          <span class="badge badge-light ml-1">{{order?.Status}}</span>
         </span>
       </div>
     </div>
