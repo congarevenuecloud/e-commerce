@@ -300,10 +300,10 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   }
 
 
-  uploadAttachments(fileInput: FileOutput) {
+  uploadAttachments(fileOutput: FileOutput) {
     this.attachmentsLoader = true;
-    const fileList = fileInput.files;
-    this.isPrivate = fileInput.visibility;
+    const fileList = fileOutput.files;
+    this.isPrivate = fileOutput.visibility;
     // To control the visibility of files, pass the additional field "IsPrivate_c" as part of the customProperties when calling uploadMultipleAttachments.
     // You must include "IsPrivate_c" or any other custom fields passed as method parameters to the DocumentMetadata object. For more details, please refer to SDK/product documentation.
     this.attachmentService.uploadMultipleAttachments(fileList, this.quote.Id, 'Proposal', {
