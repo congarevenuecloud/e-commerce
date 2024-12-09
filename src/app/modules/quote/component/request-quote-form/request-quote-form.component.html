@@ -7,6 +7,14 @@
             (ngModelChange)="quoteChange()" [label]="'CREATE_QUOTE.QUOTE_TITLE' | translate"></apt-input-field>
         </div>
         <div class="form-group">
+          <apt-output-field [record]="quote.Requestor" field="Name" label="Requestor"
+            [editable]="false"></apt-output-field>
+        </div>
+        <div class="form-group">
+          <apt-output-field [record]="quote" field="SourceChannel" label="Source Channel"
+            [editable]="false"></apt-output-field>
+        </div>
+        <div class="form-group">
           <apt-input-field [entity]="quote" [field]="'RFPResponseDueDate'" [(ngModel)]="quote.RFPResponseDueDate"
             (ngModelChange)="quoteChange()">
           </apt-input-field>

@@ -112,6 +112,22 @@
         "NO_COMPARABLE_FEATURE": "fr_FR {{products }} does not have comparable features to the selected products",
         "OTHER_FEATURES": "fr_FR Other Features"
     },
+    "PRESENT":{
+        "ORDER":"fr_FR Present Order",
+        "QUOTE":"fr_FR Present Quote"
+    },
+    "EMAIL":{
+        "FROM":"fr_FR From",
+        "TO":"fr_FR To",
+        "CC":"fr_FR Cc",
+        "BCC":"fr_FR Bcc",
+        "SUBJECT":"fr_FR Email Subject",
+        "SUBJECT_VALIDATION_MSG":"fr_FR Please enter email subject",
+        "MESSAGE":"fr_FR Email Message",
+        "TEMPLATE":"fr_FR Email Template",
+        "VALID_EMAIL":"fr_FR Please enter valid email ids.",
+        "INVALID_TO_FIELD":"fr_FR To is required"
+    },
     "MY_ACCOUNT": {
         "LAST_LOGIN_DATE": "fr_FR Last Login Date",
         "OVERVIEW": "fr_FR Overview",
@@ -385,7 +401,7 @@
         "ADD_NEW_COMMENT": "fr_FR Add new comment",
         "CLEAR": "fr_FR Clear",
         "NO_COMMENTS_TO_DISPLAY": "fr_FR There has not been any comments yet",
-        "ACCEPT_QUOTE": "fr_FR Accept Quote",
+        "ACCEPT_QUOTE": "fr_FR Accept",
         "VIEW_ORDER": "fr_FR View Order",
         "VIEW_QUOTE": "fr_FR View Quote",
         "CHANGE_SHIPPING_ADDRESS": "fr_FR Change Shipping Address",
@@ -443,18 +459,33 @@
         "ADD_PRODUCTS": "fr_FR Add Products",
         "REPLACE": "fr_FR Replace Product",
         "ACTION": "fr_FR Action",
+        "SEND":"fr_FR Send",
+        "DISCARD":"fr_FR Discard",
+        "NEXT":"fr_FR Next",
         "MANAGE_VIEW":"fr_FR Manage View",
         "ATTACHMENT_DETAILS": {
             "TITLE": "fr_FR Attach new file(s)",
             "INPUT_LABEL": "fr_FR Drop files to Attach or",
             "BROWSE": "fr_FR browse",
-            "FILE_SIZE_EXCEEDED_ERROR": "fr_FR Size exceeds 28MB",
-            "UNSUPPORTED_FILE_TYPE_ERROR": "fr_FR Unsupported file type. [Supported file types are {{supportedFileTypes}}]",
+            "FILE_SIZE_EXCEEDED_ERROR": "fr_FR Max file size exceeded: {{maxFileSize}}MB",
+            "UNSUPPORTED_FILE_TYPE_ERROR": "fr_FR Unsupported file type.",
             "SUPPORTED_FILE_TYPES": "fr_FR Supported file types are {{supportedFileTypes}}",
             "NO_ATTACHMENTS": "fr_FR No attachments have been added yet",
             "REMOVE_ATTACHMENT": "fr_FR Remove Attachment",
             "BY": "fr_FR by",
-            "MAKE_VISIBILITY_PRIVATE": "fr_FR Make visibility private"
+            "MAKE_VISIBILITY_PRIVATE": "fr_FR Make visibility private",
+            "UPLOAD_FILES":"fr_FR Upload files",
+            "ADD_ATTACHMENT":"fr_FR Add attachment",
+            "ADDITIONAL_ATTACHMENT":"fr_FR Additional attachments",
+            "DOCUMENTS":"fr_FR Documents",
+            "NO_DOC_MATCH_MESSAGE":"fr_FR No documents match the search criteria",
+            "AVAILABLE_DOCUMENTS":"fr_FR Available documents",
+            "DOC_SELECTED":"fr_FR Selected documents ({{number}})",
+            "NO_DOC_SELECTED":"fr_FR No documents selected",
+            "REVIEW_AND_SEND":"fr_FR Review and Send",
+            "SEARCH_DOCUMENTS":"fr_FR Search documents",
+            "SEARCH_TEMPLATE_PLACEHOLDER":"fr_FR Type to search email templates",
+            "MAX_FILE_UPLOAD_ERROR":"fr_FR Maximum files allowed {{number}}"
         },
         "ALT_TEXT_IMAGE": "fr_FR Generic placeholder image",
         "NO_LINE_ITEMS_MESSAGE": "fr_FR No line items yet on this {{record}}",
@@ -880,8 +911,8 @@
         "COMMENTS": "fr_FR Comments",
         "ATTACHMENTS": "fr_FR Attachments",
         "PRICE_SUMMARY": "fr_FR Price Summary",
-        "GENERATE_ORDER": "fr_FR Generate Order",
-        "GENERATE_QUOTE": "fr_FR Generate Quote",
+        "GENERATE_ORDER": "fr_FR Generate",
+        "GENERATE_QUOTE": "fr_FR Generate",
         "GENERATE": "fr_FR Generate",
         "TEMPLATE": "fr_FR Template",
         "FILE_FORMAT": "fr_FR File Format",
@@ -889,7 +920,8 @@
         "SUMMARY": "fr_FR Summary",
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "fr_FR You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "fr_FR Your Order Is: {{orderName}}",
-        "VIEW_YOUR_ORDER": "fr_FR View Your Order"
+        "VIEW_YOUR_ORDER": "fr_FR View Your Order",
+        "PRESENT_QUOTE":"Present"
     },
     "SERVICES": {
         "SELECTION_OF_ASSETS_MUST_TOOLTIP": "fr_FR Must select multiple assets to perform batch action.",
@@ -955,7 +987,8 @@
         "OF": "fr_FR of",
         "PER_PAGE": "fr_FR per page",
         "NO_DATA_TO_DISPLAY": "fr_FR No records found",
-        "NO_FILTERS_MATCHED": "fr_FR No records match the filter criteria applied"
+        "NO_FILTERS_MATCHED": "fr_FR No records match the filter criteria applied",
+        "SEQUENCE":"fr_FR Sequence"
     },
     "AOBJECTS": {
         "PROPOSALS": "fr_FR Proposals",

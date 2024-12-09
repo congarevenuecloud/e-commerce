@@ -2,13 +2,13 @@ import { Component, OnInit, ViewEncapsulation, OnDestroy, ChangeDetectorRef, Aft
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { filter, map, switchMap, mergeMap, take } from 'rxjs/operators';
-import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil } from 'lodash';
+import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil, map as _map } from 'lodash';
 import {
   Order, OrderLineItem, OrderService, UserService,
   ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService, QuoteService,
   Contact, Cart, ContactService, AttachmentService, ProductInformationService, AttachmentDetails
 } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, LookupOptions } from '@congarevenuecloud/elements';
+import { ExceptionService, LookupOptions, FileOutput } from '@congarevenuecloud/elements';
 @Component({
   selector: 'app-order-detail',
   templateUrl: './order-detail.component.html',
@@ -75,14 +75,6 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   lineItemLoader: boolean = false;
 
   attachmentsLoader = false;
-
-  hasSizeError: boolean;
-
-  file: File;
-
-  uploadFileList: any;
-
-  isSupportedFileType: boolean = true;
 
   supportedFileTypes: string;
 
@@ -304,15 +296,6 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     this.cdr.detectChanges();
   }
 
-  clearFiles() {
-    this.file = null;
-    this.uploadFileList = null;
-    this.attachmentsLoader = false;
-    this.isPrivate = false;
-    this.fileInput.nativeElement.value = null;
-    this.isSupportedFileType = true;
-  }
-
   getAttachments() {
     if (this.attachemntSubscription) this.attachemntSubscription.unsubscribe();
     this.attachemntSubscription = this.activatedRoute.params
@@ -321,15 +304,19 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       ).subscribe((attachments: Array<AttachmentDetails>) => this.ngZone.run(() => this.attachmentList$.next(attachments)));
   }
 
-  uploadAttachment(parentId: string) {
+  uploadAttachments(fileOutput: FileOutput) {
     this.attachmentsLoader = true;
-    this.attachmentService.uploadAttachment(this.file, this.isPrivate, parentId, 'order').pipe(take(1)).subscribe(res => {
+    const fileList = fileOutput.files;
+    this.isPrivate = fileOutput.visibility;
+    // To control the visibility of files, pass the additional field "IsPrivate_c" as part of the customProperties when calling uploadMultipleAttachments.
+    // You must include "IsPrivate_c" or any other custom fields passed as method parameters to the DocumentMetadata object. For more details, please refer to SDK/product documentation.
+    this.attachmentService.uploadMultipleAttachments(fileList, this.order.Id, 'Order', {
+      IsPrivate_c: this.isPrivate
+    }).pipe(take(1)).subscribe(res => {
       this.getAttachments();
       this.attachmentsLoader = false;
-      this.clearFiles();
       this.cdr.detectChanges();
     }, err => {
-      this.clearFiles();
       this.exceptionService.showError(err);
     });
   }
@@ -340,47 +327,4 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     });
   }
 
-  hasFileSizeExceeded(fileList, maxSize) {
-    let totalFileSize = 0;
-    for (let i = 0; i < fileList.length; i++) {
-      totalFileSize = totalFileSize + fileList[i].size;
-    }
-    this.hasSizeError = totalFileSize > maxSize;
-  }
-
-  fileChange(event) {
-    const fileList: FileList = event.target.files;
-    if (fileList.length > 0) {
-      this.uploadFileList = event.target.files;
-      this.hasFileSizeExceeded(this.uploadFileList, this.maxFileSizeLimit);
-      this.file = fileList[0];
-      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList, this.supportedFileTypes);
-    }
-  }
-
-  onDragFile(event) {
-    event.preventDefault();
-  }
-
-  onDropFile(event) {
-    event.preventDefault();
-    const itemList: DataTransferItemList = event.dataTransfer.items;
-    const fileList: FileList = event.dataTransfer.files;
-    if (fileList.length > 0) {
-      this.uploadFileList = event.dataTransfer.files;
-      this.hasFileSizeExceeded(this.uploadFileList, event.target.dataset.maxSize);
-      this.isSupportedFileType = this.attachmentService.checkSupportedFileType(this.uploadFileList, this.supportedFileTypes);
-    } else {
-      let f = [];
-      for (let i = 0; i < itemList.length; i++) {
-        if (itemList[i].kind === 'file') {
-          let file: File = itemList[i].getAsFile();
-          f.push(file);
-        }
-        this.uploadFileList = f;
-      }
-      this.hasFileSizeExceeded(fileList, event.target.dataset.maxSize);
-    }
-    this.file = this.uploadFileList[0];
-  }
 }
