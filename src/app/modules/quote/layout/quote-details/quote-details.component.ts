@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild, TemplateRef, NgZone, ChangeDetectorRef, OnDestroy, ViewEncapsulation, ElementRef, Inject, Renderer2 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DOCUMENT } from '@angular/common';
 import { filter, map, take, switchMap } from 'rxjs/operators';
-import { get, set, find, defaultTo, first, map as _map, isEmpty } from 'lodash';
+import { get, set, find, defaultTo, first, map as _map, isEmpty, join, split, trim } from 'lodash';
 import { Observable, of, BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
@@ -11,7 +12,7 @@ import {
   CartService, Cart
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, ToasterPosition, FileOutput } from '@congarevenuecloud/elements';
-import { DOCUMENT } from '@angular/common';
+
 @Component({
   selector: 'app-quote-details',
   templateUrl: './quote-details.component.html',
@@ -41,6 +42,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   editLoader = false;
 
   acceptLoader = false;
+
+  rejectLoader = false;
 
   commentsLoader = false;
 
@@ -90,6 +93,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   isPrivate: boolean = false;
   maxFileSizeLimit = 29360128;
   cartRecord: Cart = new Cart();
+  // Flag used to toggle the content visibility when the list of fields exceeds two rows of the summary with show more or show less icon
+  isExpanded: boolean = false;
 
   constructor(private activatedRoute: ActivatedRoute,
     private quoteService: QuoteService,
@@ -115,9 +120,11 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
       this.isLoggedIn = value;
       if (this.isLoggedIn)
         return this.attachmentService.getSupportedAttachmentType();
+      else
+        return of(null);
     }), take(1)
     ).subscribe(data => {
-      this.supportedFileTypes = data;
+      this.supportedFileTypes = join(_map(split(data, ','), (item) => trim(item)), ', ');
     }))
   }
 
@@ -195,6 +202,19 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     );
   }
 
+  rejectQuote(quoteId: string) {
+    this.rejectLoader = true;
+    this.quoteService.rejectQuote(quoteId).pipe(take(1)).subscribe(
+      {
+        next: () => {
+          this.getQuote();
+        },
+        complete: () => {
+          this.rejectLoader = false;
+        }
+      });
+  }
+
   closeModal() {
     this.intimationModal.hide();
     this.getQuote();
@@ -251,7 +271,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     if (this.attachmentSection) this.attachmentSection.nativeElement.scrollIntoView({ behavior: 'smooth' });
     let obsv$;
     if (get(this.quote, 'ApprovalStage') == 'Draft') {
-      const payload = { 'ApprovalStage': 'Generated' };
+      const payload = { 'ApprovalStage': 'Generated', 'ProposalName': get(this.quote, 'Name') };
       obsv$ = this.quoteService.updateQuote(this.quote.Id, payload as Quote);
     } else {
       obsv$ = of(null);
@@ -300,10 +320,10 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   }
 
 
-  uploadAttachments(fileOutput: FileOutput) {
+  uploadAttachments(fileInput: FileOutput) {
     this.attachmentsLoader = true;
-    const fileList = fileOutput.files;
-    this.isPrivate = fileOutput.visibility;
+    const fileList = fileInput.files;
+    this.isPrivate = fileInput.visibility;
     // To control the visibility of files, pass the additional field "IsPrivate_c" as part of the customProperties when calling uploadMultipleAttachments.
     // You must include "IsPrivate_c" or any other custom fields passed as method parameters to the DocumentMetadata object. For more details, please refer to SDK/product documentation.
     this.attachmentService.uploadMultipleAttachments(fileList, this.quote.Id, 'Proposal', {

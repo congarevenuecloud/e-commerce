@@ -114,21 +114,21 @@
         "NO_COMPARABLE_FEATURE": "es_MX {{products }} does not have comparable features to the selected products",
         "OTHER_FEATURES": "es_MX Other Features"
     },
-    "PRESENT":{
-        "ORDER":"es_MX Present Order",
-        "QUOTE":"es_MX Present Quote"
+    "PRESENT": {
+        "ORDER": "es_MX Present Order",
+        "QUOTE": "es_MX Present Quote"
     },
-    "EMAIL":{
-        "FROM":"es_MX From",
-        "TO":"es_MX To",
-        "CC":"es_MX Cc",
-        "BCC":"es_MX Bcc",
-        "SUBJECT":"es_MX Email Subject",
-        "SUBJECT_VALIDATION_MSG":"es_MX Please enter email subject",
-        "MESSAGE":"es_MX Email Message",
-        "TEMPLATE":"es_MX Email Template",
-        "VALID_EMAIL":"es_MX Please enter valid email ids.",
-        "INVALID_TO_FIELD":"es_MX To is required"
+    "EMAIL": {
+        "FROM": "es_MX From",
+        "TO": "es_MX To",
+        "CC": "es_MX Cc",
+        "BCC": "es_MX Bcc",
+        "SUBJECT": "es_MX Email Subject",
+        "SUBJECT_VALIDATION_MSG": "es_MX Please enter email subject",
+        "MESSAGE": "es_MX Email Message",
+        "TEMPLATE": "es_MX Email Template",
+        "VALID_EMAIL": "es_MX Please enter valid email ids.",
+        "INVALID_TO_FIELD": "es_MX To is required"
     },
     "MY_ACCOUNT": {
         "LAST_LOGIN_DATE": "es_MX Last Login Date",
@@ -138,7 +138,6 @@
             "WEEKLY": "es_MX Weekly",
             "ORDERS_THIS_WEEK": "es_MX Orders this week",
             "SPENT": "es_MX Spent",
-            "SHOW_MORE": "es_MX Show more",
             "QUOTES_THIS_WEEK": "es_MX Quotes This week",
             "RECENT_QUOTES": "es_MX Recent Quotes",
             "ORDERS_BY_STATUS": "es_MX Orders by Status",
@@ -164,13 +163,14 @@
             "ORDER_DATE": "es_MX Order Date",
             "ORDER_STATUS": "es_MX Order Status",
             "PRODUCT_CONFIG": "es_MX Product Configuration",
-            "ORDERS_BY_STATUS": "es_MX Orders by Status",
+            "ORDERS_BY_STATUS": "es_MX Orders By Status",
             "SHIP_TO_ACCOUNT": "es_MX Ship To Account",
             "BILL_TO_ACCOUNT": "es_MX Bill To Account",
             "ORDER_TITLE": "es_MX Order Title",
             "ACCOUNT_NAME": "es_MX Account Name",
             "DESCRIPTION": "es_MX Description",
-            "CONFIRM_ORDER": "es_MX Confirm Order"
+            "CONFIRM_ORDER": "es_MX Confirm Order",
+            "ORDER_PENDING":"es_MX Orders Pending for Activation"
         },
         "CART_LIST": {
             "CREATE_NEW": "es_MX New Cart",
@@ -218,6 +218,7 @@
             "CONFIGURATION": "es_MX Configuration",
             "QUOTES_BY_STATUS": "es_MX Quotes By Status",
             "QUOTES_BY_DUE_DATE": "es_MX Quotes By Due Date",
+            "QUOTES_AMOUNT_BY_STATUS": "es_MX Quote Amount By Status",
             "TOTAL_QUOTES": "es_MX Total Quotes",
             "FINALIZE": "es_MX Finalize"
         },
@@ -463,10 +464,14 @@
         "ADD_PRODUCTS": "es_MX Add Products",
         "REPLACE": "es_MX Replace Product",
         "ACTION": "es_MX Action",
-        "SEND":"es_MX Send",
-        "DISCARD":"es_MX Discard",
-        "NEXT":"es_MX Next",
-        "MANAGE_VIEW":"es_MX Manage View",
+        "SEND": "es_MX Send",
+        "DISCARD": "es_MX Discard",
+        "NEXT": "es_MX Next",
+        "MANAGE_VIEW": "es_MX Manage View",
+        "REJECT": "es_MX Reject",
+        "SOURCE_CHANNEL": "es_MX Source Channel",
+        "SELLING_TERM": "es_MX Selling Term",
+        "PRICING_FREQUENCY": "es_MX Pricing Frequency",
         "ATTACHMENT_DETAILS": {
             "TITLE": "es_MX Attach new file(s)",
             "INPUT_LABEL": "es_MX Drop files to Attach or",
@@ -479,18 +484,18 @@
             "BY": "es_MX by",
             "MAKE_VISIBILITY_PRIVATE": "es_MX Make visibility private",
             "INVALID_FILE": "es_MX Invalid file extension",
-            "UPLOAD_FILES":"es_MX Upload files",
-            "ADD_ATTACHMENT":"es_MX Add attachment",
-            "ADDITIONAL_ATTACHMENT":"es_MX Additional attachments",
-            "DOCUMENTS":"es_MX Documents",
-            "NO_DOC_MATCH_MESSAGE":"es_MX No documents match the search criteria",
-            "AVAILABLE_DOCUMENTS":"es_MX Available documents",
-            "DOC_SELECTED":"es_MX Selected documents ({{number}})",
-            "NO_DOC_SELECTED":"es_MX No documents selected",
-            "REVIEW_AND_SEND":"es_MX Review and Send",
-            "SEARCH_DOCUMENTS":"es_MX Search documents",
-            "SEARCH_TEMPLATE_PLACEHOLDER":"es_MX Type to search email templates",
-            "MAX_FILE_UPLOAD_ERROR":"es_MX Maximum files allowed {{number}}"
+            "UPLOAD_FILES": "es_MX Upload files",
+            "ADD_ATTACHMENT": "es_MX Add attachment",
+            "ADDITIONAL_ATTACHMENT": "es_MX Additional attachments",
+            "DOCUMENTS": "es_MX Documents",
+            "NO_DOC_MATCH_MESSAGE": "es_MX No documents match the search criteria",
+            "AVAILABLE_DOCUMENTS": "es_MX Available documents",
+            "DOC_SELECTED": "es_MX Selected documents ({{number}})",
+            "NO_DOC_SELECTED": "es_MX No documents selected",
+            "REVIEW_AND_SEND": "es_MX Review and Send",
+            "SEARCH_DOCUMENTS": "es_MX Search documents",
+            "SEARCH_TEMPLATE_PLACEHOLDER": "es_MX Type to search email templates",
+            "MAX_FILE_UPLOAD_ERROR": "es_MX Maximum files allowed {{number}}"
         },
         "ALT_TEXT_IMAGE": "es_MX Generic placeholder image",
         "NO_LINE_ITEMS_MESSAGE": "es_MX No line items yet on this {{record}}",
@@ -498,7 +503,9 @@
         "PROCESSING_MESSAGE": "es_MX Your request is being processed.....",
         "TABLE_ACTION_CONFIRMATION_MESSAGE": "es_MX Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
         "NO_MATCHING_ORDERS_FOUND": "es_MX No matching orders found",
-        "NO_MATCHING_QUOTES_FOUND": "es_MX No matching quotes found"
+        "NO_MATCHING_QUOTES_FOUND": "es_MX No matching quotes found",
+        "SHOW_MORE": "es_MX Show more",
+        "SHOW_LESS": "es_MX Show less"
     },
     "ASSET_ACTIONS": {
         "AMEND": "es_MX Amend",
@@ -534,6 +541,7 @@
         "SHIP_TO_ACCOUNT": "es_MX Ship to Account",
         "BILL_TO_ACCOUNT": "es_MX Bill to Account",
         "SEARCH_CONTACTS": "es_MX Search Contacts",
+        "REQUESTOR": "es_MX Requestor",
         "FINALIZE_AND_SUBMIT": "es_MX Finalize & Submit Quote",
         "PRIMARY_CONTACT_IS_MANDATORY": "ES_mx Primary contact is mandatory"
     },
@@ -681,7 +689,7 @@
         "CHECKOUT": "es_MX Checkout",
         "LOG_IN": "es_MX LOG IN",
         "LOGIN_FOR_FASTER_CHECKOUT": "es_MX for a faster checkout experience and to get access on additional features, or you can continue as a guest.",
-        "BILLING_AND_SHIPPING_INFORMATION": "es_MX BILLING & SHIPPING INFORMATION",
+        "BILLING_AND_SHIPPING_INFORMATION": "es_MX Billing and Shipping Information",
         "ENTER_SHIPPING_ADDRESS": "es_MX Please enter your shipping address.",
         "SUCCESSFUL_ORDER_CREATION_MESSAGE": "es_MX Your order has been placed. You will be notified the order details to your email address {{emailAddress}}",
         "SUCCESSFUL_ORDER_CREATION_MESSAGE_WITHOUT_EMAIL": "es_MX Your order has been placed"
@@ -926,7 +934,7 @@
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "es_MX You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "es_MX Your Order Is: {{orderName}}",
         "VIEW_YOUR_ORDER": "es_MX View Your Order",
-        "PRESENT_QUOTE":"es_MX Present"
+        "PRESENT_QUOTE": "es_MX Present"
     },
     "SERVICES": {
         "SELECTION_OF_ASSETS_MUST_TOOLTIP": "es_MX Must select multiple assets to perform batch action.",
@@ -991,7 +999,7 @@
         "PER_PAGE": "es_MX per page",
         "NO_DATA_TO_DISPLAY": "es_MX No records found",
         "NO_FILTERS_MATCHED": "es_MX No records match the filter criteria applied",
-        "SEQUENCE":"es_MX Sequence"
+        "SEQUENCE": "es_MX Sequence"
     },
     "AOBJECTS": {
         "PROPOSALS": "es_MX Proposals",
@@ -1038,6 +1046,7 @@
         "ACCOUNT": "es_MX Account",
         "ORDER_NAME": "es_MX Order Name",
         "PROPOSAL_NAME": "es_MX Proposal Name",
-        "CREATED_DATE": "es_MX Created Date"
+        "CREATED_DATE": "es_MX Created Date",
+        "CREATED_BY": "es_MX Created By"
     }
 }

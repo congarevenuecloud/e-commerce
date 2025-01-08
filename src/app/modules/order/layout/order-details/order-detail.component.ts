@@ -2,7 +2,7 @@ import { Component, OnInit, ViewEncapsulation, OnDestroy, ChangeDetectorRef, Aft
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { filter, map, switchMap, mergeMap, take } from 'rxjs/operators';
-import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil, map as _map } from 'lodash';
+import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil, map as _map, join, split, trim } from 'lodash';
 import {
   Order, OrderLineItem, OrderService, UserService,
   ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService, QuoteService,
@@ -87,6 +87,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   isPrivate: boolean = false;
   maxFileSizeLimit = 29360128;
   cartRecord: Cart = new Cart();
+  // Flag used to toggle the content visibility when the list of fields exceeds two rows of the summary with show more or show less icon.
+  isExpanded: boolean = false;
 
   constructor(private activatedRoute: ActivatedRoute,
     private orderService: OrderService,
@@ -116,9 +118,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       this.isLoggedIn = value;
       if (this.isLoggedIn)
         return this.attachmentService.getSupportedAttachmentType();
+      else
+        return of(null);
     }), take(1)
     ).subscribe(data => {
-      this.supportedFileTypes = data;
+      this.supportedFileTypes = join(_map(split(data, ','), (item) => trim(item)), ', ');
     }))
   }
 
@@ -304,10 +308,10 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       ).subscribe((attachments: Array<AttachmentDetails>) => this.ngZone.run(() => this.attachmentList$.next(attachments)));
   }
 
-  uploadAttachments(fileOutput: FileOutput) {
+  uploadAttachments(fileInput: FileOutput) {
     this.attachmentsLoader = true;
-    const fileList = fileOutput.files;
-    this.isPrivate = fileOutput.visibility;
+    const fileList = fileInput.files;
+    this.isPrivate = fileInput.visibility;
     // To control the visibility of files, pass the additional field "IsPrivate_c" as part of the customProperties when calling uploadMultipleAttachments.
     // You must include "IsPrivate_c" or any other custom fields passed as method parameters to the DocumentMetadata object. For more details, please refer to SDK/product documentation.
     this.attachmentService.uploadMultipleAttachments(fileList, this.order.Id, 'Order', {

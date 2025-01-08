@@ -1,4 +1,7 @@
 <app-detail *ngIf="order$ | async as order; else loading" [context]="order" [route]="'orders'">
+  <apt-alert [record]="order" message="ERROR.UPDATE_ORDER_FAILED_ON_DETAILS_PAGE" [showOnlyMessage]="false"
+    [showPriceError]="false">
+  </apt-alert>
 
   <div class="btn-group secondary-actions" role="group" [ngSwitch]="order?.Status"
     [tooltip]="order.hasErrors ? ('DETAILS.MISSING_REQ_FIELDS' | translate) : ''">
@@ -21,7 +24,7 @@
     <div class="row pt-3">
       <div class="col-12 col-md-8 pl-lg-3 pl-md-3">
         <div class="card">
-          <div class="card-header">
+          <div class="card-header border-bottom py-2">
             <h5>
               {{'DETAILS.ORDER_SUMMARY' | translate}}
             </h5>
@@ -37,24 +40,9 @@
                   [editable]="false"></apt-output-field>
               </div>
               <div class="flex-shrink-1 col-md-4 mb-2">
-                <apt-output-field [record]="order" field="PrimaryContact" displayValue="PrimaryContact"
-                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
-                  [showQuickView]="true" [lookupOptions]="lookupOptions" [required]="true"
-                  (onChange)="refreshOrder($event, order, 'PrimaryContact')"></apt-output-field>
-              </div>
-            </div>
-            <div class="row">
-              <div class="flex-shrink-1 col-md-4 mb-2">
                 <apt-output-field [record]="order" field="SoldToAccount" displayValue="SoldToAccount"
                   [label]="'MY_ACCOUNT.ORDER_DETAIL.ACCOUNT_NAME' | translate" [editable]="false"
                   [showQuickView]="true"></apt-output-field>
-              </div>
-              <div class="flex-shrink-1 col-md-4 mb-2">
-                <apt-output-field [record]="order" field="Description"
-                  [label]="'MY_ACCOUNT.ORDER_DETAIL.DESCRIPTION' | translate" field="Description"
-                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
-                  [showQuickView]="true"
-                  (onChange)="refreshOrder($event.Description, order, 'Description')"></apt-output-field>
               </div>
             </div>
             <div class="row">
@@ -64,37 +52,59 @@
                   [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
                   [showQuickView]="true" [required]="true" (onChange)="refreshOrder($event, order, 'ShipToAccount')">
                 </apt-output-field>
-                <apt-address id="shipping_address" [value]="order?.ShipToAccount" [type]="'Shipping'"
-                  [label]="'COMMON.SHIPPING_ADDRESS' | translate" [readonly]="true"></apt-address>
+                
               </div>
               <div class="flex-shrink-1 col-md-4 mb-2">
                 <apt-output-field [record]="order" field="BillToAccount" displayValue="BillToAccount"
                   [label]="'MY_ACCOUNT.ORDER_DETAIL.BILL_TO_ACCOUNT' | translate"
                   [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
                   [showQuickView]="true" (onChange)="refreshOrder($event, order, 'BillToAccount')"></apt-output-field>
-                <apt-address id="billing_address" [value]="order?.BillToAccount" [type]="'Billing'"
-                  [label]="'COMMON.BILLING_ADDRESS' | translate" [readonly]="true"></apt-address>
               </div>
+              <div class="flex-shrink-1 col-md-4 mb-2">
+                <apt-output-field [record]="order" field="PrimaryContact" displayValue="PrimaryContact"
+                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
+                  [showQuickView]="true" [lookupOptions]="lookupOptions" [required]="true"
+                  (onChange)="refreshOrder($event, order, 'PrimaryContact')"></apt-output-field>
+              </div>
+            </div>
+            <div class="row" *ngIf="isExpanded">
+              <div class="flex-shrink-1 col-md-4 mb-2">
+                <apt-output-field [record]="order" field="Description"
+                  [label]="'MY_ACCOUNT.ORDER_DETAIL.DESCRIPTION' | translate" field="Description"
+                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
+                  [showQuickView]="true"
+                  (onChange)="refreshOrder($event.Description, order, 'Description')"></apt-output-field>
+              </div>
+            </div>
+            <div class="d-flex justify-content-start">
+              <a href="javascript:void(0)" (click)="isExpanded = !isExpanded" class="text-decoration-none">
+                <span>
+                  {{ isExpanded ? ('COMMON.SHOW_LESS' | translate) : ('COMMON.SHOW_MORE' | translate) }}
+                  <i class="fas" [ngClass]="isExpanded ? 'fa-angle-double-up' : 'fa-angle-double-down'"></i>
+                </span>
+              </a>
             </div>
           </div>
         </div>
       </div>
-      <div class="col-12 col-md-4 pt-lg-0 pt-md-0 pt-sm-4 pt-4">
+      <div class="col-12 col-md-4 pt-lg-0 pt-md-0 pt-sm-3 pt-3">
         <apt-price-summary [record]="order" [page]="'orders'" [showStatus]="true"></apt-price-summary>
       </div>
     </div>
   </app-detail-section>
 
   <div class="pt-4">
-    <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-4">
+    <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-3">
       <div class="card">
         <div *ngIf="orderLineItems$ | async as orderLineItems">
-          <div class="card-header">
+          <div class="card-header border-bottom py-2">
             <h5>
               {{'DETAILS.LINE_ITEMS' | translate}}
-              <button class="btn text-primary px-4 ml-1" [ladda]="lineItemLoader" data-style="zoom-in"
+              <button class="btn text-primary px-2 ml-1 py-0" [ladda]="lineItemLoader" data-style="zoom-in"
                 *ngIf="isLoggedIn && (order?.Status === 'Draft' || order?.Status === 'Generated' || order?.Status === 'Presented') && orderLineItems?.length > 0"
-                data-spinner-color="black" (click)="editOrderItems(order)">{{'COMMON.EDIT' | translate}}
+                data-spinner-color="black" (click)="editOrderItems(order)">
+                <i class="fa fa-edit"></i>
+                {{'COMMON.EDIT' | translate}}
               </button>
             </h5>
           </div>
@@ -116,9 +126,9 @@
     </app-detail-section>
   </div>
   <div class="pt-4">
-    <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-4">
+    <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-3">
       <div class="card" #attachmentSection *ngIf="attachmentList$ | async as attachmentList; else loading">
-        <div class="card-header">
+        <div class="card-header border-bottom py-2">
           <h5>
             {{'DETAILS.ATTACHMENTS' | translate}}
             <span *ngIf="attachmentList?.length > 0">({{attachmentList?.length}})</span>

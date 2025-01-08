@@ -2,7 +2,7 @@
   <div *ngIf="!isInvalidGuest else routingMessage">
     <apt-alert [autoRun]="false"></apt-alert>
     <apt-jumbotron></apt-jumbotron>
-    <div class="container pb-5">
+    <div class="container pb-4 px-md-3 px-4">
       <div>
         <apt-product-carousel *ngIf="productListA$ | async as productListA; else loading" [productList]="productListA"
           slides="4" [title]="categories[0]?.Name" subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tincidunt quam massa, a commodo orci finibus

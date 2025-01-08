@@ -3,15 +3,15 @@
 <apt-alert [record]="cart" [autoRun]="false"></apt-alert>
 <apt-constraint-rule-alert></apt-constraint-rule-alert>
 <ng-container *ngIf="view$ | async as view">
-  <div class="container-fluid py-4">
+  <div class="container-fluid py-3">
     <div class="row">
-      <div class="col-12 col-lg-3">
+      <div class="col-12 col-lg-3 pr-2">
         <app-renewal-filter class="d-block mb-lg-2 mb-md-3 mb-sm-3 mb-3" (value)="onRenewalChange($event)"></app-renewal-filter>
         <app-price-type-filter class="d-block mb-lg-2 mb-md-3 mb-sm-3 mb-3" (value)="onPriceTypeChange($event)"></app-price-type-filter>
         <app-asset-action-filter class="d-block mb-lg-2 mb-md-3 mb-sm-3 mb-3" [value]="assetAction" [labels]="labels"
           (valueChange)="onAssetActionChange($event)"></app-asset-action-filter>
       </div>
-      <div class="col-12 col-lg-9">
+      <div class="col-12 col-lg-9 pl-2">
         <div class="row">
           <div class="col">
             <apt-data-filter [type]="type" [filterOptions]="advancedFilterOptions" [filterList]="advancedFilters"
@@ -21,7 +21,7 @@
         <div class="row">
           <div class="col-12 col-lg-6 mb-lg-0 mb-md-3 mb-sm-3 mb-3">
             <div class="card">
-              <div class="card-header">
+              <div class="card-header mt-2">
                 <strong class="text-uppercase">{{'ASSET_LIST.ASSETS_BY_PRICE_TYPE' | translate}}</strong>
               </div>
               <div class="card-body">
@@ -35,7 +35,7 @@
           </div>
           <div class="col-12 col-lg-6">
             <div class="card">
-              <div class="card-header">
+              <div class="card-header mt-2">
                 <strong class="text-uppercase"
                   >{{'ASSET_LIST.ASSET_AMOUNTS_BY_PRICE_TYPE' | translate}}</strong
                 >

@@ -1,24 +1,30 @@
 <div class="card" *ngIf="!isGuest; else guestTemplate ">
   <div class="card-body">
     <div class="row">
-      <div class="col-12 col-md-12">
+      <div class="col-12 col-md-6">
         <div class="form-group">
           <apt-input-field [entity]="quote" [field]="'ProposalName'" [(ngModel)]="quote.ProposalName"
             (ngModelChange)="quoteChange()" [label]="'CREATE_QUOTE.QUOTE_TITLE' | translate"></apt-input-field>
         </div>
         <div class="form-group">
-          <apt-output-field [record]="quote.Requestor" field="Name" label="Requestor"
+          <apt-output-field [record]="quote.Requestor" field="Name" [label]="'CREATE_QUOTE.REQUESTOR' | translate"
             [editable]="false"></apt-output-field>
         </div>
         <div class="form-group">
-          <apt-output-field [record]="quote" field="SourceChannel" label="Source Channel"
-            [editable]="false"></apt-output-field>
+          <apt-input-field [entity]="quote" [field]="'ShipToAccount'" [(ngModel)]="quote.ShipToAccount"
+            (ngModelChange)="shipToChange()"></apt-input-field>
+          <small class="px-1 font-italic d-block" *ngIf="shipToAccount$ | async as shipToAccount">
+            <apt-address [ngModel]="quote?.ShipToAccount" [readonly]="true" type="Shipping" [showLabel]="false">
+            </apt-address>
+          </small>
         </div>
         <div class="form-group">
           <apt-input-field [entity]="quote" [field]="'RFPResponseDueDate'" [(ngModel)]="quote.RFPResponseDueDate"
             (ngModelChange)="quoteChange()">
           </apt-input-field>
         </div>
+      </div>
+      <div class="col-12 col-md-6">
         <div class="form-group">
           <apt-input-field placeholder="{{'CREATE_QUOTE.SEARCH_CONTACTS' | translate }}" [entity]="quote"
             [field]="'PrimaryContact'" [lookupOptions]="lookupOptions" [required]="true"
@@ -27,23 +33,18 @@
           </apt-input-field>
         </div>
         <div class="form-group">
-          <apt-input-field [entity]="quote" [field]="'ShipToAccount'" [(ngModel)]="quote.ShipToAccount"
-            (ngModelChange)="shipToChange()"></apt-input-field>
-          <small class="px-3 font-italic d-block" *ngIf="shipToAccount$ | async as shipToAccount">
-            <apt-address [ngModel]="quote?.ShipToAccount" [readonly]="true" type="Shipping" [showLabel]="false">
-            </apt-address>
-          </small>
+          <apt-output-field [record]="quote" field="SourceChannel" [label]="'COMMON.SOURCE_CHANNEL' | translate"
+            [editable]="false"></apt-output-field>
         </div>
         <div class="form-group">
           <apt-input-field [entity]="quote" [field]="'BillToAccount'" [(ngModel)]="quote.BillToAccount"
             (ngModelChange)="billToChange()"> </apt-input-field>
-          <small class="px-3 font-italic d-block" *ngIf="billToAccount$ | async as billToAccount">
+          <small class="px-1 font-italic d-block" *ngIf="billToAccount$ | async as billToAccount">
             <apt-address [ngModel]="quote?.BillToAccount" [readonly]="true" type="Billing" [showLabel]="false">
             </apt-address>
           </small>
         </div>
-      </div>
-      <div class="col-12 col-md-6">
+
         <div>
           <!-- <h5 class="py-2" *ngIf="cart.Proposald">//Add back when the API is available
             {{'COMMON.COMMENTS' | translate}} <span *ngIf="comments?.length > 0">({{comments?.length}})</span>
@@ -94,8 +95,8 @@
           </div>
           <div class="col-12 col-md-6">
             <div class="form-group">
-              <apt-input-field [entity]="quote" name="rfpResponseDueDate" [field]="'RFPResponseDueDate'" [(ngModel)]="quote.RFPResponseDueDate"
-                (ngModelChange)="quoteChange()">
+              <apt-input-field [entity]="quote" name="rfpResponseDueDate" [field]="'RFPResponseDueDate'"
+                [(ngModel)]="quote.RFPResponseDueDate" (ngModelChange)="quoteChange()">
               </apt-input-field>
             </div>
           </div>

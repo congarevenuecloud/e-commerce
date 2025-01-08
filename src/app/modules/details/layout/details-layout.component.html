@@ -4,9 +4,9 @@
   <div class="headerContainer">
     <nav class="navbar d-block border-left-0 border-right-0 p-0 nav-tabs bg-white border-top" [ngClass]="headerClass"
       #headerNav>
-      <div class="d-flex border-bottom">
+      <div class="d-flex border-bottom px-2">
         <div
-          class="flex-grow-1 px-4 justify-content-center d-flex flex-column w-100 pt-lg-0 pt-md-0 pt-sm-2 pt-2 pb-lg-0 pb-md-0 pb-sm-3 pb-3">
+          class="flex-grow-1 px-2 justify-content-center d-flex flex-column w-100 pt-lg-0 pt-md-0 pt-sm-2 pt-2 pb-lg-0 pb-md-0 pb-sm-3 pb-3">
           <h3 [innerHTML]="title" *ngIf="title" class="overflow-hidden "></h3>
           <span [innerHTML]="subtitle" *ngIf="subtitle" class="pb-lg-0 pb-md-0 pb-sm-2 pb-2"></span>
           <ng-content select=".detail-header"></ng-content>
@@ -39,7 +39,7 @@
           </ul>
         </div>
 
-        <div class="ml-auto p-2 actions secondary-actions d-lg-block d-md-block d-sm-none d-none py-3">
+        <div class="ml-auto actions secondary-actions d-lg-block d-md-block d-sm-none d-none py-2 pl-2">
           <div class="d-flex align-items-center pl-4 h-100" #secondaryActions [hidden]="hideSecondaryActions">
             <ng-content select=".secondary-actions"></ng-content>
           </div>

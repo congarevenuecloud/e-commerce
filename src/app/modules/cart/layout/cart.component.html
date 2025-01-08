@@ -4,26 +4,26 @@
 </div>
 
 <ng-container *ngIf="cart">
-  <div class="container-fluid p-4" id="checkout-form">
+  <div class="container-fluid px-md-4 p-2" id="checkout-form">
     <apt-mini-profile #profile></apt-mini-profile>
     
-  <div class="d-flex justify-content-between">
-    <h4 class="text-muted">{{'CART.CHECKOUT' | translate}}</h4>
-    <div class="d-flex justify-content-end mb-3">
-      <apt-captcha *ngIf="showCaptchaOnCheckoutPage" (onCaptchaSuccess)="captchaSuccess(cart)"></apt-captcha>
-      <button class="btn btn-link" [routerLink]="['/carts/active']" [hidden]="loading">
-        {{'COMMON.CANCEL' | translate }}
-      </button>
-      <div class="d-flex" *ngIf="!showCaptchaOnCheckoutPage">
-        <ng-content select=".cancel-button"></ng-content>
-        <button class="btn btn-primary btn-block btn-raised" [ladda]="loading" data-style="zoom-in" [disabled]="(disableSubmit || (cart?.LineItems?.length < 1))"
-          (click)="orderPlacement()">
-          <span>{{ 'COMMON.PLACE_ORDER' | translate }}</span>
+    <div class="d-flex justify-content-between align-items-center flex-row flex-wrap w-100">
+      <h4 class="text-black mb-0 pl-md-0 pl-3">{{'CART.CHECKOUT' | translate}}</h4>
+      <div class="d-flex justify-content-end">
+        <apt-captcha *ngIf="showCaptchaOnCheckoutPage" (onCaptchaSuccess)="captchaSuccess(cart)"></apt-captcha>
+        <button class="btn btn-link py-0" [routerLink]="['/carts/active']" [hidden]="loading">
+          {{'COMMON.CANCEL' | translate }}
         </button>
+        <div class="d-flex" *ngIf="!showCaptchaOnCheckoutPage">
+          <ng-content select=".cancel-button"></ng-content>
+          <button class="btn btn-primary btn-block btn-raised" [ladda]="loading" data-style="zoom-in"
+            [disabled]="(disableSubmit || (cart?.LineItems?.length < 1))" (click)="orderPlacement()">
+            <span>{{ 'COMMON.PLACE_ORDER' | translate }}</span>
+          </button>
+        </div>
       </div>
-  </div>
-   </div>
-    <div class="row">
+    </div>
+    <div class="row py-2">
       <div class="col-md-4 order-md-2 mb-4">
         <apt-price-summary [record]="cart" [form]="form" [page]="pricingSummaryType" [loading]="loading" [showCaptcha]="false"
         (onSubmitOrder)="submitOrder()" (onShowCaptcha)="loadCaptcha()" #priceSummary>
@@ -31,13 +31,12 @@
         <cart-summary [cart]="cart"></cart-summary>
       </div>
       <div class="col-md-8 order-md-1">
-        <div class="mb-3" *ngIf="isLoggedIn" [ngClass]="isLoggedIn ? 'mt-2' : 'mt-4'">
-          <h5 class="mb-0 text-muted">{{'CART.BILLING_AND_SHIPPING_INFORMATION' | translate}}</h5>
-          <small>{{'CART.ENTER_SHIPPING_ADDRESS' | translate}}</small>
-        </div>
-        <div class="card p-3">
+        <div class="card px-3 pb-3 pt-0">
+          <div class="card-header border-bottom py-3 px-0" *ngIf="isLoggedIn">
+            <h5 class="card-title m-0 font-weight-light">{{'CART.BILLING_AND_SHIPPING_INFORMATION' | translate}}</h5>
+          </div>
           <form class="needs-validation" novalidate #form="ngForm">
-            <div class="row" *ngIf="!isLoggedIn">
+            <div class="row pt-3" *ngIf="!isLoggedIn">
               <div class="col-12 col-md-6">
                 <apt-input-field name="orderName" [entity]="order" [field]="'Name'" [(ngModel)]="order.Name"
                   [required]="true" [label]="'MY_ACCOUNT.DASHBOARD.ORDER_NAME' | translate" 

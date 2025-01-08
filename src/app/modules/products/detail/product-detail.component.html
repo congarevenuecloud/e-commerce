@@ -7,14 +7,14 @@
 
     <div class="primary-actions d-lg-block d-md-block d-sm-none d-none">
         <form class="d-flex">
-            <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-4 text-nowrap">
-                <small class="mb-2 d-block"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
+            <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-4 text-nowrap align-items-end">
+                <small class="mb-2 d-block text-right"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
                 <h5>
                     <apt-price [record]="viewState?.product" type="list"></apt-price>
                 </h5>
             </div>
-            <div class="form-group my-0 mr-lg-3 mr-md-3 mr-sm-1 mr-1">
-                <small class="mb-2 d-block"> {{'COMMON.NET_PRICE' | translate}} </small>
+            <div class="form-group my-0 mr-lg-2 mr-md-2 mr-sm-1 mr-1 align-items-end">
+                <small class="mb-2 d-block text-right"> {{'COMMON.NET_PRICE' | translate}} </small>
                 <h5>
                     <ng-container *ngIf="cartItemList?.length > 0 || viewState?.relatedTo; else productPrice">
                         <span *ngIf="primaryLineItem?.NetPrice; else pricemask">
@@ -72,12 +72,12 @@
 
                 <ng-template #newProduct>
                     <div class="d-flex justify-content-end">
-                        <div class="form-group mx-3 my-0 d-flex align-items-center w-50">
-                            <span class="mr-3"> {{'COMMON.QUANTITY' | translate}} </span>
+                        <div class="form-group ml-3 my-0 d-flex align-items-center col-5">
+                            <span class="mr-2">{{'COMMON.QUANTITY' | translate}}</span>
                             <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity"
                                 (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mr-2">
                             <apt-add-to-cart [showQuantityControls]="false" [configurationEnabled]="false"
                                 [quantity]="viewState.quantity" (onAddToCart)="onAddToCart($event)"
                                 [cartItems]="cartItemList" [product]="product ? product: viewState?.product"
@@ -88,9 +88,11 @@
                     </div>
                 </ng-template>
 
-                <button class="btn btn-outline-primary ml-2"
+                <button class="btn btn-outline-primary ms-2 text-nowrap"
                     *ngIf="(viewState?.product?.HasAttributes || viewState?.product?.HasOptions)"
-                    (click)="showSummary();">{{'DETAILS.PRICE_SUMMARY' | translate}}</button>
+                    (click)="showSummary();">
+                    {{'DETAILS.PRICE_SUMMARY' | translate}}
+                </button>
             </div>
         </ng-template>
 
@@ -99,12 +101,12 @@
     <div class="detail-header d-lg-none d-md-none d-sm-block d-block pt-2 border-top">
         <form class="d-flex justify-content-between pb-2">
             <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-5">
-                <small class="mb-2 d-block"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
+                <small class="mb-2 d-block text-right-lg"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
                 <h5>
                     <apt-price [record]="viewState?.product" type="list"></apt-price>
                 </h5>
             </div>
-            <div class="form-group my-0 mr-lg-3 mr-md-3 mr-sm-5 mr-5 ml-5">
+            <div class="form-group my-0 mr-lg-3 mr-md-3 mr-sm-5 mr-2 ml-5">
                 <small class="mb-2 d-block"> {{'COMMON.NET_PRICE' | translate}} </small>
                 <h5>
                     <ng-container *ngIf="cartItemList?.length > 0 || viewState?.relatedTo; else productPrice">
@@ -184,7 +186,7 @@
     </div>
 
     <app-detail-section [title]="'PRODUCT_DETAILS.DETAILS' | translate">
-        <div class="row px-2">
+        <div class="row px-1 mt-3">
             <div class="col-12 col-md-4">
                 <div class="card">
                     <div class="card-body">
@@ -194,7 +196,7 @@
             </div>
             <div class="col-12 col-md-8">
                 <div class="card d-lg-block d-md-block d-sm-none d-none">
-                    <div class="card-body pt-0 d-flex align-items-center">
+                    <div class="card-body pt-0 pl-2 pb-2 d-flex align-items-center">
                         <apt-output-field [record]="viewState?.product" field="Description" [valueOnly]="true" [editable]="false" class="px-2 pt-0"></apt-output-field>
                     </div>
                 </div>
