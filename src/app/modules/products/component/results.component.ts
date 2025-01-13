@@ -6,7 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
   selector: 'pl-results',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="border p-2 d-flex align-items-center justify-content-between" *ngIf="recordCount > 0">
+    <div class="p-2 d-flex align-items-center justify-content-between" *ngIf="recordCount > 0">
       <div>
         {{showRecordsCountMessage}}
         <span class="d-none d-md-inline" *ngIf="query"> for your search of&nbsp;<strong>{{query}}</strong></span>

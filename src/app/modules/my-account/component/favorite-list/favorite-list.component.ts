@@ -73,6 +73,10 @@ export class FavoriteListComponent implements OnInit {
                 {
                   prop: 'CreatedDate',
                   value: (record: Favorite) => this.getDateFormat(record)
+                },
+                {
+                  prop: 'ModifiedDate',
+                  value: (record: Favorite) => this.getDateFormat(record)
                 }
               ],
               actions: [
@@ -103,12 +107,19 @@ export class FavoriteListComponent implements OnInit {
                   label: 'Delete',
                   theme: 'danger',
                   validate: (record: Favorite) => this.canDelete(record),
-                  action: (recordList: Array<Favorite>) => this.favoriteService.removeFavorites(recordList).pipe(rmap(res => {
-                    if (res) {
-                      this.exceptionService.showSuccess('SUCCESS.FAVORITE.DELETED');
-                      this.loadData();
-                    }
-                  })),
+                  action: (recordList: Array<Favorite>) => this.favoriteService.removeFavorites(recordList)
+                    .pipe(
+                      rmap(res => {
+                        if (res) {
+                          this.exceptionService.showSuccess('SUCCESS.FAVORITE.DELETED');
+                          this.fetchFavoriteTotals();
+                        }
+                      }),
+                      catchError((err) => {
+                        this.fetchFavoriteTotals();
+                        throw err;
+                      })
+                    ),
                   disableReload: true
                 } as TableAction
               ],

@@ -9,20 +9,20 @@
 
 <apt-alert [autoRun]="false"></apt-alert>
 <apt-constraint-rule-alert></apt-constraint-rule-alert>
-<div class="container-fluid py-lg-4 py-md-2 py-sm-4 py-4" id="top">
-  <div class="d-flex justify-content-end mb-2">
+<div class="container-fluid py-lg-3 py-md-2 py-sm-3 py-3" id="top">
+  <div class="d-flex justify-content-end">
     <!-- This will be added back when assets feature is available in RLP -->
     <!-- <apt-installed-products></apt-installed-products> -->
   </div>
   <div class="row">
-    <div class="col-12 col-lg-3">
+    <div class="col-12 col-lg-3 pl-lg-3 pr-lg-2">
       <div>
 
-        <apt-product-type-filter (onFilterAdd)="onFilterAdd($event)" (onFilterRemove)="onFilterRemove($event)">
+        <apt-product-type-filter class="mb-2" (onFilterAdd)="onFilterAdd($event)" (onFilterRemove)="onFilterRemove($event)">
         </apt-product-type-filter>
 
         <apt-category-filter [category]="category" title="{{'PRODUCT_LIST.RELATED_CATEGORIES' | translate}}" limit="10"
-          relationship="peers" class="mb-2" (onChange)="onCategory($event)"></apt-category-filter>
+          relationship="peers" class="mb-2 mt-0" (onChange)="onCategory($event)"></apt-category-filter>
 
         <apt-category-filter [category]="category" title="{{'COMMON.SUB_CATEGORIES' | translate}}" limit="10"
           relationship="children" selection="multi" class="mb-2" (onChange)="onSubcategoryFilter($event)">
@@ -34,12 +34,12 @@
         </div>
       </div>
     </div>
-    <div class="col-12 col-lg-9">
+    <div class="col-12 col-lg-9 pl-lg-2 pr-lg-3">
       <div *ngIf="!hasSearchError else showSearchError">
 
         <div *ngIf="data$ | async as data;else loading">
           <div *ngIf="data?.TotalCount > 0; else noResult">
-            <nav class="navbar navbar-light bg-white p-0 mb-3">
+            <nav class="border navbar navbar-light bg-white pl-2 pr-0 py-1 mb-3 rounded">
               <pl-results [recordCount]="data?.TotalCount" [limit]="pageSize" [offset]="(page - 1) * pageSize"
                 [page]="page" [view]="view" [query]="searchString" [sortBy]="sortField" (onViewChange)="onView($event)"
                 (onSortChange)="onSortChange($event)" (onPageSizeChange)="onPageSizeChange($event)"
@@ -59,9 +59,9 @@
                 </pagination>
               </div>
             
-              <div class="col-12 d-lg-flex justify-content-start mb-3">
-                <apt-select-all [items]="data.Products"></apt-select-all>
-                <label class="pl-2 mt-1 pb-0 mb-0 align-items-center d-flex" *ngIf="selectedCount > 0">&#124;
+              <div class="col-12 d-lg-flex justify-content-start mb-3 align-items-baseline">
+                <apt-select-all class="mt-n3" [items]="data.Products"></apt-select-all>
+                <label class="pl-2 mt-n3 pb-0 mb-0 align-items-center d-flex" *ngIf="selectedCount > 0">&#124;
                   <span class="pl-1" [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'"
                     [translateParams]="{selectedCount: selectedCount, totalCount: data?.TotalCount | digitFormatter}">
                   </span>

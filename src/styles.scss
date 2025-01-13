@@ -121,8 +121,8 @@ address {
 }
 
 .thumbnail {
-  max-width: 3rem;
-  max-height: 3rem;
+  width: 3rem;
+  object-fit: contain;
 }
 
 /**
@@ -378,7 +378,7 @@ td.col-md-3{
     height: 6.25rem !important;
 
     button.dropdown-item {
-      padding: 0 1.5rem;
+      padding: 0 0.5rem;
       max-width: 100%;
     }
 
@@ -832,7 +832,7 @@ cc-page-header {
   padding: 0 1rem;
   margin: 0;
   line-height: $line-height-lg;
-  background-color: transparent;
+  background-color: transparent !important;
 }
 
 .card-header h5 {
@@ -846,7 +846,7 @@ cc-page-header {
 }
 
 label {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
   font-family: "Open Sans";
 }
 

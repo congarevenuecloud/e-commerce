@@ -115,21 +115,21 @@
         "NO_COMPARABLE_FEATURE": "{{products }} does not have comparable features to the selected products",
         "OTHER_FEATURES": "Other Features"
     },
-    "PRESENT":{
-        "ORDER":"Present Order",
-        "QUOTE":"Present Quote"
+    "PRESENT": {
+        "ORDER": "Present Order",
+        "QUOTE": "Present Quote"
     },
-    "EMAIL":{
-        "FROM":"From",
-        "TO":"To",
-        "CC":"Cc",
-        "BCC":"Bcc",
-        "SUBJECT":"Email Subject",
-        "SUBJECT_VALIDATION_MSG":"Please enter email subject",
-        "MESSAGE":"Email Message",
-        "TEMPLATE":"Email Template",
-        "VALID_EMAIL":"Please enter valid email ids.",
-        "INVALID_TO_FIELD":"To is required"
+    "EMAIL": {
+        "FROM": "From",
+        "TO": "To",
+        "CC": "Cc",
+        "BCC": "Bcc",
+        "SUBJECT": "Email Subject",
+        "SUBJECT_VALIDATION_MSG": "Please enter email subject",
+        "MESSAGE": "Email Message",
+        "TEMPLATE": "Email Template",
+        "VALID_EMAIL": "Please enter valid email ids.",
+        "INVALID_TO_FIELD": "To is required"
     },
     "MY_ACCOUNT": {
         "LAST_LOGIN_DATE": "Last Login Date",
@@ -137,7 +137,6 @@
         "SETTINGS": "Settings",
         "DASHBOARD": {
             "WEEKLY": "Weekly",
-            "SHOW_MORE": "Show more",
             "ORDERS_THIS_WEEK": "Orders this week",
             "QUOTES_THIS_WEEK": "Quotes This week",
             "SPENT": "Spent",
@@ -165,13 +164,14 @@
             "ORDER_DATE": "Order Date",
             "ORDER_STATUS": "Order Status",
             "PRODUCT_CONFIG": "Product Configuration",
-            "ORDERS_BY_STATUS": "Orders by Status",
+            "ORDERS_BY_STATUS": "Orders By Status",
             "SHIP_TO_ACCOUNT": "Ship To Account",
             "BILL_TO_ACCOUNT": "Bill To Account",
             "ORDER_TITLE": "Order Title",
             "ACCOUNT_NAME": "Account Name",
             "DESCRIPTION": "Description",
-            "CONFIRM_ORDER": "Confirm Order"
+            "CONFIRM_ORDER": "Confirm Order",
+            "ORDER_PENDING":"Orders Pending for Activation"
         },
         "CART_LIST": {
             "CREATE_NEW": "New Cart",
@@ -220,6 +220,7 @@
             "CONFIGURATION": "Configuration",
             "QUOTES_BY_STATUS": "Quotes By Status",
             "QUOTES_BY_DUE_DATE": "Quotes By Due Date",
+            "QUOTES_AMOUNT_BY_STATUS": "Quote Amount By Status",
             "TOTAL_QUOTES": "Total Quotes",
             "FINALIZE": "Finalize"
         },
@@ -473,10 +474,14 @@
         "ADD_PRODUCTS": "Add Products",
         "REPLACE": "Replace Product",
         "ACTION": "Action",
-        "MANAGE_VIEW":"Manage View",
-        "SEND":"Send",
-        "DISCARD":"Discard",
-        "NEXT":"Next",
+        "MANAGE_VIEW": "Manage View",
+        "SEND": "Send",
+        "DISCARD": "Discard",
+        "NEXT": "Next",
+        "REJECT": "Reject",
+        "SOURCE_CHANNEL": "Source Channel",
+        "SELLING_TERM": "Selling Term",
+        "PRICING_FREQUENCY": "Pricing Frequency",
         "ATTACHMENT_DETAILS": {
             "TITLE": "Attach new file(s)",
             "INPUT_LABEL": "Drop files to Attach or",
@@ -489,18 +494,18 @@
             "BY": "by",
             "MAKE_VISIBILITY_PRIVATE": "Make visibility private",
             "INVALID_FILE": "Invalid file extension",
-            "UPLOAD_FILES":"Upload files",
-            "ADD_ATTACHMENT":"Add attachment",
-            "ADDITIONAL_ATTACHMENT":"Additional attachments",
-            "DOCUMENTS":"Documents",
-            "NO_DOC_MATCH_MESSAGE":"No documents match the search criteria",
-            "AVAILABLE_DOCUMENTS":"Available documents",
-            "DOC_SELECTED":"Selected documents ({{number}})",
-            "NO_DOC_SELECTED":"No documents selected",
-            "SEARCH_DOCUMENTS":"Search documents",
-            "SEARCH_TEMPLATE_PLACEHOLDER":"Type to search email templates",
-            "REVIEW_AND_SEND":"Review and Send",
-            "MAX_FILE_UPLOAD_ERROR":"Maximum files allowed {{number}}"
+            "UPLOAD_FILES": "Upload files",
+            "ADD_ATTACHMENT": "Add attachment",
+            "ADDITIONAL_ATTACHMENT": "Additional attachments",
+            "DOCUMENTS": "Documents",
+            "NO_DOC_MATCH_MESSAGE": "No documents match the search criteria",
+            "AVAILABLE_DOCUMENTS": "Available documents",
+            "DOC_SELECTED": "Selected documents ({{number}})",
+            "NO_DOC_SELECTED": "No documents selected",
+            "SEARCH_DOCUMENTS": "Search documents",
+            "SEARCH_TEMPLATE_PLACEHOLDER": "Type to search email templates",
+            "REVIEW_AND_SEND": "Review and Send",
+            "MAX_FILE_UPLOAD_ERROR": "Maximum files allowed {{number}}"
         },
         "ALT_TEXT_IMAGE": "Generic placeholder image",
         "NO_LINE_ITEMS_MESSAGE": "No line items yet on this {{record}}",
@@ -508,7 +513,9 @@
         "PROCESSING_MESSAGE": "Your request is being processed.....",
         "TABLE_ACTION_CONFIRMATION_MESSAGE": "Are you sure you want to {{actionType}} all {{recordCount}} {{objectName}}(s)",
         "NO_MATCHING_ORDERS_FOUND": "No matching orders found",
-        "NO_MATCHING_QUOTES_FOUND": "No matching quotes found"
+        "NO_MATCHING_QUOTES_FOUND": "No matching quotes found",
+        "SHOW_MORE": "Show more",
+        "SHOW_LESS": "Show less"
     },
     "ASSET_ACTIONS": {
         "AMEND": "Amend",
@@ -544,6 +551,7 @@
         "SHIP_TO_ACCOUNT": "Ship to Account",
         "BILL_TO_ACCOUNT": "Bill to Account",
         "SEARCH_CONTACTS": "Search Contacts",
+        "REQUESTOR": "Requestor",
         "FINALIZE_AND_SUBMIT": "Finalize & Submit Quote",
         "PRIMARY_CONTACT_IS_MANDATORY": "Primary contact is mandatory"
     },
@@ -693,7 +701,7 @@
         "CHECKOUT": "Checkout",
         "LOG_IN": "LOG IN",
         "LOGIN_FOR_FASTER_CHECKOUT": "for a faster checkout experience and to get access on additional features, or you can continue as a guest.",
-        "BILLING_AND_SHIPPING_INFORMATION": "BILLING & SHIPPING INFORMATION",
+        "BILLING_AND_SHIPPING_INFORMATION": "Billing and Shipping Information",
         "ENTER_SHIPPING_ADDRESS": "Please enter your shipping address.",
         "SUCCESSFUL_ORDER_CREATION_MESSAGE": "Your order has been placed. You will be notified the order details to your email address {{emailAddress}}",
         "SUCCESSFUL_ORDER_CREATION_MESSAGE_WITHOUT_EMAIL": "Your order has been placed"
@@ -944,7 +952,7 @@
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "Your Order Is: {{orderName}}",
         "VIEW_YOUR_ORDER": "View Your Order",
-        "PRESENT_QUOTE":"Present"
+        "PRESENT_QUOTE": "Present"
     },
     "SERVICES": {
         "SELECTION_OF_ASSETS_MUST_TOOLTIP": "Must select multiple assets to perform batch action.",
@@ -1020,7 +1028,7 @@
         "PER_PAGE": "per page",
         "NO_DATA_TO_DISPLAY": "No records found",
         "NO_FILTERS_MATCHED": "No records match the filter criteria applied",
-        "SEQUENCE":"Sequence"
+        "SEQUENCE": "Sequence"
     },
     "AOBJECTS": {
         "PROPOSALS": "Proposals",
@@ -1067,6 +1075,7 @@
         "ACCOUNT": "Account",
         "ORDER_NAME": "Order Name",
         "PROPOSAL_NAME": "Proposal Name",
-        "CREATED_DATE": "Created Date"
+        "CREATED_DATE": "Created Date",
+        "CREATED_BY": "Created By"
     }
 }

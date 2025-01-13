@@ -33,7 +33,7 @@
         </button>
       </div>
       <div class="modal-body pt-0 bg-white custom-border-bottom-radius-0">
-        <h4 class="modal-title pull-left font-weight-bold  pb-3 pt-2">{{'MY_ACCOUNT.CART_LIST.CREATE_NEW' | translate}}
+        <h4 class="modal-title pull-left font-weight-bold py-3">{{'MY_ACCOUNT.CART_LIST.CREATE_NEW' | translate}}
         </h4>
         <div>
           <apt-input-field placeholder="{{'COMMON.NAME' | translate}}" name="cartName" [(ngModel)]="cart.Name"
@@ -41,10 +41,10 @@
         </div>
         <small class="text-danger animated fadeIn" *ngIf="message">{{message}}</small>
       </div>
-      <div class="d-flex justify-content-end modal-footer border-top  bg-white">
-        <button class="btn btn-link pr-1" type="button" (click)="modalRef.hide()">{{'COMMON.CANCEL' |
+      <div class="d-flex justify-content-end modal-footer border-top bg-white">
+        <button class="btn btn-link m-0" type="button" (click)="modalRef.hide()">{{'COMMON.CANCEL' |
           translate}}</button>
-        <button class="btn button btn-primary btn-raised px-1 m-0 w-25" type="submit" [ladda]="loading">{{'COMMON.SAVE'
+        <button class="btn button btn-primary btn-raised px-1 m-0" type="submit" [ladda]="loading">{{'COMMON.SAVE'
           |
           translate}}</button>
       </div>

@@ -59,35 +59,35 @@
                 aria-orientation="vertical">
                 <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/orders']"
                   [routerLinkActive]="'active'">
-                  <i class="fas fa-list-ul"></i>
+                  <i class="fas fa-list-ul pr-1"></i>
                   {{'COMMON.MY_ORDERS' | translate}}
                 </a>
                 <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/quotes']"
                   [routerLinkActive]="'active'">
-                  <i class="fas fa-pencil-alt"></i>
+                  <i class="fas fa-pencil-alt pr-1"></i>
                   {{'COMMON.MY_QUOTES' | translate}}
                 </a>
                 <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/carts']"
                   [routerLinkActive]="'active'">
-                  <i class="fas fa-shopping-cart"></i>
+                  <i class="fas fa-shopping-cart pr-1"></i>
                   {{'COMMON.MY_CARTS' | translate}}
                 </a>
                 <a class="pt-3" href="javascript:void(0)" *ngIf="showFavorites$ | async"
                   [routerLink]="['/my-account/favorites']" [routerLinkActive]="'active'">
-                  <i class="fas fa-shopping-cart"></i>
+                  <i class="fas fa-star pr-1"></i>
                   {{'COMMON.FAVORITES' | translate}}
                 </a>
                 <a class="pt-3" href="javascript:void(0)" [routerLink]="['/assets']" routerLinkActive="active" class="pt-3">
-                  <i class = "fa fa-shopping-bag"></i>
+                  <i class = "fa fa-shopping-bag pr-2"></i>
                   {{'COMMON.INSTALLED_PRODUCTS' | translate}}
                  </a>
                 <a class="pt-3 d-lg-none d-md-none d-sm-block d-block" href="javascript:void(0)" [routerLink]="['/my-account/settings']"
                   [routerLinkActive]="'active'">
-                  <i class="fas fa-cog"></i>
+                  <i class="fas fa-cog pr-2"></i>
                   {{'MY_ACCOUNT.SETTINGS' | translate}}
                 </a>
                 <a class="pt-3" href="javascript:void(0)" (click)="doLogout()">
-                  <i class="fas fa-sign-out-alt"></i>
+                  <i class="fas fa-sign-out-alt pr-2"></i>
                   {{'HEADER.LOG_OUT' | translate}}
                 </a>
               </div>

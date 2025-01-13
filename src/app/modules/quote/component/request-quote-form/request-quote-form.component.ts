@@ -12,8 +12,6 @@ import {
 } from '@congarevenuecloud/ecommerce';
 import { LookupOptions } from '@congarevenuecloud/elements';
 
-import moment from 'moment';
-
 @Component({
   selector: 'app-request-quote-form',
   templateUrl: './request-quote-form.component.html',
@@ -33,7 +31,6 @@ export class RequestQuoteFormComponent implements OnInit {
   bsConfig: Partial<BsDatepickerConfig>;
   startDate: Date = new Date();
   rfpDueDate: Date = new Date();
-  _moment = moment;
   note: Note = new Note();
   comments: any = [];
 

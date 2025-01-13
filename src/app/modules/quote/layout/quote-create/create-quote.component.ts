@@ -76,6 +76,9 @@ export class CreateQuoteComponent implements OnInit {
   convertCartToQuote(cart: Cart) {
     const quoteAmountGroup = find(get(cart, 'SummaryGroups'), c => get(c, 'LineType') === 'Grand Total');
     set(this.quoteRequestObj, 'GrandTotal.Value', defaultTo(get(quoteAmountGroup, 'NetPrice', 0).toString(), '0'));
+    if(!this.isLoggedIn){
+      this.quoteRequestObj.PrimaryContact.Name = this.quoteRequestObj?.PrimaryContact.FirstName+' '+this.quoteRequestObj?.PrimaryContact.LastName;
+    }
     if (this.quoteRequestObj.PrimaryContact) {
       this.loading = true;
       this.quoteService.convertCartToQuote(this.quoteRequestObj).pipe(take(1)).subscribe(res => {

@@ -56,10 +56,12 @@ export class CartListComponent implements OnInit {
                 },
                 {
                   prop: 'CreatedDate',
+                  label: 'CUSTOM_LABELS.CREATED_DATE',
                   value: (record: Cart) => this.getDateFormat(record)
                 },
                 {
-                  prop: 'NumberOfItems'
+                  prop: 'CreatedBy.Name',
+                   label: 'CUSTOM_LABELS.CREATED_BY'
                 },
                 {
                   prop: 'IsActive',
@@ -75,6 +77,9 @@ export class CartListComponent implements OnInit {
                 },
                 {
                   prop: 'Status'
+                },
+                {
+                  prop: 'NumberOfItems'
                 }
               ],
               lookups: ['SummaryGroups'],
@@ -116,11 +121,17 @@ export class CartListComponent implements OnInit {
                   label: 'Delete',
                   theme: 'danger',
                   validate: (record: Cart) => this.canPerformAction(record),
-                  action: (recordList: Array<Cart>) => this.cartService.deleteCart(recordList).pipe(map(res => {
-                    this.exceptionService.showSuccess('SUCCESS.CART.DELETED');
-                    this.getCartAggregate();
-                    this.loadView();
-                  })),
+                  action: (recordList: Array<Cart>) => this.cartService.deleteCart(recordList)
+                    .pipe(
+                      map(res => {
+                        this.exceptionService.showSuccess('SUCCESS.CART.DELETED');
+                        this.getCartAggregate();
+                      }),
+                      catchError(err => {
+                        this.getCartAggregate();
+                        throw err;
+                      })
+                    ),
                   disableReload: true
                 } as TableAction,
                 {

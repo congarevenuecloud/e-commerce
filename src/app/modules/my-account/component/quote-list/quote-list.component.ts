@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { map as rmap, switchMap, take, catchError } from 'rxjs/operators';
 import moment from 'moment';
-import { get, sumBy, map as _map, mapValues, groupBy, omit, mapKeys, bind, includes } from 'lodash';
+import { get, sumBy, map as _map, mapValues, groupBy, omit } from 'lodash';
 import { Operator, ApiService, FilterOperator } from '@congarevenuecloud/core';
 import { Quote, QuoteService, LocalCurrencyPipe, AccountService, FieldFilter, QuoteResult, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
 import { TableOptions, CustomFilterView, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
@@ -20,10 +20,8 @@ export class QuoteListComponent implements OnInit {
   view$: Observable<QuoteListView>;
   amountsByStatus$: Observable<GroupByAggregateResponse>;
   quotesByStatus$: Observable<GroupByAggregateResponse>;
-  quotesByDueDate$: Observable<GroupByAggregateResponse>;
-  colorPalette: Array<String> = [];
-  minDaysFromDueDate: number = 7;
-  maxDaysFromDueDate: number = 14;
+  colorPalette = ['#D22233', '#F2A515', '#6610f2', '#008000', '#17a2b8', '#0079CC', '#CD853F', '#6f42c1', '#20c997', '#fd7e14'];
+
 
   filterList$: BehaviorSubject<Array<FieldFilter>> = new BehaviorSubject<Array<FieldFilter>>([]);
 
@@ -137,25 +135,7 @@ export class QuoteListComponent implements OnInit {
     return this.quoteService.getQuoteAggregatesByApprovalStage(null, this.aggregateFields, queryFields, groupByFields, this.filterList$.value).pipe(take(1)).subscribe((data) => {
       this.amountsByStatus$ = of(omit(mapValues(groupBy(data, 'ApprovalStage'), (s) => sumBy(s, 'sum(Amount)')), 'null'));
       this.quotesByStatus$ = of(omit(mapValues(groupBy(data, 'ApprovalStage'), (s) => sumBy(s, 'count(ApprovalStage)')), 'null'));
-      this.quotesByDueDate$ = of(omit(mapKeys(mapValues(groupBy(data, 'RFPResponseDueDate'), s => sumBy(s, 'count(RFPResponseDueDate)')), bind(this.generateLabel, this)), 'null'));
     });
-  }
-
-  private generateLabel(date): string {
-    const today = moment(new Date());
-    const dueDate = (date) ? moment(date) : null;
-    if (dueDate && dueDate.diff(today, 'days') < this.minDaysFromDueDate) {
-      if (!includes(this.colorPalette, 'rgba(208, 2, 27, 1)')) this.colorPalette.push('rgba(208, 2, 27, 1)');
-      return '< ' + this.minDaysFromDueDate + ' Days';
-    }
-    else if (dueDate && dueDate.diff(today, 'days') > this.minDaysFromDueDate && dueDate.diff(today, 'days') < this.maxDaysFromDueDate) {
-      if (!includes(this.colorPalette, 'rgba(245, 166, 35, 1)')) this.colorPalette.push('rgba(245, 166, 35, 1)');
-      return '< ' + this.maxDaysFromDueDate + ' Days';
-    }
-    else {
-      if (!includes(this.colorPalette, 'rgba(43, 180, 39, 1)')) this.colorPalette.push('rgba(43, 180, 39, 1)');
-      return '> ' + this.maxDaysFromDueDate + ' Days';
-    }
   }
 
   handleFilterListChange(event: any) {

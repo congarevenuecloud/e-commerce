@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy, SecurityContext } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
+import { DomSanitizer } from '@angular/platform-browser';
 import { get, isNil, isEmpty, toString, toNumber, set, isEqual, remove } from 'lodash';
-import { Observable, of, BehaviorSubject, Subscription, combineLatest, empty } from 'rxjs';
+import { Observable, of, BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-import { mergeMap, take } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { FilterOperator } from '@congarevenuecloud/core';
 import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote, CartService, StorefrontService } from '@congarevenuecloud/ecommerce';
-import { DomSanitizer } from '@angular/platform-browser';
-import { BatchSelectionService } from '@congarevenuecloud/elements'
+import { BatchSelectionService } from '@congarevenuecloud/elements';
 /**
  * Product list component shows all the products in a list for user selection.
  */
@@ -164,7 +164,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.moveToLast = false;
     });
     this.fields = ['AdjustmentType', 'AdjustmentAmount', 'StartDate', 'EndDate'];
-    this.businessObjectFields = ['Description', 'BillToAccount', 'Amount', 'ModifiedDate', 'AutoActivateOrder', 'ABOType', 'DiscountPercent', 'configurationSyncDate', 'PONumber']
+    this.businessObjectFields = ['Description', 'BillToAccount', 'Amount', 'ModifiedDate', 'AutoActivateOrder', 'ABOType', 'DiscountPercent', 'configurationSyncDate', 'SourceChannel', 'PONumber']
     this.object = new Quote();
     this.subscription = (this.batchSelectionService.getSelectedProducts().subscribe((data) => {
       this.selectedCount = data?.length ? data.length : 0;
