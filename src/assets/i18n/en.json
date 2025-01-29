@@ -47,7 +47,9 @@
             "TRY_AGAIN_MSG": "Your favorite {{name}} could not be created. Please try again."
         },
         "INVALID_GUEST_MESSAGE": "You need to login to continue to this store. Redirecting to login screen…",
-        "GENERATE_DOCUMENT_ERROR": "Document generation has failed"
+        "GENERATE_DOCUMENT_ERROR": "Document generation has failed",
+        "PAGE_ERROR":"Something's not right",
+        "INVALID_STOREFRONT":"This is an invalid storefront, please contact your System Administrator."
     },
     "SUCCESS": {
         "TITLE": "Success",

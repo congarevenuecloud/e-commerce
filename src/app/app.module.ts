@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslatorLoaderService, CommerceModule } from '@congarevenuecloud/ecommerce';
-import { TableModule, CongaModalModule, IconModule, ProductDrawerModule } from '@congarevenuecloud/elements';
+import { TableModule, CongaModalModule, IconModule, ProductDrawerModule, ErrorPageModule } from '@congarevenuecloud/elements';
 import { AuthConfigModule } from './auth/auth-config.module';
 import { AuthorizationGuard } from './auth/auth.guard';
 import { AppRoutingModule } from './app-routing.module';
@@ -40,7 +40,8 @@ registerLocaleData(localeEs, 'es-MX', localeEsExtras);
     ProductDrawerModule,
     CongaModalModule,
     IconModule,
-    AuthConfigModule
+    AuthConfigModule,
+    ErrorPageModule
   ],
   providers: [
     AuthorizationGuard, AuthenticationGuard
