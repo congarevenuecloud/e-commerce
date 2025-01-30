@@ -69,7 +69,7 @@
                 </div>
                 <div class="card-body">
                     <ng-container *ngIf="quotesByStatus$ | async as quotesByStatus; else loading">
-                        <apt-chart *ngIf="(quotesByStatus | json) != '{}'; else noData" [data]="quotesByStatus"
+                        <apt-chart [data]="quotesByStatus"
                             [amountsByStatus]="amountsByStatus$ | async" [type]="'bar'" [showLegend]="false">
                         </apt-chart>
                     </ng-container>
@@ -84,7 +84,7 @@
                 </div>
                 <div class="card-body">
                     <ng-container *ngIf="amountsByStatus$ | async as amountsByStatus; else loading">
-                        <apt-chart *ngIf="(amountsByStatus | json) != '{}'; else noData"
+                        <apt-chart
                             [data]="amountsByStatus" [type]="'doughnut'" [legendPosition]="'right'"
                             [colorPalette]="colorPalette" [labelDataTransform]="'currency'">
                         </apt-chart>
@@ -107,12 +107,6 @@
     <ng-template #loading>
         <div class="d-flex justify-content-center pt-5">
             <apt-dots></apt-dots>
-        </div>
-    </ng-template>
-    <ng-template #noData>
-        <div class="d-flex justify-content-center align-items-baseline">
-            <i class="fas fa-exclamation-triangle"> </i>
-            <p class="pl-1">{{'COMMON.NO_MATCHING_QUOTES_FOUND' | translate}}</p>
         </div>
     </ng-template>
 </ng-template>

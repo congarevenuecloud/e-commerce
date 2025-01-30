@@ -6,7 +6,7 @@ import { Observable, of, Subscription } from 'rxjs';
 import { catchError, map, take } from 'rxjs/operators';
 import { ClassType } from 'class-transformer/ClassTransformer';
 import { find, first, get, isNil } from 'lodash';
-import { AObject, FilterOperator } from '@congarevenuecloud/core';
+import { AObject, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import { CartService, Cart, PriceService, CartResult, FieldFilter, SummaryGroup, LocalCurrencyPipe, DateFormatPipe, AccountService } from '@congarevenuecloud/ecommerce';
 import { TableOptions, TableAction, ExceptionService } from '@congarevenuecloud/elements';
 
@@ -61,7 +61,7 @@ export class CartListComponent implements OnInit {
                 },
                 {
                   prop: 'CreatedBy.Name',
-                   label: 'CUSTOM_LABELS.CREATED_BY'
+                  label: 'CUSTOM_LABELS.CREATED_BY'
                 },
                 {
                   prop: 'IsActive',
@@ -265,7 +265,7 @@ export class CartListComponent implements OnInit {
     return [
       {
         field: 'Account.Id',
-        value: localStorage.getItem('account'),
+        value: localStorage.getItem(PlatformConstants.ACCOUNT),
         filterOperator: FilterOperator.EQUAL
       },
       {

@@ -821,7 +821,8 @@
         "TOTAL_PROMOTION_AMOUNT": "es_MX Total Promotion Amount",
         "PROMOTION_APPLIEDTO": "es_MX Promotions Applied To",
         "APPLIED_PROMOTION": "es_MX applied to the following items in the cart.",
-        "COUPON_CODE": "es_MX Coupon Code"
+        "COUPON_CODE": "es_MX Coupon Code",
+        "AVAILABLE_PROMOTIONS": "es_MX Available Promotions"
     },
     "LOGIN": {
         "PLS_SIGNIN": "es_MX Please sign in",

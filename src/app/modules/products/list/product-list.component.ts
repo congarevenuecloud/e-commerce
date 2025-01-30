@@ -5,7 +5,7 @@ import { get, isNil, isEmpty, toString, toNumber, set, isEqual, remove } from 'l
 import { Observable, of, BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { mergeMap } from 'rxjs/operators';
-import { FilterOperator } from '@congarevenuecloud/core';
+import { FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, Product, FacetFilter, FacetFilterPayload, Quote, CartService, StorefrontService } from '@congarevenuecloud/ecommerce';
 import { BatchSelectionService } from '@congarevenuecloud/elements';
 /**
@@ -59,9 +59,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   hasSearchError: boolean;
   moveToLast: boolean = false;
   productResult: PreviousState;
-  private static VIEW_KEY = 'view';
-  private static PAGESIZE_KEY = 'pagesize'
-  private PRICELIST_KEY: string = 'pricelistId';
+  private static VIEW_KEY: string = PlatformConstants.PAGE_VIEW;
+  private static PAGESIZE_KEY: string = PlatformConstants.PAGE_SIZE;
+  private PRICELIST_KEY: string = PlatformConstants.PRICELIST_ID;
   product = new Product();
   facetFilterPayload: FacetFilterPayload;
 
