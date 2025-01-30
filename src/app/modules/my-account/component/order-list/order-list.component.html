@@ -53,7 +53,7 @@
                 </div>
                 <div class="card-body">
                     <ng-container *ngIf="ordersByStatus$ | async as ordersByStatus; else loading">
-                        <apt-chart *ngIf="(ordersByStatus | json) != '{}'; else noData" [data]="ordersByStatus"
+                        <apt-chart [data]="ordersByStatus"
                             [amountsByStatus]="orderAmountByStatus$ | async" [type]="'bar'" [showLegend]="false">
                         </apt-chart>
                     </ng-container>
@@ -67,7 +67,7 @@
                 </div>
                 <div class="card-body">
                     <ng-container *ngIf="orderAmountByStatus$ | async as orderAmountByStatus; else loading">
-                        <apt-chart *ngIf="(orderAmountByStatus | json) != '{}'; else noData"
+                        <apt-chart
                             [data]="orderAmountByStatus" [type]="'doughnut'" [legendPosition]="'right'"
                             [colorPalette]="colorPalette" [labelDataTransform]="'currency'">
                         </apt-chart>
@@ -93,10 +93,4 @@
         </div>
     </ng-template>
 
-    <ng-template #noData>
-        <div class="d-flex justify-content-center align-items-baseline">
-            <i class="fas fa-exclamation-triangle"> </i>
-            <p class="pl-1">{{'COMMON.NO_MATCHING_ORDERS_FOUND' | translate}}</p>
-        </div>
-    </ng-template>
 </ng-template>

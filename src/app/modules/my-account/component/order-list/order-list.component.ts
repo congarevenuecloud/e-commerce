@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { of, Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { switchMap, take, map as rmap, catchError } from 'rxjs/operators';
 import { get, groupBy, isArray, map, omit, sumBy, zipObject, mapValues } from 'lodash';
-import { Operator, ApiService, FilterOperator } from '@congarevenuecloud/core';
+import { Operator, ApiService, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import { OrderService, Order, AccountService, FieldFilter, OrderResult, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
 import { TableOptions, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
 @Component({
@@ -131,7 +131,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
     return [
       {
         field: 'SoldToAccount.Id',
-        value: localStorage.getItem('account'),
+        value: localStorage.getItem(PlatformConstants.ACCOUNT),
         filterOperator: FilterOperator.EQUAL
       }] as Array<FieldFilter>;
   }
