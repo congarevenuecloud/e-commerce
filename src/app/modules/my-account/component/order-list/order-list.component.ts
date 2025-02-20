@@ -64,8 +64,12 @@ export class OrderListComponent implements OnInit, OnDestroy {
             tableOptions: {
               columns: [
                 {
+                  prop: 'OrderNumber',
+                  enableRouteLink: true
+                },
+                {
                   prop: 'Name',
-                  label: 'CUSTOM_LABELS.ORDER_NAME'
+                  label: 'COMMON.NAME'
                 },
                 {
                   prop: 'Status'
@@ -101,7 +105,8 @@ export class OrderListComponent implements OnInit, OnDestroy {
                 'ShipToAccount.Name',
                 'OrderAmount',
                 'CreatedDate',
-                'ActivatedDate'
+                'ActivatedDate',
+                'OrderNumber'
               ],
               filters: this.filterList$.value.concat(this.getFilters()),
               routingLabel: 'orders'

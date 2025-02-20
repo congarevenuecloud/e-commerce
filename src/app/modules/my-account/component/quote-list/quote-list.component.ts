@@ -88,8 +88,12 @@ export class QuoteListComponent implements OnInit {
             tableOptions: {
               columns: [
                 {
+                  prop: 'ProposalNumber',
+                  enableRouteLink: true
+                },
+                {
                   prop: 'Name',
-                  label: 'CUSTOM_LABELS.PROPOSAL_NAME'
+                  label: 'COMMON.NAME'
                 },
                 {
                   prop: 'ApprovalStage'
