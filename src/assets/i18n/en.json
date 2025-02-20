@@ -836,7 +836,8 @@
         "TOTAL_PROMOTION_AMOUNT": "Total Promotion Amount",
         "PROMOTION_APPLIEDTO": "Promotions Applied To",
         "APPLIED_PROMOTION": "applied to the following items in the cart.",
-        "COUPON_CODE": "Coupon Code"
+        "COUPON_CODE": "Coupon Code",
+        "AVAILABLE_PROMOTIONS": "Available Promotions"
     },
     "LOGIN": {
         "PLS_SIGNIN": "Please sign in",

@@ -816,7 +816,8 @@
         "TOTAL_PROMOTION_AMOUNT": "fr_FR Total Promotion Amount",
         "PROMOTION_APPLIEDTO": "fr_FR Promotions Applied To",
         "APPLIED_PROMOTION": "fr_FR applied to the following items in the cart.",
-        "COUPON_CODE": "fr_FR Coupon Code"
+        "COUPON_CODE": "fr_FR Coupon Code",
+        "AVAILABLE_PROMOTIONS": "fr_FR Available Promotions"
     },
     "LOGIN": {
         "PLS_SIGNIN": "fr_FR Please sign in",

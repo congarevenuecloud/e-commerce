@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of, Subscription } from 'rxjs';
 import { take, map } from 'rxjs/operators';
-import { sumBy, get, defaultTo, includes, some, forEach, filter, isEmpty, omit, mapKeys, mapValues, groupBy, size, bind } from 'lodash';
-import { ApiService, FilterOperator } from '@congarevenuecloud/core';
+import { sumBy, get, defaultTo, forEach, filter, isEmpty, omit, mapValues, groupBy, size, reduce, pickBy } from 'lodash';
+import { ApiService, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import { OrderService, Order, UserService, User, FieldFilter, AccountService, LocalCurrencyPipe, QuoteService, Quote, OrderResult, QuoteResult, DateFormatPipe } from '@congarevenuecloud/ecommerce';
 import { TableOptions } from '@congarevenuecloud/elements';
 
@@ -16,7 +16,7 @@ import moment from 'moment';
 export class DashboardComponent implements OnInit {
 
   orderType = Order;
-  quoteType= Quote;
+  quoteType = Quote;
 
   user$: Observable<User>;
   subscription: Subscription;
@@ -27,11 +27,11 @@ export class DashboardComponent implements OnInit {
   orderAmountByStatus$: Observable<number>;
   view$: Observable<TableOptions>;
   quoteView$: Observable<TableOptions>;
-  categorizedOrders$: Observable<any>;
-  quotesByDueDateData: any;
+  categorizedOrders$: Observable<Object>;
+  quotesByDueDateData$: Observable<Object>;
   minDaysFromDueDate: number = 7;
   maxDaysFromDueDate: number = 14;
-  colorPalette = ['#D22233', '#F2A515', '#6610f2', '#008000', '#17a2b8', '#0079CC', '#CD853F', '#6f42c1', '#20c997', '#fd7e14'];
+  colorPalette = [];
   totalCount: number;
 
   constructor(private orderService: OrderService, private currencyPipe: LocalCurrencyPipe, private userService: UserService, private apiService: ApiService, private accountService: AccountService, private quoteService: QuoteService, private dateFormatPipe: DateFormatPipe) { }
@@ -46,20 +46,26 @@ export class DashboardComponent implements OnInit {
         this.totalOrderRecords$ = this.orderService.getMyOrders(null, null, this.getOrderFilters()).pipe(map(orderResult => defaultTo(get(orderResult, 'TotalCount'), 0)))
         this.totalOrderAmount$ = this.orderService.getMyOrders(null, null, this.getFilterForAmount(), null, null, null, null, null, false).pipe(map((orderResult: OrderResult) => {
           const orders = get(orderResult, 'Orders', []);
-          this.getChartData(orders);
+          this.categorizeOrdersByAge(orders);
           return sumBy(orders, (order) => get(order, 'OrderAmount.DisplayValue'));
         })
-      );
+        );
         this.totalQuoteRecords$ = this.quoteService.getMyQuotes(null, this.getQuoteFilters(), null, null, null, null, null, false).pipe(map(quoteResult => defaultTo(get(quoteResult, 'TotalCount'), 0)))
-        this.totalQuoteAmount$ = this.quoteService.getMyQuotes(null, this.getQuoteFilterForAmount(), null, null, null, null, null, false).pipe(
+        this.totalQuoteAmount$ = this.quoteService.getMyQuotes(null, this.getQuoteFilterForAmount(), null, null, null, 'CreatedDate', 'DESC', false).pipe(
           map((quoteResult: QuoteResult) => {
             const quotes = get(quoteResult, 'Quotes', []);
             this.totalCount = get(quoteResult, 'TotalCount');
 
-            this.quotesByDueDateData = omit(mapKeys(mapValues(groupBy(quotes, 'RFPResponseDueDate'),
-              group => size(group)),
-              bind(this.generateLabel, this)), 'null');
-    
+            // Group quotes by 'RFPResponseDueDate' and count the number of quotes for each due date.
+            const quotesCountByDueDate = mapValues(pickBy(groupBy(quotes, 'RFPResponseDueDate'), (value, date) => date !== 'null'),
+              group => size(group));
+            const categorizedQuoteCounts = reduce(quotesCountByDueDate, (quotesByCategory, quoteCount, dueDate) => {
+              const categoryLabel = this.generateLabel(dueDate); // Generate a category label based on the due dates
+              quotesByCategory[categoryLabel] = (quotesByCategory[categoryLabel] || 0) + quoteCount; // Group the quote count by each category label based on the due dates
+              return quotesByCategory; // Return the updated object
+            }, {});
+            this.quotesByDueDateData$ = of(omit(categorizedQuoteCounts, 'null'));
+
             return sumBy(quotes, (quote) => get(quote, 'Amount.DisplayValue'));
           })
         );
@@ -87,7 +93,7 @@ export class DashboardComponent implements OnInit {
             limit: 5,
             routingLabel: 'proposals'
           },
-        }as unknown as TableOptions);
+        } as unknown as TableOptions);
         return {
           tableOptions: {
             columns: [
@@ -115,59 +121,60 @@ export class DashboardComponent implements OnInit {
     this.user$ = this.userService.getCurrentUser();
   }
 
-  getChartData(orders: Order[]) {
+  categorizeOrdersByAge(orders: Array<Order>): Observable<Object> {
     const currentDate = moment();
-    const notActivatedOrders = filter(orders, order => get(order, 'Status') !== 'Activated');
-    if (isEmpty(notActivatedOrders))
+    const nonActivatedOrders = filter(orders, order => get(order, 'Status') !== 'Activated'); // Filter out orders where the status is not 'Activated'
+    
+    // If there are no non-activated orders, return an empty result
+    if (isEmpty(nonActivatedOrders)){
+      this.categorizedOrders$ = of({});  
       return;
-  
-    // Initialize counts for each category with new labels directly
-    let categorizedOrders = {
-      '>30 Days': 0,
-      '20-30 Days': 0,
-      '10-20 Days': 0,
-      '<10 Days': 0
-    };
-    forEach(notActivatedOrders, (order) => {
-      const createdDate = moment(get(order, 'CreatedDate')); 
-  
-      if (!createdDate.isValid()) {
-        return; 
-      }
-  
-      const differenceInDays = currentDate.diff(createdDate, 'days'); 
-  
-      // Categorize the order based on the calculated days and increment the corresponding count
-      if (differenceInDays > 30) {
-        categorizedOrders['>30 Days']++;
-      } else if (differenceInDays >= 20 && differenceInDays <= 30) {
-        categorizedOrders['20-30 Days']++;
-      } else if (differenceInDays >= 10 && differenceInDays < 20) {
-        categorizedOrders['10-20 Days']++;
-      } else if (differenceInDays < 10) {
-        categorizedOrders['<10 Days']++;
-      }
+    } 
+
+    // Initialize counts for each category
+    const categorizedOrders = { '>30 Days': 0, '20-30 Days': 0, '10-20 Days': 0, '<10 Days': 0 };
+
+    forEach(nonActivatedOrders, (order) => {
+      const createdDate = moment(get(order, 'CreatedDate'));
+      if (!createdDate.isValid()){
+        this.categorizedOrders$ = of({});
+        return;
+      };
+
+      const differenceInDays = currentDate.diff(createdDate, 'days');
+      // Determine which category the order falls into based on the age of the order
+      const label = differenceInDays > 30 ? '>30 Days' :
+                    differenceInDays >= 20 ? '20-30 Days' :
+                    differenceInDays >= 10 ? '10-20 Days' : '<10 Days';
+      categorizedOrders[label]++;
     });
-  
     this.categorizedOrders$ = of(categorizedOrders);
   }
 
   private generateLabel(date): string {
-      const today = moment(new Date());
-      const dueDate = (date) ? moment(date) : null;
-      if (dueDate && dueDate.diff(today, 'days') < this.minDaysFromDueDate) {
-        if (!includes(this.colorPalette, 'rgba(208, 2, 27, 1)')) this.colorPalette.push('rgba(208, 2, 27, 1)');
-        return '< ' + this.minDaysFromDueDate + ' Days';
-      }
-      else if (dueDate && dueDate.diff(today, 'days') > this.minDaysFromDueDate && dueDate.diff(today, 'days') < this.maxDaysFromDueDate) {
-        if (!includes(this.colorPalette, 'rgba(245, 166, 35, 1)')) this.colorPalette.push('rgba(245, 166, 35, 1)');
-        return '< ' + this.maxDaysFromDueDate + ' Days';
-      }
-      else {
-        if (!includes(this.colorPalette, 'rgba(43, 180, 39, 1)')) this.colorPalette.push('rgba(43, 180, 39, 1)');
-        return '> ' + this.maxDaysFromDueDate + ' Days';
-      }
+    const dueDate = date ? moment(date) : null;
+    if (!dueDate) return;
+
+    const diffDays = Math.abs(dueDate.diff(moment(), 'days')); // Calculate the difference in days from today
+    let label: string, color: string;
+
+    // Determine label and color based on the difference in days
+    if (diffDays < this.minDaysFromDueDate) {
+        label = `< ${this.minDaysFromDueDate} Days`;
+        color = 'rgba(208, 2, 27, 1)';
+    } else if (diffDays < this.maxDaysFromDueDate) {
+        label = `< ${this.maxDaysFromDueDate} Days`;
+        color = 'rgba(245, 166, 35, 1)';
+    } else {
+        label = `> ${this.maxDaysFromDueDate} Days`;
+        color = 'rgba(43, 180, 39, 1)';
     }
+    // Check if the selected color is already in the colorPalette
+    if (!this.colorPalette.includes(color)) 
+      this.colorPalette.push(color); // Adds color to colorPalette if not already included
+    return label;
+}
+
   getOrderFilters(): Array<FieldFilter> {//Added timestamp in order to fetch order list data within 7 days
     return [{
       field: 'CreatedDate',
@@ -181,7 +188,7 @@ export class DashboardComponent implements OnInit {
     },
     {
       field: 'SoldToAccount.Id',
-      value: localStorage.getItem('account'),
+      value: localStorage.getItem(PlatformConstants.ACCOUNT),
       filterOperator: FilterOperator.EQUAL
     }] as Array<FieldFilter>;
   }
@@ -199,7 +206,7 @@ export class DashboardComponent implements OnInit {
     },
     {
       field: 'Account.Id',
-      value: localStorage.getItem('account'),
+      value: localStorage.getItem(PlatformConstants.ACCOUNT),
       filterOperator: FilterOperator.EQUAL
     }] as Array<FieldFilter>;
   }
@@ -207,7 +214,7 @@ export class DashboardComponent implements OnInit {
   getFilterForAmount(): Array<FieldFilter> {
     return [{
       field: 'SoldToAccount.Id',
-      value: localStorage.getItem('account'),
+      value: localStorage.getItem(PlatformConstants.ACCOUNT),
       filterOperator: FilterOperator.EQUAL
     }] as Array<FieldFilter>;
   }
@@ -215,7 +222,7 @@ export class DashboardComponent implements OnInit {
   getQuoteFilterForAmount(): Array<FieldFilter> {
     return [{
       field: 'Account.Id',
-      value: localStorage.getItem('account'),
+      value: localStorage.getItem(PlatformConstants.ACCOUNT),
       filterOperator: FilterOperator.EQUAL
     }] as Array<FieldFilter>;
   }

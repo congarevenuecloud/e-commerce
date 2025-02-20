@@ -3,7 +3,7 @@ import { Observable, BehaviorSubject, of } from 'rxjs';
 import { map as rmap, switchMap, take, catchError } from 'rxjs/operators';
 import moment from 'moment';
 import { get, sumBy, map as _map, mapValues, groupBy, omit } from 'lodash';
-import { Operator, ApiService, FilterOperator } from '@congarevenuecloud/core';
+import { Operator, ApiService, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import { Quote, QuoteService, LocalCurrencyPipe, AccountService, FieldFilter, QuoteResult, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
 import { TableOptions, CustomFilterView, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
 
@@ -160,7 +160,7 @@ export class QuoteListComponent implements OnInit {
   getFilters(): Array<FieldFilter> {
     return [{
       field: 'Account.Id',
-      value: localStorage.getItem('account'),
+      value: localStorage.getItem(PlatformConstants.ACCOUNT),
       filterOperator: FilterOperator.EQUAL
     }] as Array<FieldFilter>;
   }
