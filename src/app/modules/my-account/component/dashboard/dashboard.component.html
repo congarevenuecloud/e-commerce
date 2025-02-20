@@ -102,7 +102,7 @@
             </div>
             <div>
                 <apt-table *ngIf="view$ | async as view; else loading" [type]="orderType" [showTableControls]=false
-                    [showErrorToaster]=true [options]="view?.tableOptions"></apt-table>
+                    [showErrorToaster]=true [options]="view?.tableOptions" [primaryColumn]="'OrderNumber'"></apt-table>
             </div>
         </div>
     </div>
@@ -116,7 +116,7 @@
             <div>
                 <apt-table *ngIf="quoteView$ | async as quoteView; else loading" [type]="quoteType"
                     [showTableControls]=false [showErrorToaster]=true
-                    [options]="quoteView?.tableOptions"></apt-table>
+                    [options]="quoteView?.tableOptions" [primaryColumn]="'ProposalNumber'"></apt-table>
             </div>
         </div>
     </div>

@@ -70,6 +70,10 @@
             <div class="card-body">
               <div class="row">
                 <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="ProposalNumber" [editable]="false">
+                  </apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="Name" [label]="'CREATE_QUOTE.QUOTE_TITLE' | translate"
                     [DisplayName]="ProposalName"
                     [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
@@ -80,12 +84,12 @@
                   <apt-output-field [record]="quote" field="CreatedDate" [editable]="false">
                   </apt-output-field>
                 </div>
+              </div>
+              <div class="row">
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote.CreatedBy" field="Name" [label]="'COMMON.CREATED_BY' | translate"
                     [editable]="false"></apt-output-field>
                 </div>
-              </div>
-              <div class="row">
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="SourceChannel" [editable]="false"></apt-output-field>
                 </div>
@@ -97,13 +101,13 @@
                     (onChange)="refreshQuote($event, quote, 'PrimaryContact')">
                   </apt-output-field>
                 </div>
+              </div>
+              <div class="row" *ngIf="isExpanded">
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="Account" [displayValue]="'Account'"
                     [label]="'MY_ACCOUNT.ORDER_DETAIL.ACCOUNT_NAME' | translate" [editable]="false"
                     [showQuickView]="true"></apt-output-field>
                 </div>
-              </div>
-              <div class="row" *ngIf="isExpanded">
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="ShipToAccount" [displayValue]="'ShipToAccount'"
                     [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"

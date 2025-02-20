@@ -81,7 +81,7 @@
             <div>
                 <div>
                     <apt-table *ngIf="view?.tableOptions; else loading" [type]="type" [options]="view?.tableOptions"
-                        [showErrorToaster]="true"></apt-table>
+                        [showErrorToaster]="true" [primaryColumn]="'OrderNumber'"></apt-table>
                 </div>
             </div>
         </div>
