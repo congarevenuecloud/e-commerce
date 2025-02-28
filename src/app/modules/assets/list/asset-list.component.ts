@@ -6,7 +6,7 @@ import {
   AssetLineItemExtended,
   AssetLineItem,
   AccountService, Account,
-  Cart, FieldFilter, GroupByAggregateResponse, AggregateFields, AssetActionLabels,StorefrontService
+  Cart, FieldFilter, GroupByAggregateResponse, AggregateFields, AssetActionLabels,StorefrontService, LineItemProductService
 } from '@congarevenuecloud/ecommerce';
 import { Observable, of, Subscription, take, map, combineLatest } from 'rxjs';
 import { isNil, set, get, filter, omit, concat, mapValues, groupBy, sumBy, first, last, isEmpty } from 'lodash';
@@ -180,6 +180,7 @@ export class AssetListComponent implements OnInit, OnDestroy {
 
   constructor(
     public assetService: AssetService,
+    public lineItemProductService: LineItemProductService,
     private assetModalService: AssetModalService,
     protected cartService: CartService,
     protected toastr: ToastrService,
@@ -261,6 +262,9 @@ export class AssetListComponent implements OnInit, OnDestroy {
                 { prop: 'PriceType' }
               ],
               actions: this.getActions(cart),
+              callback:(recordList: Array<AssetLineItemExtended>) => {
+                return this.lineItemProductService.addProductInfoToLineItems(recordList,'prices');
+              },
               disableLink: true,
               routingLabel: 'assets'
             } as TableOptions,
@@ -341,7 +345,8 @@ export class AssetListComponent implements OnInit, OnDestroy {
         label: get(this.labels,'renewLabel'),
         theme: 'primary',
         validate(record: AssetLineItemExtended, childRecords: Array<AssetLineItemExtended>): boolean {
-          return record.canRenew() && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
+          const product = record.Product;
+          return record.canRenew(enableOneTime, product, childRecords) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
           this.assetModalService.openRenewModal(
@@ -356,7 +361,8 @@ export class AssetListComponent implements OnInit, OnDestroy {
         label: get(this.labels,'amendLabel'),
         theme: 'primary',
         validate(record: AssetLineItemExtended): boolean {
-          return record.canChangeConfiguration(enableOneTime) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
+          const product = record.Product;
+          return record.canAmend(enableOneTime, product) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
           this.assetModalService.openAmendModal(
@@ -372,7 +378,8 @@ export class AssetListComponent implements OnInit, OnDestroy {
         label: get(this.labels,'buyMoreLabel'),
         theme: 'primary',
         validate(record: AssetLineItemExtended,childRecords: Array<AssetLineItemExtended>): boolean {
-          return record.canBuyMore(childRecords) &&  record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
+          const product = record.Product;
+          return record.canBuyMore(enableOneTime, product, childRecords) &&  record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
           this.assetModalService.openBuyMoreModal(
@@ -388,7 +395,8 @@ export class AssetListComponent implements OnInit, OnDestroy {
         label: get(this.labels,'terminateLabel'),
         theme: 'danger',
         validate(record: AssetLineItemExtended, childRecords: Array<AssetLineItemExtended>): boolean {
-          return record.canTerminate(childRecords) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
+          const product = record.Product;
+          return record.canTerminate(enableOneTime, product, childRecords) && record.AssetStatus === 'Activated' && !(filter(get(cart, 'LineItems'), (item) => get(item, 'AssetLineItem.Id') === record.Id).length > 0);
         },
         action: (recordList: Array<AObject>): Observable<void> => {
           this.assetModalService.openTerminateModal(
