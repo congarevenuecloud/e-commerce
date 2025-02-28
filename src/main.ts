@@ -30,6 +30,9 @@ config$.pipe(take(1)).subscribe((authOptions: AuthOptions) => {
   environment.endpoint = authOptions.apiEndpoint;
   environment.loginEndpoint = authOptions.login;
   environment.clientId = authOptions.spaClientId;
+  environment.userId = (authOptions.guestUserId && authOptions.guestUserId !== 'null')
+    ? authOptions.guestUserId
+    : environment.userId;
   platformBrowserDynamic().bootstrapModule(AppModule)
     .catch(err => console.error(err));
 });
