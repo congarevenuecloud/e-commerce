@@ -205,7 +205,8 @@
             "CLONE": "fr_FR Clone",
             "DESCRIPTION": "fr_FR Description",
             "CONTRACT_PRICE": "fr_FR Contract Price",
-            "PRODUCT_CREATION_FAILED": "fr_FR Could not create product. Please contact your administrator"
+            "PRODUCT_CREATION_FAILED": "fr_FR Could not create product. Please contact your administrator",
+            "BROWSE_PRODUCTS": "fr_FR Browse Products"
         },
         "CART_DETAIL": {
             "ASSOCIATED_TO": "fr_FR Associated to",
@@ -274,6 +275,7 @@
         "RELATED_CATEGORIES": "fr_FR Related Categories",
         "PRODUCT_FAMILY": "fr_FR Product Family",
         "SHOW_COUNT_OF_RECORDS_MESSAGE": "fr_FR Showing {{minVal}}-{{maxVal}} of {{totalVal}} results",
+        "SHOW_NO_COUNT_MESSAGE": "fr_FR Showing {{totalVal}} results",
         "SHOW": "fr_FR Show",
         "SORT_BY": "fr_FR Sort By",
         "SORT_BY_RELEVANCE": "fr_FR Relevance",
@@ -1012,6 +1014,17 @@
     },
     "FAVORITE": {
         "VISIBILITY": "fr_FR Visibility",
+        "PUBLIC": "fr_FR Public",
+        "PRIVATE": "fr_FR Private",
+        "ALL": "fr_FR All",
+        "NO_FAVORITES_FOUND": "fr_FR Your favorite list is empty. Start browsing the catalog and adding your favorites",
+        "SEARCH_FAV": "fr_FR Search favorites",
+        "QUICK_LINK": "fr_FR Quick Link",
+        "BROWSE_FAVORITE": "fr_FR Browse favorites",
+        "SCOPE": "fr_FR Scope",
+        "NO_SEARCH_RESULTS":"fr_FR Sorry, no results were found for your search criteria. Try adjusting your search or filters to find what you are looking for.",
+        "EMPTY_FAVORITE":"fr_FR Favorites is empty.",
+        "NO_RESULTS_FOUND":"fr_FR No Results Found",
         "FAVORITE_MODAL": {
             "ADD_FAVORITE": "fr_FR Add Favorite",
             "SEARCH_OR_ADD_FAV": "fr_FR Search or add new favorite",
