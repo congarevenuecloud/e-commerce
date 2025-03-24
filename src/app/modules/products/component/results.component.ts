@@ -6,7 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
   selector: 'pl-results',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="p-2 d-flex align-items-center justify-content-between" *ngIf="recordCount > 0">
+    <div class="p-2 d-flex align-items-center justify-content-between">
       <div>
         {{showRecordsCountMessage}}
         <span class="d-none d-md-inline" *ngIf="query"> for your search of&nbsp;<strong>{{query}}</strong></span>
@@ -34,6 +34,7 @@ import { TranslateService } from '@ngx-translate/core';
             <option [value]="'Name'">{{'COMMON.NAME' | translate}}</option>
           </select>
         </div>
+        <ng-container *ngIf="view">
         <a href="javascript:void(0)"
             class="btn btn-link btn-sm p-0 move-down d-none d-sm-none d-md-block"
             [class.disabled]="view == 'grid'"
@@ -48,6 +49,7 @@ import { TranslateService } from '@ngx-translate/core';
             (click)="onViewChange.emit('list')">
           <i class="fas fa-list-ul"></i>
         </a>
+        </ng-container>
       </div>
     </div>
   `,
@@ -86,6 +88,7 @@ export class ResultsComponent implements OnChanges {
       return '2000+';
     else if (this.recordCount)
       return this.recordCount.toString();
+    return "0";
   }
 
   get lastResult() {
@@ -93,7 +96,8 @@ export class ResultsComponent implements OnChanges {
   }
 
   prepareRecordsCountMessage() {
-    this.translateService.stream('PRODUCT_LIST.SHOW_COUNT_OF_RECORDS_MESSAGE', { minVal: this.recordCount > 0 ? this.offset + 1 : 0, maxVal: this.lastResult, totalVal: this.totalRecords })
+    const translationKey = Number(this.totalRecords) !== 0 ? 'PRODUCT_LIST.SHOW_COUNT_OF_RECORDS_MESSAGE' : 'PRODUCT_LIST.SHOW_NO_COUNT_MESSAGE';
+    this.translateService.stream(translationKey, { minVal: this.recordCount > 0 ? this.offset + 1 : 0, maxVal: this.lastResult, totalVal: this.totalRecords })
       .subscribe((message: string) => {
         this.showRecordsCountMessage = message;
       });

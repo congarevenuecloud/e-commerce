@@ -209,7 +209,8 @@
             "CLONE": "Clone",
             "DESCRIPTION": "Description",
             "CONTRACT_PRICE": "Contract Price",
-            "PRODUCT_CREATION_FAILED": "Could not create product. Please contact your administrator"
+            "PRODUCT_CREATION_FAILED": "Could not create product. Please contact your administrator",
+            "BROWSE_PRODUCTS": "Browse Products"
         },
         "CART_DETAIL": {
             "ASSOCIATED_TO": "Associated to",
@@ -279,6 +280,7 @@
         "RELATED_CATEGORIES": "Related Categories",
         "PRODUCT_FAMILY": "Product Family",
         "SHOW_COUNT_OF_RECORDS_MESSAGE": "Showing {{minVal}}-{{maxVal}} of {{totalVal}} results",
+        "SHOW_NO_COUNT_MESSAGE": "Showing {{totalVal}} results",
         "SHOW": "Show",
         "SORT_BY": "Sort By",
         "SORT_BY_RELEVANCE": "Relevance",
@@ -1044,6 +1046,17 @@
     },
     "FAVORITE": {
         "VISIBILITY": "Visibility",
+        "PUBLIC": "Public",
+        "PRIVATE": "Private",
+        "ALL": "All",
+        "NO_FAVORITES_FOUND": "Your favorite list is empty. Start browsing the catalog and adding your favorites",
+        "SEARCH_FAV": "Search favorites",
+        "QUICK_LINK": "Quick Link",
+        "BROWSE_FAVORITE": "Browse favorites",
+        "SCOPE": "Scope",
+        "NO_SEARCH_RESULTS":"Sorry, no results were found for your search criteria. Try adjusting your search or filters to find what you are looking for.",
+        "EMPTY_FAVORITE":"Favorites is empty.",
+        "NO_RESULTS_FOUND":"No Results Found",
         "FAVORITE_MODAL": {
             "ADD_FAVORITE": "Add Favorite",
             "SEARCH_OR_ADD_FAV": "Search or add new favorite",

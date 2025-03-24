@@ -14,6 +14,10 @@ const routes: Routes = [
     data: { title: 'Product Comparison' }
   },
   {
+    path: 'favorites',
+    component: ProductListComponent
+  },
+  {
     path: ':id',
     component: ProductDetailComponent,
     canDeactivate: [ConfigureGuard]
