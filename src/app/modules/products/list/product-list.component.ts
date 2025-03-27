@@ -281,11 +281,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
 
   /**
-   * This function is called when removing search filter criteria to product grid.
-   * @param condition Search filter query to remove from products grid.
+   * Removes filter conditions from the products grid and fetches updated results.
+   * @param conditions Array of FieldFilter conditions to remove.
    */
-  onFilterRemove(condition: FieldFilter) {
-    remove(this.productFamilyFilter, (c) => isEqual(c, condition));
+  onFilterRemove(conditions: Array<FieldFilter>) {
+    this.productFamilyFilter = this.productFamilyFilter.filter(
+      (c) => !conditions.some(condition => isEqual(c, condition)));
     this.page = 1;
     this.getResults();
   }
