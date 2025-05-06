@@ -957,7 +957,8 @@
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "Your Order Is: {{orderName}}",
         "VIEW_YOUR_ORDER": "View Your Order",
-        "PRESENT_QUOTE": "Present"
+        "PRESENT_QUOTE": "Present",
+        "MISSING_REQ_FIELDS": "Some mandatory informations are missing in the order details. Please fill to proceed."
     },
     "SERVICES": {
         "SELECTION_OF_ASSETS_MUST_TOOLTIP": "Must select multiple assets to perform batch action.",

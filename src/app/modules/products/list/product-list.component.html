@@ -250,7 +250,7 @@
               <apt-select-all class="justify-content-end" [items]="data.Products"></apt-select-all>
               <label class="pl-2 mt-1 pb-0 mb-0 align-items-center d-flex " *ngIf="selectedCount > 0">&#124;
                 <span class="pl-1" [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'"
-                  [translateParams]="{selectedCount: selectedCount, totalCount: data?.TotalCount}"></span>
+                  [translateParams]="{selectedCount: selectedCount, totalCount: data?.TotalCount | digitFormatter}"></span>
               </label>
             </div>
 

@@ -8,16 +8,16 @@
     <div class="primary-actions d-lg-block d-md-block d-sm-none d-none">
         <form class="d-flex">
             <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-4 text-nowrap align-items-end">
-                <small class="mb-2 d-block text-right"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
-                <h5>
+                <small [id]="'standard-price-label'" class="mb-2 d-block text-right"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
+                <h5 [id]="'standard-price-value'">
                     <apt-price [record]="viewState?.product" type="list"></apt-price>
                 </h5>
             </div>
             <div class="form-group my-0 mr-lg-2 mr-md-2 mr-sm-1 mr-1 align-items-end">
-                <small class="mb-2 d-block text-right"> {{'COMMON.NET_PRICE' | translate}} </small>
+                <small [id]="'net-price-label'" class="mb-2 d-block text-right"> {{'COMMON.NET_PRICE' | translate}} </small>
                 <h5>
                     <ng-container *ngIf="cartItemList?.length > 0 || viewState?.relatedTo; else productPrice">
-                        <span *ngIf="primaryLineItem?.NetPrice; else pricemask">
+                        <span  [id]="'net-price-value'" *ngIf="primaryLineItem?.NetPrice; else pricemask">
                             {{ primaryLineItem?.NetPrice | localCurrency | async }}
                         </span>
                     </ng-container>
@@ -36,8 +36,8 @@
             *ngIf="!viewState?.product?.HasAttributes && !viewState?.product?.HasOptions; else complex">
             <div class="form-group mx-3 my-0 d-flex align-items-center w-50">
                 <span class="mr-3"> {{'COMMON.QUANTITY' | translate}} </span>
-                <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity"
-                    name="quantity" />
+                <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity" name="quantity"
+                    [id]="'simple-product-quantity'" />
             </div>
             <div class="d-flex align-items-center">
                 <apt-add-to-cart [showQuantityControls]="false" (onAddToCart)="onAddToCart($event)"
@@ -55,7 +55,7 @@
                 <ng-container *ngIf="viewState?.relatedTo; else newProduct">
                     <div class="form-group mx-3 my-0 d-flex align-items-center">
                         <span class="mr-3"> {{'COMMON.QUANTITY' | translate}} </span>
-                        <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity"
+                        <input type="number" [id]="'complex-product-quantity'" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity"
                             (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
                     </div>
                     <div class="form-group mx-3 my-0 d-flex align-items-center">
@@ -75,7 +75,8 @@
                         <div class="form-group ml-3 my-0 d-flex align-items-center col-5">
                             <span class="mr-2">{{'COMMON.QUANTITY' | translate}}</span>
                             <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity"
-                                (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
+                                [id]="'product-quantity'" (change)="changeProductQuantity(viewState.quantity)"
+                                name="quantity" />
                         </div>
                         <div class="d-flex align-items-center mr-2">
                             <apt-add-to-cart [showQuantityControls]="false" [configurationEnabled]="false"
@@ -101,16 +102,16 @@
     <div class="detail-header d-lg-none d-md-none d-sm-block d-block pt-2 border-top">
         <form class="d-flex justify-content-between pb-2">
             <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-5">
-                <small class="mb-2 d-block text-right-lg"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
-                <h5>
+                <small [id]="'standard-price-label-sm'" class="mb-2 d-block text-right-lg"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
+                <h5 [id]="'standard-price-value-sm'">
                     <apt-price [record]="viewState?.product" type="list"></apt-price>
                 </h5>
             </div>
             <div class="form-group my-0 mr-lg-3 mr-md-3 mr-sm-5 mr-2 ml-5">
-                <small class="mb-2 d-block"> {{'COMMON.NET_PRICE' | translate}} </small>
+                <small [id]="'net-price-label-sm'" class="mb-2 d-block"> {{'COMMON.NET_PRICE' | translate}} </small>
                 <h5>
                     <ng-container *ngIf="cartItemList?.length > 0 || viewState?.relatedTo; else productPrice">
-                        <span *ngIf="primaryLineItem?.NetPrice; else pricemask">
+                        <span [id]="'net-price-value-sm'" *ngIf="primaryLineItem?.NetPrice; else pricemask">
                             {{ primaryLineItem?.NetPrice | localCurrency | async }}
                         </span>
                     </ng-container>
@@ -127,8 +128,8 @@
             *ngIf="!viewState?.product?.HasAttributes && !viewState?.product?.HasOptions; else complexSmallScreen">
             <div class="form-group my-0 mr-3 d-flex align-items-center">
                 <span class="mr-3"> {{'COMMON.QUANTITY' | translate}} </span>
-                <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity"
-                    name="quantity" />
+                <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity" name="quantity"
+                    [id]="'simple-product-quantity-sm'" />
             </div>
             <div class="d-flex align-items-center">
                 <apt-add-to-cart [showQuantityControls]="false" (onAddToCart)="onAddToCart($event)"
@@ -146,7 +147,7 @@
                 <ng-container *ngIf="viewState?.relatedTo; else newProductSmallScreen">
                     <div class="form-group my-0 d-flex align-items-center w-50">
                         <span class="mr-1"> {{'COMMON.QTY' | translate}} </span>
-                        <input type="number" min="1" class="form-control quantity w-50" [(ngModel)]="viewState.quantity"
+                        <input type="number" [id]="'complex-product-quantity-sm'" min="1" class="form-control quantity w-50" [(ngModel)]="viewState.quantity"
                             (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
                         <div class="pl-3">
                             <div class="custom-control custom-checkbox">
@@ -166,7 +167,8 @@
                     <div class="form-group my-0 d-flex align-items-center w-50">
                         <span class="mr-1"> {{'COMMON.QTY' | translate}} </span>
                         <input type="number" min="1" class="form-control quantity w-50" [(ngModel)]="viewState.quantity"
-                            (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
+                            [id]="'product-quantity-sm'" (change)="changeProductQuantity(viewState.quantity)"
+                            name="quantity" />
                         <div class="pl-2">
                             <apt-add-to-cart [showQuantityControls]="false" [configurationEnabled]="false"
                                 [quantity]="viewState.quantity" (onAddToCart)="onAddToCart($event)"

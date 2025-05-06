@@ -939,7 +939,8 @@
         "SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE": "es_MX You have successfully accepted the quote ({{quoteName}}) and the order has been generated for the same.",
         "GENERATED_ORDER_NUMBER": "es_MX Your Order Is: {{orderName}}",
         "VIEW_YOUR_ORDER": "es_MX View Your Order",
-        "PRESENT_QUOTE": "es_MX Present"
+        "PRESENT_QUOTE": "es_MX Present",
+        "MISSING_REQ_FIELDS": "es_MX Some mandatory informations are missing in the order details. Please fill to proceed."
     },
     "SERVICES": {
         "SELECTION_OF_ASSETS_MUST_TOOLTIP": "es_MX Must select multiple assets to perform batch action.",
