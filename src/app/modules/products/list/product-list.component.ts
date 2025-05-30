@@ -116,9 +116,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.isFavoriteCatalog = true;
     }
 
-    this.subscriptions.push(
-      this.accountService.getCurrentAccount().subscribe(() => this.getResults(this.isFavoriteCatalog ? 'favorite' : 'product'))
-    );
+    // we need to listen to account change to refresh the product list
+    this.accountService.getCurrentAccount().subscribe(() => {
+      this.getResults(this.isFavoriteCatalog ? 'favorite' : 'product')
+    });
+
+    
     this.productFamilies$ = this.productService.getFieldPickList('Family');
     this.subscriptions.push(
       this.translateService.stream('PAGINATION').subscribe((val: string) => {
