@@ -1,8 +1,8 @@
-import { Component, OnInit, Output, EventEmitter, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, ViewChild, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
-import { Observable, of, combineLatest } from 'rxjs';
+import { Observable, of, combineLatest, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { get, lowerCase } from 'lodash';
 import { TabsetComponent } from 'ngx-bootstrap/tabs';
@@ -17,7 +17,7 @@ import { LookupOptions } from '@congarevenuecloud/elements';
   templateUrl: './request-quote-form.component.html',
   styleUrls: ['./request-quote-form.component.scss']
 })
-export class RequestQuoteFormComponent implements OnInit {
+export class RequestQuoteFormComponent implements OnInit, OnDestroy {
   @ViewChild('staticTabs') staticTabs: TabsetComponent;
   @ViewChild('form', { static: false }) form: NgForm;
   @Input() cart: Cart;
@@ -26,6 +26,7 @@ export class RequestQuoteFormComponent implements OnInit {
   /**
    * An Observable containing the current contact record
    */
+  subscriptions: Subscription[] = [];
   primaryContact: Contact;
   quote = new Quote();
   bsConfig: Partial<BsDatepickerConfig>;
@@ -92,13 +93,31 @@ export class RequestQuoteFormComponent implements OnInit {
         this.getPriceList
       });
 
-    this.translateService.stream(['CHECKOUT_PAGE', 'AOBJECTS']).pipe(take(1)).subscribe((val: string) => {
-      this.errMessages.requiredFirstName = val['CHECKOUT_PAGE']['INVALID_FIRSTNAME'];
-      this.errMessages.requiredLastName = val['CHECKOUT_PAGE']['INVALID_LASTNAME'];
-      this.errMessages.requiredEmail = val['CHECKOUT_PAGE']['INVALID_EMAIL'];
-      this.errMessages.requiredPrimaryContact = val['CHECKOUT_PAGE']['INVALID_PRIMARY_CONTACT'];
-      this.errMessages.requiredProposalName = val['CHECKOUT_PAGE']['INVALID_PROPOSAL_NAME'];
-    });
+    this.subscriptions.push(
+      combineLatest([
+        this.translateService.stream('CHECKOUT_PAGE.INVALID_FIRSTNAME'),
+        this.translateService.stream('CHECKOUT_PAGE.INVALID_LASTNAME'),
+        this.translateService.stream('CHECKOUT_PAGE.INVALID_EMAIL'),
+        this.translateService.stream('CHECKOUT_PAGE.INVALID_PRIMARY_CONTACT'),
+        this.translateService.stream('CHECKOUT_PAGE.INVALID_PROPOSAL_NAME')
+      ]).subscribe(([
+        invalidFirstName,
+        invalidLastName,
+        invalidEmail,
+        invalidPrimaryContact,
+        invalidProposalName
+      ]) => {
+        this.errMessages.requiredFirstName = invalidFirstName;
+        this.errMessages.requiredLastName = invalidLastName;
+        this.errMessages.requiredEmail = invalidEmail;
+        this.errMessages.requiredPrimaryContact = invalidPrimaryContact;
+        this.errMessages.requiredProposalName = invalidProposalName;
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   /**

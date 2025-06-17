@@ -124,11 +124,16 @@ export class ProductListComponent implements OnInit, OnDestroy {
     
     this.productFamilies$ = this.productService.getFieldPickList('Family');
     this.subscriptions.push(
-      this.translateService.stream('PAGINATION').subscribe((val: string) => {
-        this.paginationButtonLabels.first = val['FIRST'];
-        this.paginationButtonLabels.previous = val['PREVIOUS'];
-        this.paginationButtonLabels.next = val['NEXT'];
-        this.paginationButtonLabels.last = val['LAST'];
+      combineLatest([
+        this.translateService.stream('PAGINATION.FIRST'),
+        this.translateService.stream('PAGINATION.PREVIOUS'),
+        this.translateService.stream('PAGINATION.NEXT'),
+        this.translateService.stream('PAGINATION.LAST')
+      ]).subscribe(([first, previous, next, last]) => {
+        this.paginationButtonLabels.first = first;
+        this.paginationButtonLabels.previous = previous;
+        this.paginationButtonLabels.next = next;
+        this.paginationButtonLabels.last = last;
       })
     );
     this.enableOneTime$ = this.storefrontService.isOneTimeChangeEnabled();
