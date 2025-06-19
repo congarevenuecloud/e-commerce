@@ -138,19 +138,38 @@ export class CartComponent implements OnInit, OnDestroy {
 
     }));
     this.user$ = this.userService.me();
-    this.subscriptions.push(this.translate.stream(['CHECKOUT_PAGE', 'AOBJECTS']).subscribe((val: string) => {
-      this.errMessages.requiredFirstName = val['CHECKOUT_PAGE']['INVALID_FIRSTNAME'];
-      this.errMessages.requiredLastName = val['CHECKOUT_PAGE']['INVALID_LASTNAME'];
-      this.errMessages.requiredEmail = val['CHECKOUT_PAGE']['INVALID_EMAIL'];
-      this.errMessages.requiredPrimaryContact = val['CHECKOUT_PAGE']['INVALID_PRIMARY_CONTACT'];
-      this.errMessages.requiredOrderName = val['CHECKOUT_PAGE']['INVALID_ORDER_NAME'];
-      this.breadcrumbs = [
-        {
-          label: val['AOBJECTS']['CART'],
-          route: [`/carts/active`]
+    this.subscriptions.push(
+      combineLatest([
+        this.translate.stream('CHECKOUT_PAGE.INVALID_FIRSTNAME'),
+        this.translate.stream('CHECKOUT_PAGE.INVALID_LASTNAME'),
+        this.translate.stream('CHECKOUT_PAGE.INVALID_EMAIL'),
+        this.translate.stream('CHECKOUT_PAGE.INVALID_PRIMARY_CONTACT'),
+        this.translate.stream('CHECKOUT_PAGE.INVALID_ORDER_NAME'),
+        this.translate.stream('AOBJECTS.CART'),
+      ]).subscribe(
+        ([
+          invalidFirstName,
+          invalidLastName,
+          invalidEmail,
+          invalidPrimaryContact,
+          invalidOrderName,
+          cartLabel,
+        ]) => {
+          this.errMessages.requiredFirstName = invalidFirstName;
+          this.errMessages.requiredLastName = invalidLastName;
+          this.errMessages.requiredEmail = invalidEmail;
+          this.errMessages.requiredPrimaryContact = invalidPrimaryContact;
+          this.errMessages.requiredOrderName = invalidOrderName;
+          this.breadcrumbs = [
+            {
+              label: cartLabel,
+              route: ['/carts/active'],
+            },
+          ];
         }
-      ];
-    }));
+      )
+    );
+
 
     this.onBillToChange();
     this.onShipToChange();

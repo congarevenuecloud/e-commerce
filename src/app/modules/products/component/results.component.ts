@@ -9,7 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
     <div class="p-2 d-flex align-items-center justify-content-between">
       <div>
         {{showRecordsCountMessage}}
-        <span class="d-none d-md-inline" *ngIf="query"> for your search of&nbsp;<strong>{{query}}</strong></span>
+        <span class="d-none d-md-inline" *ngIf="query"> {{'FOR_YOUR_SEARCH' | translate }}&nbsp;<strong>{{query}}</strong></span>
       </div>
 
       <div class="d-flex align-items-center">

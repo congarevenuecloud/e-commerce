@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of, Subscription } from 'rxjs';
 import { take, map } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 import { sumBy, get, defaultTo, forEach, filter, isEmpty, omit, mapValues, groupBy, size, reduce, pickBy } from 'lodash';
 import { ApiService, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import { OrderService, Order, UserService, User, FieldFilter, AccountService, LocalCurrencyPipe, QuoteService, Quote, OrderResult, QuoteResult, DateFormatPipe } from '@congarevenuecloud/ecommerce';
@@ -34,7 +35,7 @@ export class DashboardComponent implements OnInit {
   colorPalette = [];
   totalCount: number;
 
-  constructor(private orderService: OrderService, private currencyPipe: LocalCurrencyPipe, private userService: UserService, private apiService: ApiService, private accountService: AccountService, private quoteService: QuoteService, private dateFormatPipe: DateFormatPipe) { }
+  constructor(private orderService: OrderService, private currencyPipe: LocalCurrencyPipe, private userService: UserService, private apiService: ApiService, private accountService: AccountService, private quoteService: QuoteService, private dateFormatPipe: DateFormatPipe, private translateService: TranslateService) { }
 
   ngOnInit() {
     this.loadView();
@@ -131,31 +132,38 @@ export class DashboardComponent implements OnInit {
   categorizeOrdersByAge(orders: Array<Order>): Observable<Object> {
     const currentDate = moment();
     const nonActivatedOrders = filter(orders, order => get(order, 'Status') !== 'Activated'); // Filter out orders where the status is not 'Activated'
-    
+
     // If there are no non-activated orders, return an empty result
-    if (isEmpty(nonActivatedOrders)){
-      this.categorizedOrders$ = of({});  
-      return;
-    } 
+    if (isEmpty(nonActivatedOrders)) {
+      this.categorizedOrders$ = of({});
+      return this.categorizedOrders$;
+    }
 
-    // Initialize counts for each category
-    const categorizedOrders = { '>30 Days': 0, '20-30 Days': 0, '10-20 Days': 0, '<10 Days': 0 };
+    this.categorizedOrders$ = this.translateService.stream('COMMON.DAYS').pipe(
+      map((translatedDays: string) => {
+        // Initialize counts for each category
+        const categorizedOrders = {
+          [`>30 ${translatedDays}`]: 0,
+          [`20-30 ${translatedDays}`]: 0,
+          [`10-20 ${translatedDays}`]: 0,
+          [`<10 ${translatedDays}`]: 0
+        };
 
-    forEach(nonActivatedOrders, (order) => {
-      const createdDate = moment(get(order, 'CreatedDate'));
-      if (!createdDate.isValid()){
-        this.categorizedOrders$ = of({});
-        return;
-      };
+        forEach(nonActivatedOrders, (order) => {
+          const createdDate = moment(get(order, 'CreatedDate'));
+          if (!createdDate.isValid()) return;
 
-      const differenceInDays = currentDate.diff(createdDate, 'days');
-      // Determine which category the order falls into based on the age of the order
-      const label = differenceInDays > 30 ? '>30 Days' :
-                    differenceInDays >= 20 ? '20-30 Days' :
-                    differenceInDays >= 10 ? '10-20 Days' : '<10 Days';
-      categorizedOrders[label]++;
-    });
-    this.categorizedOrders$ = of(categorizedOrders);
+          const differenceInDays = currentDate.diff(createdDate, 'days');
+          // Determine which category the order falls into based on the age of the order
+          const label = differenceInDays > 30 ? `>30 ${translatedDays}` :
+                        differenceInDays >= 20 ? `20-30 ${translatedDays}` :
+                        differenceInDays >= 10 ? `10-20 ${translatedDays}` : `<10 ${translatedDays}`;
+          categorizedOrders[label]++;
+        });
+        return categorizedOrders;
+      })
+    );
+    return this.categorizedOrders$;
   }
 
   private generateLabel(date): string {
@@ -164,23 +172,24 @@ export class DashboardComponent implements OnInit {
 
     const diffDays = Math.abs(dueDate.diff(moment(), 'days')); // Calculate the difference in days from today
     let label: string, color: string;
+    const daysTranslation = this.translateService.instant('COMMON.DAYS');
 
     // Determine label and color based on the difference in days
     if (diffDays < this.minDaysFromDueDate) {
-        label = `< ${this.minDaysFromDueDate} Days`;
-        color = 'rgba(208, 2, 27, 1)';
+      label = `< ${this.minDaysFromDueDate} ${daysTranslation}`;
+      color = 'rgba(208, 2, 27, 1)';
     } else if (diffDays < this.maxDaysFromDueDate) {
-        label = `< ${this.maxDaysFromDueDate} Days`;
-        color = 'rgba(245, 166, 35, 1)';
+      label = `< ${this.maxDaysFromDueDate} ${daysTranslation}`;
+      color = 'rgba(245, 166, 35, 1)';
     } else {
-        label = `> ${this.maxDaysFromDueDate} Days`;
-        color = 'rgba(43, 180, 39, 1)';
+      label = `> ${this.maxDaysFromDueDate} ${daysTranslation}`;
+      color = 'rgba(43, 180, 39, 1)';
     }
     // Check if the selected color is already in the colorPalette
-    if (!this.colorPalette.includes(color)) 
+    if (!this.colorPalette.includes(color))
       this.colorPalette.push(color); // Adds color to colorPalette if not already included
     return label;
-}
+  }
 
   getOrderFilters(): Array<FieldFilter> {//Added timestamp in order to fetch order list data within 7 days
     return [{
