@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { first, get, slice, reverse, sortBy, last, forEach } from 'lodash';
+import { first, get, slice, reverse, sortBy, last, forEach, isNil } from 'lodash';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Product, CategoryService, ProductService, Category, UserService, ItemRequest, GuestUserService, CartService } from '@congarevenuecloud/ecommerce';
@@ -42,13 +42,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     }));
     this.subscriptions.push(this.categoryService.getCategories()
       .subscribe(categoryList => {
-        this.categories = slice(reverse(sortBy(categoryList, 'ProductCount')), 0, 2);
-        this.productListA$ = this.categories.length > 0 ? this.productService.getProducts([get(first(this.categories), 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
-        this.productListB$ = this.categories.length > 0 ? this.productService.getProducts([get(last(this.categories), 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
+        if(!isNil(categoryList)) {
+          this.categories = categoryList
+          this.productListA$ = this.categories.length > 0 ? this.productService.getProducts([get(first(this.categories), 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
+          this.productListB$ = this.categories.length > 1 ? this.productService.getProducts([get(this.categories[1], 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
+        }
       }));
   }
 
   createItemRequest(products: Array<Product>): Array<ItemRequest> {
+    this.listItem = [];
     forEach(products, product => {
       const itemReq = {
         Product: product,

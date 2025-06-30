@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LaddaModule } from 'angular2-ladda';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ToastrModule } from 'ngx-toastr';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
@@ -33,7 +34,8 @@ import { FooterComponent } from './footer/footer.component';
     DirectivesModule,
     ProductSearchModule,
     CongaModule,
-    InputFieldModule
+    InputFieldModule,
+    FormsModule
   ],
   exports: [
     HeaderComponent,
