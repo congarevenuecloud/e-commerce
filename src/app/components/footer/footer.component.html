@@ -3,70 +3,65 @@
     <footer class="border-top p-5">
       <div class="row">
         <div class="col-12 col-md-4 col-lg-3">
-          <img [src]="(storefront$ | async)?.Logo | image" height="35" />
-          <p class="mt-3 text-justify">
-            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the subas
-            industry's standard
-            dummy text ever since the 1500s.
+          <h4 class="text-secondary">
+            <strong>
+              {{ 'FOOTER.TITLE' | translate }}
+            </strong>
+          </h4>
+          <p class="mt-4 mb-0">
+            {{ 'FOOTER.DESCRIPTION_1' | translate }}
           </p>
-          <p class="text-justify">
-            When an unknown printer took a galley of type and If you are going to use a passage of Lorem Ipsum scrambled
-            it to make.
+          <p class="text-left">
+            {{ 'FOOTER.DESCRIPTION_2' | translate }}
           </p>
         </div>
-        <div class="col-12 col-md-4 col-lg-3">
-          <h4 class="pl-4 text-secondary">
+        <div class="col-12 col-md-4 col-lg-3" *ngIf="categories?.length > 0">
+          <h4 class="pl-sm-4 text-secondary">
             <strong>{{'FOOTER.PRODUCTS' | translate}}</strong>
           </h4>
-          <ul class="mt-3">
-            <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.NEW_PRODUCTS' | translate}}</button>
-            </li>
-            <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.DISCOUNT_PRODUCTS' | translate}}</button>
-            </li>
-            <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.BSET_SELL_PRODUCTS' | translate}}</button>
-            </li>
-            <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.POPULAR_PRODUCTS' | translate}}</button>
-            </li>
-            <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.MANUFACTURERS' | translate}}</button>
-            </li>
-            <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.SUPPLIERS' | translate}}</button>
-            </li>
-            <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.SPECIAL_PRODUCTS' | translate}}</button>
+          <ul class="mt-3 pl-sm-4 list-unstyled">
+            <li *ngFor="let category of categories">
+              <button class="btn btn-link small px-0"
+                [routerLink]="['/products/category', category.Id]">
+                <span [title]="category.Name">
+                  {{category.Name | truncate:21}}
+                </span>
+              </button>
             </li>
           </ul>
         </div>
         <div class="col-12 col-md-4 col-lg-3">
-          <h4 class="pl-4 text-secondary">
+          <h4 class="pl-sm-4 text-secondary">
             <strong>{{'FOOTER.MY_ACCOUNT' | translate}}</strong>
           </h4>
-          <ul class="mt-3">
+          <ul class="mt-3 list-unstyled pl-sm-4">
             <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.MY_ACCOUNT' | translate}}</button>
+              <button class="btn btn-link small px-0" [routerLink]="['/my-account/dashboard']">{{'MY_ACCOUNT.OVERVIEW' |
+                translate}}</button>
             </li>
             <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.MY_WISHLIST' | translate}}</button>
+              <button class="btn btn-link small px-0" [routerLink]="['/my-account/orders']">{{'COMMON.ORDERS' |
+                translate}}</button>
             </li>
             <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.MY_CART' | translate}}</button>
+              <button class="btn btn-link small px-0" [routerLink]="['/my-account/quotes']">{{'COMMON.QUOTES' |
+                translate}}</button>
             </li>
             <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.SIGN_IN' | translate}}</button>
+              <button class="btn btn-link small px-0" [routerLink]="['/my-account/carts']">{{'COMMON.CARTS' |
+                translate}}</button>
             </li>
             <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.REGISTRATION' | translate}}</button>
+              <button class="btn btn-link small px-0" [routerLink]="['/my-account/favorites']">{{'COMMON.FAVORITES' |
+                translate}}</button>
             </li>
             <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.CHECKOUT' | translate}}</button>
+              <button class="btn btn-link small px-0" [routerLink]="['/assets']">{{'COMMON.INSTALLED_PRODUCTS' |
+                translate}}</button>
             </li>
             <li>
-              <button class="btn btn-link small px-0 text-secondary">{{'FOOTER.ORDER_COMPLETE' | translate}}</button>
+              <button class="btn btn-link small px-0" [routerLink]="['/my-account/settings']">{{'MY_ACCOUNT.SETTINGS' |
+                translate}}</button>
             </li>
           </ul>
         </div>
@@ -74,18 +69,21 @@
           <h4 class="text-secondary">
             <strong>{{'FOOTER.GET_IN_TOUCH' | translate}}</strong>
           </h4>
-          <form class="mt-3">
+          <form #contactForm="ngForm" class="mt-4" (ngSubmit)="onContactFormSubmit(contactForm)">
             <div class="form-group">
-              <input type="text" class="form-control" placeholder="{{'FOOTER.YOUR_NAME_HERE' | translate}}">
+              <input type="text" class="form-control" [(ngModel)]="contactFormDetails.name" name="name"
+                placeholder="{{'FOOTER.YOUR_NAME_HERE' | translate}}" required>
             </div>
             <div class="form-group">
-              <input type="email" class="form-control" placeholder="{{'FOOTER.YOUR_EMAIL_HERE' | translate}}">
+              <input type="email" class="form-control" [(ngModel)]="contactFormDetails.email" name="email"
+                placeholder="{{'FOOTER.YOUR_EMAIL_HERE' | translate}}" required email>
             </div>
             <div class="form-group">
-              <textarea class="px-2 form-control" placeholder="{{'FOOTER.YOUR_MESSAGE_HERE' | translate}}"
-                rows="3"></textarea>
+              <textarea class="px-2 form-control" [(ngModel)]="contactFormDetails.message" name="message"
+                placeholder="{{'FOOTER.YOUR_MESSAGE_HERE' | translate}}" rows="3" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">{{'FOOTER.SUBMIT' | translate}}</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!contactForm.valid"
+              [ladda]="contactFormLoading">{{'FOOTER.SUBMIT' | translate}}</button>
           </form>
         </div>
       </div>

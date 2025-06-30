@@ -23,7 +23,8 @@ const mainChildrenRoutes: Routes = [
   },
   {
     path: 'assets',
-    loadChildren: () => import('./modules/assets/assets.module').then(m => m.AssetsModule)
+    loadChildren: () => import('./modules/assets/assets.module').then(m => m.AssetsModule),
+    canActivate: [AuthenticationGuard],
   },
   {
     path: 'my-account',
