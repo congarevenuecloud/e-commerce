@@ -86,9 +86,13 @@
                   class="mr-2 text-wrap text-break">
                   {{ favorite?.Name }}
                 </a>
-                <span class="badge badge-pill badge-light">
+                <span class="badge badge-pill badge-light py-0">
                   <span [ngClass]="favorite?.Scope === 'Public' ? 'fa-users' : 'fa-user'" class="fa text-muted"></span>
-                  <label *ngIf="favorite?.Scope" class="text-dark ml-2 mb-0">{{ favorite?.Scope }}</label>
+                  <label class="mb-0">
+                    <apt-output-field *ngIf="favorite?.Scope" [record]="favorite" field="Scope" [valueOnly]="true" [editable]="false"
+                      [valueClass]="'d-inline text-dark ml-2 mb-0 pt-0'">
+                    </apt-output-field>
+                  </label>
                 </span>
                 <div class="d-flex align-items-center justify-content-start mt-2">
                   <label class="mb-0 mr-1">{{ "COMMON.CREATED_DATE" | translate }}:</label>

@@ -15,6 +15,7 @@ import {
 import { HeaderComponent } from './header/header.component';
 import { CategoryCarouselComponent } from './category-carousel/category-carousel.component';
 import { FooterComponent } from './footer/footer.component';
+import { ProgressComponent } from './progress/progress.component';
 
 @NgModule({
   imports: [
@@ -42,12 +43,14 @@ import { FooterComponent } from './footer/footer.component';
     LaddaModule,
     ToastrModule,
     FooterComponent,
-    ConstraintRuleModule
+    ConstraintRuleModule,
+    ProgressComponent
   ],
   declarations: [
     HeaderComponent,
     CategoryCarouselComponent,
-    FooterComponent
+    FooterComponent,
+    ProgressComponent
   ]
 })
 export class ComponentModule { }
