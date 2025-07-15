@@ -1,0 +1,24 @@
+<div class="d-flex justify-content-between mt-2">
+  <svg [ngClass]="(activeIndex === 0) ? 'activeState' : (activeIndex > 0) ? 'completedState' : 'uncompletedState'"
+    height="40" viewBox="0 0 250 40" preserveAspectRatio="none"
+    [tooltip]="((activeIndex === 0) ? ('STATUS.CURRENT' | translate ) : (activeIndex > 0) ? ('STATUS.COMPLETED' | translate) : ('STATUS.UPCOMING' | translate)) + ': ' + steps[0]">
+    <path d="M0,0 H 230 L 250,20 L 230,40 H 0"></path>
+    <text x="50%" y="26">{{(activeIndex > 0) ? '✓ ' + steps[0] : steps[0]}}</text>
+  </svg>
+
+  <svg *ngFor="let step of steps | slice:1:steps.length - 1; let index = index;"
+    [ngClass]="(index + 1 === activeIndex) ? 'activeState' : (index + 1 < activeIndex) ? 'completedState' : 'uncompletedState'"
+    height="40" viewBox="0 0 250 40" preserveAspectRatio="none"
+    [tooltip]="((index + 1 === activeIndex) ? ('STATUS.CURRENT' | translate ) : (index + 1 < activeIndex) ? ('STATUS.COMPLETED' | translate) : ('STATUS.UPCOMING' | translate)) + ': ' + step">
+    <path d="M0,0 H 230 L 250,20 L 230,40 H 0 L 20,20"></path>
+    <text x="50%" y="26">{{(activeIndex > index + 1) ? '✓ ' + step : step}}</text>
+  </svg>
+
+  <svg [ngClass]="(activeIndex === steps.length - 1) ? 'completedState' : 'uncompletedState'" height="40"
+    viewBox="0 0 250 40" preserveAspectRatio="none"
+    [tooltip]="((activeIndex === steps.length - 1) ? ('STATUS.COMPLETED' | translate) : ('STATUS.UPCOMING' | translate)) + ': ' + steps[steps.length -1]">
+    <path d="M0,0 H 250 V 40 H 0 L 20,20"></path>
+    <text x="50%" y="26">{{(activeIndex === steps.length - 1) ? '✓' + steps[steps.length -1] : steps[steps.length -1]}}
+    </text>
+  </svg>
+</div>

@@ -12,7 +12,10 @@
       <span class="page-header d-lg-block d-md-block d-sm-none d-none">{{ order?.Name }}</span>
       <span tooltip="{{order?.Name}}" class="page-header d-lg-none d-md-none d-sm-block d-block">{{ order?.Name |
         truncate:13 }}</span>
-      <span class="badge badge-light ml-1 px-2 py-1" *ngIf="order?.Status">{{order?.Status}}</span>
+      <span class="badge badge-light ml-1 px-2 py-1" *ngIf="order?.Status">
+        <apt-output-field [record]="order" field="Status" [editable]="false" [valueOnly]="true"
+          [valueClass]="'pt-0'"></apt-output-field>
+      </span>
       <div *ngIf="order?.Proposal as proposal" class="ml-auto">
         <apt-output-field [record]="proposal" field="Name" labelClass="d-none" [editable]="false"
           [showQuickView]="true"></apt-output-field>
@@ -56,8 +59,8 @@
                   [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
                   [showQuickView]="true" [required]="true" (onChange)="refreshOrder($event, order, 'ShipToAccount')">
                 </apt-output-field>
-                
               </div>
+              
               <div class="flex-shrink-1 col-md-4 mb-2">
                 <apt-output-field [record]="order" field="BillToAccount" displayValue="BillToAccount"
                   [label]="'MY_ACCOUNT.ORDER_DETAIL.BILL_TO_ACCOUNT' | translate"

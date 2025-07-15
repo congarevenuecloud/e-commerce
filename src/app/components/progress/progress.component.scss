@@ -1,0 +1,44 @@
+svg {
+  pointer-events: none;
+  overflow: overlay;
+  &:not(:first-of-type) {
+    margin-left: -1%;
+  }
+  path {
+    pointer-events: all;
+    transition: all .2s ease;
+    cursor: pointer;
+    &:hover {
+      opacity: .85;
+    }
+  }
+  text {
+    font-size: 20px;
+    fill: white;
+    text-anchor: middle;
+  }
+  &.uncompletedState {
+    text {
+      fill: grey
+    }
+  }
+}
+label {
+  position: relative;
+  width: 100%;
+  top: -40px;
+  line-height: 40px;
+  margin-bottom: 0px;
+}
+
+.completedState {
+  fill: #009900;
+}
+
+.activeState {
+  fill: #0079CC;
+}
+
+.uncompletedState {
+  fill: #E5E5E5;
+}

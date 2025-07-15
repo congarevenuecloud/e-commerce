@@ -5,10 +5,10 @@
     <div class="container pb-4 px-md-3 px-4">
       <div>
         <apt-product-carousel *ngIf="productListA$ | async as productListA; else loading" [productList]="productListA"
-          slides="4" [title]="categories[0]?.Name" [subtitle]="categories[0]?.Description"></apt-product-carousel>
+          slides="4" [title]="categories[0]?.Label" [subtitle]="categories[0]?.Description"></apt-product-carousel>
 
         <apt-product-carousel *ngIf="productListB$ | async as productListB; else loading" [productList]="productListB"
-            slides="4" [title]="categories[1]?.Name" [subtitle]="categories[1]?.Description"></apt-product-carousel>
+            slides="4" [title]="categories[1]?.Label" [subtitle]="categories[1]?.Description"></apt-product-carousel>
       </div>
     </div>
     <app-footer [categories]="categories"></app-footer>

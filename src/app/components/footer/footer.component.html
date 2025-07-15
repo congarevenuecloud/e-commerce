@@ -23,8 +23,8 @@
             <li *ngFor="let category of categories">
               <button class="btn btn-link small px-0"
                 [routerLink]="['/products/category', category.Id]">
-                <span [title]="category.Name">
-                  {{category.Name | truncate:21}}
+                <span [title]="category.Label">
+                  {{category.Label | truncate:21}}
                 </span>
               </button>
             </li>
