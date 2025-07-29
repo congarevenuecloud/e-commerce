@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { Subscription, take } from 'rxjs';
-import { NavigationInterceptorService, PageErrorService } from '@congarevenuecloud/ecommerce';
+import { PageErrorService } from '@congarevenuecloud/ecommerce';
 
 @Component({
   selector: 'app-main',
@@ -35,12 +34,9 @@ export class MainComponent implements OnInit {
   subscriptions: Array<Subscription> = new Array();
   pageErrorCode: number = null;
 
-  constructor(private route: ActivatedRoute, private navigationInterceptorService: NavigationInterceptorService, private pageErrorService: PageErrorService) { }
+  constructor(private pageErrorService: PageErrorService) { }
 
   ngOnInit() {
-    this.subscriptions.push(this.route.paramMap.subscribe(params => {
-      this.navigationInterceptorService.updateRouteParam(params, 'storefront');
-    }));
     this.pageErrorService.getPageErrorCode().pipe(take(1)).subscribe((res) => {
       this.pageErrorCode = res;
     });

@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild, OnDestroy, TemplateRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { get, isNil, find, forEach, maxBy, filter, has, defaultTo, first, set } from 'lodash';
 import { combineLatest, Observable, Subscription, of, BehaviorSubject } from 'rxjs';
 import { switchMap, map as rmap, distinctUntilChanged, take } from 'rxjs/operators';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { get, isNil, find, forEach, maxBy, filter, defaultTo, first, set } from 'lodash';
 
 import {
     CartService,
@@ -19,7 +20,6 @@ import {
     ItemRequest
 } from '@congarevenuecloud/ecommerce';
 import { ProductConfigurationComponent, ProductConfigurationSummaryComponent, ProductConfigurationService, RevalidateCartService } from '@congarevenuecloud/elements';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 @Component({
     selector: 'app-product-detail',
     templateUrl: './product-detail.component.html',
@@ -31,6 +31,8 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 export class ProductDetailComponent implements OnInit, OnDestroy {
 
     @ViewChild('confirmationTemplate') confirmationTemplate: TemplateRef<any>;
+    @ViewChild('productDescriptionModal') productDescriptionModal: TemplateRef<any>;
+
 
     viewState$: BehaviorSubject<ProductDetailsState> = new BehaviorSubject<ProductDetailsState>(null);
     recommendedProducts$: Observable<Array<ItemRequest>>;
@@ -67,6 +69,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     disabled: boolean = false;
     discovery: string;
     priceProgress: boolean = false;
+    productDescriptionModalRef: BsModalRef;
+
 
     constructor(private cartService: CartService,
         private router: Router,
@@ -137,7 +141,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
             this.relatedTo = get(this.viewState$, 'value.relatedTo');
             this.product = get(response, 'product');
             this.cartItemList = get(response, 'itemList');
-            this.priceProgress= get(response, 'priceProgress');
+            this.priceProgress = get(response, 'priceProgress');
             if (get(response, 'configurationFlags.optionChanged') || get(response, 'configurationFlags.attributeChanged')) this.configurationChanged = true;
             if (!isNil(this.cartItemList)) this.primaryLineItem = find(this.cartItemList, (r) => get(r, 'LineType') == 'Product/Service');
         }));
@@ -168,7 +172,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     onAddToCart(cartItems: Array<CartItem>): void {
         this.productConfigurationService.unsavedConfiguration.next(false);
         this.configurationChanged = false;
-        const primaryItem = find(cartItems, i => get(i, 'IsPrimaryLine') === true && get(i, 'LineType')== 'Product/Service');
+        const primaryItem = find(cartItems, i => get(i, 'IsPrimaryLine') === true && get(i, 'LineType') == 'Product/Service');
         if (!isNil(primaryItem) && (get(primaryItem, 'Product.HasOptions') || get(primaryItem, 'Product.HasAttributes'))) {
             this.router.navigate(['/products', get(this, 'product.Id'), get(primaryItem, 'Id')]);
         }
@@ -189,11 +193,11 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
      * to see the updated the netprice of the product.
      */
     changeProductQuantity(newQty: any) {
-        if (this.cartItemList && this.cartItemList.length > 0 && !isNil(get(this.viewState$,'value.relatedTo'))){
-            let item  = find(this.cartItemList, c => c.LineType === 'Product/Service');
+        if (this.cartItemList && this.cartItemList.length > 0 && !isNil(get(this.viewState$, 'value.relatedTo'))) {
+            let item = find(this.cartItemList, c => c.LineType === 'Product/Service');
             item.Quantity = newQty;
             this.subscriptions.push(this.productConfigurationService.changeProductQuantity(newQty, item).subscribe(() => { }));
-     }
+        }
     }
 
     changeProductToOptional(event: boolean) {
@@ -201,7 +205,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
             forEach(this.cartItemList, c => {
                 c.IsOptional = event;
             });
-        this.productConfigurationService.changeItemToOptional(this.cartItemList).pipe(take(1)).subscribe(()=>{});
+        this.productConfigurationService.changeItemToOptional(this.cartItemList).pipe(take(1)).subscribe(() => { });
     }
     /**
      * Changes the quantity of the cart item passed to this method.
@@ -227,6 +231,34 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
             primaryItem = find(cartItems, i => get(i, 'LineType') === 'Product/Service' && i.PrimaryLineNumber === get(this, 'relatedTo.PrimaryLineNumber') && isNil(get(i, 'Option')));
         }
         return primaryItem;
+    }
+
+    isTextOverflowing(text: string): boolean {
+        if (!text) return false;
+
+        // Check for HTML formatting likely to take up multiple lines
+        const hasFormattingTags = /<\/?(ul|ol|li|br|p|div|h[1-6])[^>]*>/i.test(text);
+
+        // Count text line breaks or <br> tags
+        const lineBreaks = (text.match(/\n/g) || []).length;
+        const brTags = (text.match(/<br\s*\/?>/gi) || []).length;
+
+        // Enforce 200 character limit
+        const isOverCharLimit = text.length > 200;
+
+        // Clamp if there's formatting OR line breaks OR it's too long
+        return hasFormattingTags || (lineBreaks + brTags) >= 2 || isOverCharLimit;
+    }
+
+    openProductDescriptionModal() {
+        this.productDescriptionModalRef = this.modalService.show(this.productDescriptionModal, { class: 'modal-lg', backdrop: 'static', keyboard: false });
+    }
+
+    closeProductDescriptionModal() {
+        if (this.productDescriptionModalRef) {
+            this.productDescriptionModalRef.hide();
+            this.productDescriptionModalRef = null;
+        }
     }
 
     ngOnDestroy() {

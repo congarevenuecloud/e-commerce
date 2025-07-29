@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { get, set, isEmpty, forEach, map as _map } from 'lodash';
-import { Favorite, FavoriteService, LineItemService, ItemGroup, User, UserService, FavoriteScope, Cart, CartItem } from '@congarevenuecloud/ecommerce';
+import { Favorite, FavoriteService, LineItemService, ItemGroup, User, UserService, FavoriteScope, Cart, ComplexArray } from '@congarevenuecloud/ecommerce';
 import { ExceptionService } from '@congarevenuecloud/elements';
 
 /** Favorite details component shows the details of the selected favorite configuration. */
@@ -34,9 +34,16 @@ export class FavoriteDetailsComponent implements OnInit, OnDestroy {
 
   favoriteScopes = [FavoriteScope.Private, FavoriteScope.Public];
 
+  picklistValues: Array<ComplexArray> = [];
+
   ngOnInit() {
     this.user$ = this.userService.getCurrentUser();
     this.getFavorite();
+    this.picklistValues = this.favoriteScopes.map(scope => ({
+        'Key': scope,
+        'Value': scope,
+        'Sequence': 1
+      }));
   }
 
   private getFavorite() {

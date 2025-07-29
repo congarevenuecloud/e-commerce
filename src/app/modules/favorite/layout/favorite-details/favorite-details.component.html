@@ -36,7 +36,7 @@
             <div *ngIf="user$ | async as user">
               <div class="row">
                 <div class="flex-shrink-1 col-md-4 mb-2">
-                  <apt-output-field [record]="favorite" field="Name" label=" Name" [editable]="
+                  <apt-output-field [record]="favorite" field="Name" [editable]="
                   favorite?.IsActive && favorite?.CreatedBy?.Id === user?.Id
                 " (onChange)="updateFavorite($event.Name, favorite, 'Name')">
                   </apt-output-field>
@@ -46,21 +46,24 @@
                     <dt [ngClass]="labelClass" class="mutedLabels mt-2">
                       {{ "FAVORITE.VISIBILITY" | translate }}
                     </dt>
-                    <dd class="m-0 position-relative">
-                      <span *ngFor="let scope of favoriteScopes"
-                        class="custom-control custom-radio custom-control-inline pt-1">
-                        <input type="radio" class="custom-control-input" [id]="scope" [name]="scope" [disabled]="
-                            !(
+                    <dd class="m-0 position-relative pt-2" [id]="scope">
+                      <apt-input-field
+                        [valueClass]="'text-capitalize'"
+                        [field]="'Scope'"
+                        [entity]="favorite"
+                        [(ngModel)]="favorite.Scope"
+                        [showLabel]="false"
+                        [picklistValues]="picklistValues"
+                        [lookupOptions]="lookupOptions"
+                        [inline]="true"
+                        [readonly]="!(
                               favorite?.IsActive &&
                               favorite?.CreatedBy?.Id === user?.Id
-                            )
-                          " [checked]="favorite.Scope === scope" [value]="scope"
-                          (change)="updateFavorite(scope, favorite, 'Scope')" />
-
-                        <label class="custom-control-label mr-auto pt-1" [for]="scope">{{
-                          scope
-                          }}</label>
-                      </span>
+                            )"
+                        [displayAsRadioButtons]="true"
+                        (ngModelChange)="updateFavorite($event, favorite, 'Scope')"
+                      >
+                      </apt-input-field>
                     </dd>
                   </span>
                 </div>
@@ -79,7 +82,7 @@
                 "></apt-output-field>
                 </div>
                 <div class="flex-shrink-1 col-md-4 mb-2">
-                  <apt-output-field [record]="favorite" field="IsActive" label="Active" [editable]="false">
+                  <apt-output-field [record]="favorite" field="IsActive" [label]="('COMMON.ACTIVE' | translate)" [editable]="false">
                   </apt-output-field>
                 </div>
                 <div class="flex-shrink-1 col-md-4 mb-2">
