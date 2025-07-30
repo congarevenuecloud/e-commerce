@@ -87,7 +87,7 @@ export class FavoriteListComponent implements OnInit {
                   theme: 'primary',
                   validate: (record: Favorite) => this.isActiveFavorite(record),
                   action: (recordList: Array<Favorite>) => this.addFavoriteToCart(first(recordList)),
-                  disableReload: false
+                  disableReload: true
                 } as TableAction,
                 {
                   enabled: true,

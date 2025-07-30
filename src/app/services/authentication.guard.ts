@@ -21,7 +21,7 @@ export class AuthenticationGuard {
             take(1),
             switchMap((cart: Cart) => {
               // If the cart has line items, show confirmation popup
-              if (get(cart, 'LineItems', []).length > 0) {
+              if (get(cart, 'LineItems', [])?.length > 0) {
                 return this.translateService.stream('FOOTER.CONFIRM_POPUP_MESSAGE').pipe(
                   take(1),
                   switchMap((message: string) => {

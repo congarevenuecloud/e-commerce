@@ -12,7 +12,7 @@
       <span class="page-header d-lg-block d-md-block d-sm-none d-none">{{ order?.Name }}</span>
       <span tooltip="{{order?.Name}}" class="page-header d-lg-none d-md-none d-sm-block d-block">{{ order?.Name |
         truncate:13 }}</span>
-      <span class="badge badge-light ml-1 px-2 py-1" *ngIf="order?.Status">
+      <span class="badge badge-light ml-1 px-2 py-0" *ngIf="order?.Status">
         <apt-output-field [record]="order" field="Status" [editable]="false" [valueOnly]="true"
           [valueClass]="'pt-0'"></apt-output-field>
       </span>

@@ -1,0 +1,18 @@
+@import "variables";
+
+.clamp-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+apt-output-field {
+  line-height: 1 !important;
+  color: $gray-700;
+}
+
+.product-description {
+  color: $gray-700;
+}

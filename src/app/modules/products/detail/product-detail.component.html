@@ -5,188 +5,6 @@
         <apt-constraint-rule-alert></apt-constraint-rule-alert>
     </div>
 
-    <div class="primary-actions d-lg-block d-md-block d-sm-none d-none">
-        <form class="d-flex">
-            <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-4 text-nowrap align-items-end">
-                <small [id]="'standard-price-label'" class="mb-2 d-block text-right"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
-                <h5 [id]="'standard-price-value'">
-                    <apt-price [record]="viewState?.product" type="list"></apt-price>
-                </h5>
-            </div>
-            <div class="form-group my-0 mr-lg-2 mr-md-2 mr-sm-1 mr-1 align-items-end">
-                <small [id]="'net-price-label'" class="mb-2 d-block text-right"> {{'COMMON.NET_PRICE' | translate}} </small>
-                <h5>
-                    <ng-container *ngIf="cartItemList?.length > 0 || viewState?.relatedTo; else productPrice">
-                        <span  [id]="'net-price-value'" *ngIf="primaryLineItem?.NetPrice; else pricemask">
-                            {{ primaryLineItem?.NetPrice | localCurrency | async }}
-                        </span>
-                    </ng-container>
-                    <ng-template #productPrice>
-                        <apt-price [record]="viewState?.product" type="list">
-                        </apt-price>
-                    </ng-template>
-                </h5>
-            </div>
-        </form>
-    </div>
-
-    <div class="secondary-actions d-lg-block d-md-block d-sm-none d-none">
-        <!-- Simple Product Controls -->
-        <form class="d-flex justify-content-end"
-            *ngIf="!viewState?.product?.HasAttributes && !viewState?.product?.HasOptions; else complex">
-            <div class="form-group mx-3 my-0 d-flex align-items-center w-50">
-                <span class="mr-3"> {{'COMMON.QUANTITY' | translate}} </span>
-                <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity" name="quantity"
-                    [id]="'simple-product-quantity'" />
-            </div>
-            <div class="d-flex align-items-center">
-                <apt-add-to-cart [showQuantityControls]="false" (onAddToCart)="onAddToCart($event)"
-                    [configurationEnabled]="false" [quantity]="viewState.quantity" [aboEnabled]="false"
-                    [cartItems]="(cartItemList?.length > 0) ? cartItemList : null"
-                    [product]="product ? product: viewState?.product" [btnClass]="'btn-primary btn-raised px-3 py-2 text-nowrap'"
-                    [disabled]="configurationPending">
-                </apt-add-to-cart>
-            </div>
-        </form>
-
-        <!-- Complex Product Controls -->
-        <ng-template #complex>
-            <div class="d-flex">
-                <ng-container *ngIf="viewState?.relatedTo; else newProduct">
-                    <div class="form-group mx-3 my-0 d-flex align-items-center">
-                        <span class="mr-3"> {{'COMMON.QUANTITY' | translate}} </span>
-                        <input type="number" [id]="'complex-product-quantity'" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity"
-                            (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
-                    </div>
-                    <div class="form-group mx-3 my-0 d-flex align-items-center">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input"
-                                [(ngModel)]="viewState.relatedTo.IsOptional" [id]="viewState?.relatedTo?.Id"
-                                [checked]="viewState?.relatedTo?.IsOptional"
-                                (ngModelChange)="changeProductToOptional($event)">
-                            <label class="custom-control-label pl-1 pt-1"
-                                [for]="viewState?.relatedTo?.Id">{{'PRODUCT_DETAILS.IS_OPTIONAL' | translate}}</label>
-                        </div>
-                    </div>
-                </ng-container>
-
-                <ng-template #newProduct>
-                    <div class="d-flex justify-content-end">
-                        <div class="form-group ml-3 my-0 d-flex align-items-center col-5">
-                            <span class="mr-2">{{'COMMON.QUANTITY' | translate}}</span>
-                            <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity"
-                                [id]="'product-quantity'" (change)="changeProductQuantity(viewState.quantity)"
-                                name="quantity" />
-                        </div>
-                        <div class="d-flex align-items-center mr-2">
-                            <apt-add-to-cart [showQuantityControls]="false" [configurationEnabled]="false"
-                                [quantity]="viewState.quantity" (onAddToCart)="onAddToCart($event)"
-                                [cartItems]="cartItemList" [product]="product ? product: viewState?.product"
-                                [aboEnabled]="false" [cart]="!viewState?.relatedTo ? cart : null"
-                                [btnClass]="'btn-primary btn-raised px-3'" [disabled]="configurationPending">
-                            </apt-add-to-cart>
-                        </div>
-                    </div>
-                </ng-template>
-
-                <button class="btn btn-outline-primary ms-2 text-nowrap"
-                    *ngIf="(viewState?.product?.HasAttributes || viewState?.product?.HasOptions)"
-                    (click)="showSummary();">
-                    {{'DETAILS.PRICE_SUMMARY' | translate}}
-                </button>
-            </div>
-        </ng-template>
-
-    </div>
-
-    <div class="detail-header d-lg-none d-md-none d-sm-block d-block pt-2 border-top">
-        <form class="d-flex justify-content-between pb-2">
-            <div class="form-group my-0 mr-lg-5 mr-md-5 mr-sm-4 mr-5">
-                <small [id]="'standard-price-label-sm'" class="mb-2 d-block text-right-lg"> {{'PRODUCT_DETAILS.STANDARD_PRICE' | translate}} </small>
-                <h5 [id]="'standard-price-value-sm'">
-                    <apt-price [record]="viewState?.product" type="list"></apt-price>
-                </h5>
-            </div>
-            <div class="form-group my-0 mr-lg-3 mr-md-3 mr-sm-5 mr-2 ml-5">
-                <small [id]="'net-price-label-sm'" class="mb-2 d-block"> {{'COMMON.NET_PRICE' | translate}} </small>
-                <h5>
-                    <ng-container *ngIf="cartItemList?.length > 0 || viewState?.relatedTo; else productPrice">
-                        <span [id]="'net-price-value-sm'" *ngIf="primaryLineItem?.NetPrice; else pricemask">
-                            {{ primaryLineItem?.NetPrice | localCurrency | async }}
-                        </span>
-                    </ng-container>
-                    <ng-template #productPrice>
-                        <apt-price [record]="viewState?.product" type="list">
-                        </apt-price>
-                    </ng-template>
-                </h5>
-            </div>
-        </form>
-
-        <!-- Simple Product Controls -->
-        <form class="d-flex justify-content-between pt-3 border-top"
-            *ngIf="!viewState?.product?.HasAttributes && !viewState?.product?.HasOptions; else complexSmallScreen">
-            <div class="form-group my-0 mr-3 d-flex align-items-center">
-                <span class="mr-3"> {{'COMMON.QUANTITY' | translate}} </span>
-                <input type="number" min="1" class="form-control quantity" [(ngModel)]="viewState.quantity" name="quantity"
-                    [id]="'simple-product-quantity-sm'" />
-            </div>
-            <div class="d-flex align-items-center">
-                <apt-add-to-cart [showQuantityControls]="false" (onAddToCart)="onAddToCart($event)"
-                    [configurationEnabled]="false" [quantity]="viewState.quantity" [aboEnabled]="false"
-                    [cartItems]="(cartItemList?.length > 0) ? cartItemList : null"
-                    [product]="product ? product: viewState?.product" [btnClass]="'btn-primary btn-raised px-3 py-2 text-nowrap'"
-                    [disabled]="configurationPending">
-                </apt-add-to-cart>
-            </div>
-        </form>
-
-        <!-- Complex Product Controls -->
-        <ng-template #complexSmallScreen>
-            <div class="d-flex justify-content-between pt-3 border-top">
-                <ng-container *ngIf="viewState?.relatedTo; else newProductSmallScreen">
-                    <div class="form-group my-0 d-flex align-items-center w-50">
-                        <span class="mr-1"> {{'COMMON.QTY' | translate}} </span>
-                        <input type="number" [id]="'complex-product-quantity-sm'" min="1" class="form-control quantity w-50" [(ngModel)]="viewState.quantity"
-                            (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
-                        <div class="pl-3">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input"
-                                    [(ngModel)]="viewState.relatedTo.IsOptional" [id]="viewState?.relatedTo?.Id"
-                                    [checked]="viewState?.relatedTo?.IsOptional"
-                                    (ngModelChange)="changeProductToOptional($event)">
-                                <label class="custom-control-label pl-1 pt-1"
-                                    [for]="viewState?.relatedTo?.Id">{{'PRODUCT_DETAILS.IS_OPTIONAL' |
-                                    translate}}</label>
-                            </div>
-                        </div>
-                    </div>
-                </ng-container>
-
-                <ng-template #newProductSmallScreen>
-                    <div class="form-group my-0 d-flex align-items-center w-50">
-                        <span class="mr-1"> {{'COMMON.QTY' | translate}} </span>
-                        <input type="number" min="1" class="form-control quantity w-50" [(ngModel)]="viewState.quantity"
-                            [id]="'product-quantity-sm'" (change)="changeProductQuantity(viewState.quantity)"
-                            name="quantity" />
-                        <div class="pl-2">
-                            <apt-add-to-cart [showQuantityControls]="false" [configurationEnabled]="false"
-                                [quantity]="viewState.quantity" (onAddToCart)="onAddToCart($event)"
-                                [label]="'COMMON.ADD'" [cartItems]="cartItemList"
-                                [product]="product ? product: viewState?.product" [aboEnabled]="false"
-                                [cart]="!viewState?.relatedTo ? cart : null" [btnClass]="'btn-primary btn-raised px-3'"
-                                [disabled]="configurationPending">
-                            </apt-add-to-cart>
-                        </div>
-                    </div>
-                </ng-template>
-                <button class="btn btn-link text-primary ml-2 px-0 pr-2"
-                    *ngIf="(viewState?.product?.HasAttributes || viewState?.product?.HasOptions)"
-                    (click)="showSummary();">{{'DETAILS.PRICE_SUMMARY' | translate}}</button>
-            </div>
-        </ng-template>
-    </div>
-
     <app-detail-section [title]="'PRODUCT_DETAILS.DETAILS' | translate">
         <div class="row px-1 mt-3">
             <div class="col-12 col-md-4">
@@ -197,14 +15,191 @@
                 </div>
             </div>
             <div class="col-12 col-md-8">
-                <div class="card d-lg-block d-md-block d-sm-none d-none">
-                    <div class="card-body pt-0 pl-2 pb-2 d-flex align-items-center">
-                        <apt-output-field [record]="viewState?.product" field="Description" [valueOnly]="true" [editable]="false" class="px-2 pt-0"></apt-output-field>
+                <!-- For large and Medium screens -->
+                <div class="card d-lg-block d-md-block d-sm-none d-none border-0">
+                    <div class="card-body pt-0 pl-2 pb-2 d-flex align-items-start flex-column">
+
+                        <!-- Description -->
+                        <div>
+                            <ng-template [ngTemplateOutlet]="productDescription"></ng-template>
+                        </div>
+
+                        <!-- Prices -->
+                        <ng-template [ngTemplateOutlet]="productPrices"></ng-template>
+
+                        <!-- Simple product -->
+                        <ng-container
+                            *ngIf="!viewState?.product?.HasAttributes && !viewState?.product?.HasOptions; else complex">
+                            <!-- Quantity -->
+                            <div class="form-group mt-3 w-50">
+                                <div class="w-25">
+                                    <label class="mr-3"> {{'COMMON.QUANTITY' | translate}} </label>
+                                    <input type="number" min="1" class="form-control quantity"
+                                        [(ngModel)]="viewState.quantity" name="quantity"
+                                        [id]="'simple-product-quantity'" />
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="mt-3 d-flex">
+                                <apt-add-to-cart [showQuantityControls]="false" (onAddToCart)="onAddToCart($event)"
+                                    [configurationEnabled]="false" [quantity]="viewState.quantity" [aboEnabled]="false"
+                                    [cartItems]="(cartItemList?.length > 0) ? cartItemList : null"
+                                    [product]="product ? product: viewState?.product"
+                                    [btnClass]="'btn-primary btn-raised px-3 py-2 text-nowrap'"
+                                    [disabled]="configurationPending">
+                                </apt-add-to-cart>
+                            </div>
+                        </ng-container>
+
+                        <!-- Complex Product -->
+                        <ng-template #complex>
+                            <!-- Quantity -->
+                            <div class="form-group mt-3 w-50">
+                                <div class="w-25">
+                                    <label class="mb-1"> {{'COMMON.QUANTITY' | translate}} </label>
+                                    <input type="number" [id]="'complex-product-quantity'" min="1"
+                                        class="form-control quantity" [(ngModel)]="viewState.quantity"
+                                        (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="mt-3 d-flex">
+
+                                <button class="btn btn-outline-primary mr-3 text-nowrap"
+                                    *ngIf="(viewState?.product?.HasAttributes || viewState?.product?.HasOptions)"
+                                    (click)="showSummary();">
+                                    {{'DETAILS.PRICE_SUMMARY' | translate}}
+                                </button>
+
+                                <ng-container *ngIf="viewState?.relatedTo; else newProduct">
+                                    <button class="btn btn-primary mr-3 text-nowrap" [routerLink]="['/carts','active']">
+                                        {{'MINI_CART.VIEW_CART' | translate}}
+                                    </button>
+                                    <div class="form-group mr-3 my-0 d-flex align-items-center">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input"
+                                                [(ngModel)]="viewState.relatedTo.IsOptional"
+                                                [id]="viewState?.relatedTo?.Id"
+                                                [checked]="viewState?.relatedTo?.IsOptional"
+                                                (ngModelChange)="changeProductToOptional($event)">
+                                            <label class="custom-control-label pl-1 pt-1"
+                                                [for]="viewState?.relatedTo?.Id">{{'PRODUCT_DETAILS.IS_OPTIONAL' |
+                                                translate}}</label>
+                                        </div>
+                                    </div>
+                                </ng-container>
+
+                                <ng-template #newProduct>
+                                    <div class="d-flex align-items-center">
+                                        <apt-add-to-cart [showQuantityControls]="false" [configurationEnabled]="false"
+                                            [quantity]="viewState.quantity" (onAddToCart)="onAddToCart($event)"
+                                            [cartItems]="cartItemList" [product]="product ? product: viewState?.product"
+                                            [aboEnabled]="false" [cart]="!viewState?.relatedTo ? cart : null"
+                                            [btnClass]="'btn-primary btn-raised px-3'"
+                                            [disabled]="configurationPending">
+                                        </apt-add-to-cart>
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </ng-template>
                     </div>
                 </div>
+
+
+                <!-- For Small screens -->
                 <div class="card border-0 d-lg-none d-md-none d-sm-block d-block">
-                    <div class="card-body px-0 pt-0 d-flex align-items-center">
-                        <apt-output-field [record]="viewState?.product" field="Description" [valueOnly]="true" [editable]="false" class="px-2 pt-0"></apt-output-field>
+                    <div class="card-body pt-0 pl-2 pb-2 d-flex align-items-start flex-column">
+
+                        <!-- Description -->
+                        <div class="mt-3">
+                            <ng-template [ngTemplateOutlet]="productDescription"></ng-template>
+                        </div>
+
+                        <!-- Prices -->
+                        <ng-template [ngTemplateOutlet]="productPrices"></ng-template>
+
+                        <!-- Simple product -->
+                        <ng-container
+                            *ngIf="!viewState?.product?.HasAttributes && !viewState?.product?.HasOptions; else complexSmallScreen">
+
+                            <!-- Quantity -->
+                            <div class="form-group mt-3 w-75">
+                                <div class="w-25">
+                                    <label class="mr-3"> {{'COMMON.QUANTITY' | translate}} </label>
+                                    <input type="number" min="1" class="form-control quantity"
+                                        [(ngModel)]="viewState.quantity" name="quantity"
+                                        [id]="'simple-product-quantity-sm'" />
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="mt-3 d-flex">
+                                <apt-add-to-cart [showQuantityControls]="false" (onAddToCart)="onAddToCart($event)"
+                                    [configurationEnabled]="false" [quantity]="viewState.quantity" [aboEnabled]="false"
+                                    [cartItems]="(cartItemList?.length > 0) ? cartItemList : null"
+                                    [product]="product ? product: viewState?.product"
+                                    [btnClass]="'btn-primary btn-raised px-3 py-2 text-nowrap'"
+                                    [disabled]="configurationPending">
+                                </apt-add-to-cart>
+                            </div>
+                        </ng-container>
+
+                        <!-- Complex Product -->
+                        <ng-template #complexSmallScreen>
+
+                            <!-- Quantity -->
+                            <div class="form-group mt-3 w-75">
+                                <div class="w-25">
+                                    <span class="mr-1"> {{'COMMON.QTY' | translate}} </span>
+                                    <input type="number" min="1" class="form-control quantity"
+                                        [(ngModel)]="viewState.quantity" [id]="'complex-product-quantity-sm'"
+                                        (change)="changeProductQuantity(viewState.quantity)" name="quantity" />
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="form-group mt-3 d-flex">
+
+                                <button class="btn btn-outline-primary mr-3 text-nowrap"
+                                    *ngIf="(viewState?.product?.HasAttributes || viewState?.product?.HasOptions)"
+                                    (click)="showSummary();">
+                                    {{'DETAILS.PRICE_SUMMARY' | translate}}
+                                </button>
+
+                                <ng-container *ngIf="viewState?.relatedTo; else newProductSmallScreen">
+                                    <button class="btn btn-primary mr-3 text-nowrap" [routerLink]="['/carts','active']">
+                                        {{'MINI_CART.VIEW_CART' | translate}}
+                                    </button>
+                                </ng-container>
+
+                                <ng-template #newProductSmallScreen>
+                                    <div class="d-flex align-items-center">
+                                        <apt-add-to-cart [showQuantityControls]="false" [configurationEnabled]="false"
+                                            [quantity]="viewState.quantity" (onAddToCart)="onAddToCart($event)"
+                                            [cartItems]="cartItemList" [product]="product ? product: viewState?.product"
+                                            [aboEnabled]="false" [cart]="!viewState?.relatedTo ? cart : null"
+                                            [btnClass]="'btn-primary btn-raised px-3'"
+                                            [disabled]="configurationPending">
+                                        </apt-add-to-cart>
+                                    </div>
+                                </ng-template>
+                            </div>
+
+                            <!-- Is Optional Checkbox -->
+                            <div *ngIf="viewState?.relatedTo" class="form-group mt-2 d-flex align-items-center">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input"
+                                        [(ngModel)]="viewState.relatedTo.IsOptional" [id]="viewState?.relatedTo?.Id"
+                                        [checked]="viewState?.relatedTo?.IsOptional"
+                                        (ngModelChange)="changeProductToOptional($event)">
+                                    <label class="custom-control-label pl-1 pt-1"
+                                        [for]="viewState?.relatedTo?.Id">{{'PRODUCT_DETAILS.IS_OPTIONAL' |
+                                        translate}}</label>
+                                </div>
+                            </div>
+                        </ng-template>
                     </div>
                 </div>
             </div>
@@ -239,7 +234,7 @@
         </div>
     </app-detail-section>
 
-    <ng-container *ngIf="recommendedProducts$ | async as recommendedProducts; else loading">
+    <ng-container *ngIf="recommendedProducts$ | async as recommendedProducts">
         <app-detail-section *ngIf="recommendedProducts?.length"
             [title]="'PRODUCT_DETAILS.RECOMMENDED_PRODUCTS' | translate">
             <div class="row mt-4">
@@ -250,6 +245,76 @@
             </div>
         </app-detail-section>
     </ng-container>
+
+    <!-- Product Description -->
+    <ng-template #productDescription>
+        <label class="mb-0 h6">
+            {{ 'PRODUCT_DETAILS.DETAILS' | translate }}
+        </label>
+    
+        <apt-output-field [record]="viewState?.product" field="Description" [valueOnly]="true"
+            [class.clamp-2-lines]="isTextOverflowing(viewState?.product?.Description)" [editable]="false"
+            [valueClass]="'px-0 pb-0 pt-2'" class="mt-2"></apt-output-field>
+    
+        <button *ngIf="isTextOverflowing(viewState?.product?.Description)" class="btn btn-link p-0"
+            (click)="openProductDescriptionModal()"> {{ 'COMMON.SHOW_MORE' | translate }}
+            <i class="fa fa-angle-double-right ml-1"></i>
+        </button>
+    
+    </ng-template>
+
+    <!-- Product Prices -->
+    <ng-template #productPrices>
+        <div class="d-flex mt-3">
+            <div class="py-0 pr-lg-5 pr-md-5 pr-sm-4 pr-4 text-nowrap align-items-end border-right">
+                <label [id]="'standard-price-label'" class="mb-2 d-block text-right-lg mt-1">
+                    {{'PRODUCT_DETAILS.STANDARD_PRICE' |
+                    translate}} </label>
+                <h5 [id]="'standard-price-value'">
+                    <apt-price [record]="viewState?.product" type="list"></apt-price>
+                </h5>
+            </div>
+
+            <div class="py-0 pl-lg-5 pl-md-5 pl-sm-4 pl-4 align-items-end">
+                <label [id]="'net-price-label'" class="mb-2 d-block text-right-lg mt-1">
+                    {{'COMMON.NET_PRICE' |
+                    translate}}
+                </label>
+                <h5>
+                    <ng-container *ngIf="cartItemList?.length > 0 || viewState?.relatedTo; else productPrice">
+                        <span [id]="'net-price-value'" *ngIf="primaryLineItem?.NetPrice; else pricemask">
+                            {{ primaryLineItem?.NetPrice | localCurrency | async }}
+                        </span>
+                    </ng-container>
+                    <ng-template #productPrice>
+                        <apt-price [record]="viewState?.product" type="list">
+                        </apt-price>
+                    </ng-template>
+                </h5>
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- Product Description Modal -->
+    <ng-template #productDescriptionModal>
+        <div class="modal-header align-items-center d-flex flex-row-reverse pt-0 mt-3 px-0 pb-2">
+            <button type="button" class="close close-button pull-right" aria-label="Close"
+                (click)="closeProductDescriptionModal()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="modal-body d-flex flex-column justify-content-center pb-3 pt-1 bg-white scrollbar">
+
+            <h6 class="modal-title pull-left font-weight-bold p-2 mt-2">
+                {{ 'PRODUCT_DETAILS.PRODUCT_DETAIL' | translate }}
+            </h6>
+
+            <apt-output-field [record]="viewState?.product" field="Description" [valueOnly]="true" [editable]="false"
+                class="p-2"></apt-output-field>
+
+        </div>
+    </ng-template>
 
     <apt-product-configuration-summary *ngIf='viewState?.product?.HasOptions || viewState?.product?.HasAttributes'
         [product]="viewState?.product" [relatedTo]="viewState?.relatedTo" [changes]="cartItemList" [preload]="true"
