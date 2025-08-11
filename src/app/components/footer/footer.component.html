@@ -52,7 +52,8 @@
                 translate}}</button>
             </li>
             <li>
-              <button class="btn btn-link small px-0" [routerLink]="['/my-account/favorites']">{{'COMMON.FAVORITES' |
+              <button *ngIf="showFavorites$ | async" class="btn btn-link small px-0"
+                [routerLink]="['/my-account/favorites']">{{'COMMON.FAVORITES' |
                 translate}}</button>
             </li>
             <li>

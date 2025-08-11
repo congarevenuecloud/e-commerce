@@ -28,19 +28,21 @@ export class FooterComponent implements OnInit {
   }
   accountInquiryDetails: any = null; // Account details to be used for the contact form
   contactFormLoading: boolean = false;
+  showFavorites$: Observable<boolean>;
 
 
   constructor(private storefrontService: StorefrontService, private translateService: TranslateService, private emailService: EmailService, private exceptionService: ExceptionService) { }
 
   ngOnInit() {
     this.storefront$ = this.storefrontService.getStorefront();
+    this.showFavorites$ = this.storefrontService.isFavoriteEnabled();
     this.currentYear = new Date().getFullYear().toString();
     this.subscriptions.push(this.translateService.stream('FOOTER.CONGA_COPYRIGHT', { currentYear: this.currentYear }).subscribe((
       copyright: string) => {
       this.copyrightMessage = copyright;
     }));
     this.footerCategories = slice(this.categories, 0, 7);
-    
+
     // Retrieve the account owner and email address from ConfigSystemProperties, tied to the storefront configuration, for use in the "Get in Touch" form payload.
     this.subscriptions.push(this.storefrontService.getConfigSettings().subscribe((configSettings: any) => {
       this.accountInquiryDetails = get(configSettings, 'EnableGetInTouchFormInDC', null);

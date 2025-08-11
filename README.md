@@ -1,6 +1,6 @@
 # Digital Commerce Core Reference Template
 
-This is the base reference application for the Conga ecommerce product. Follow below instructions to get started. See the [docs](https://congarevenuecloud.github.io/202507.2.0/) for more detailed instructions on interacting with the underlying SDK.
+This is the base reference application for the Conga ecommerce product. Follow below instructions to get started. See the [docs](https://congarevenuecloud.github.io/202508.1.0/) for more detailed instructions on interacting with the underlying SDK.
 
 ---
 
@@ -137,7 +137,7 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 
 ## Digital Commerce SDK
 
-The objective of this section is to provide information about reference templates, base libraries, models, and components that can be inherited and reused. This section also provides information about services that are sufficient for most of the business logic. You can create orders, request quotes, and more with the **SDK libraries**. See the [Docs](https://congarevenuecloud.github.io/202507.2.0/) for more information.
+The objective of this section is to provide information about reference templates, base libraries, models, and components that can be inherited and reused. This section also provides information about services that are sufficient for most of the business logic. You can create orders, request quotes, and more with the **SDK libraries**. See the [Docs](https://congarevenuecloud.github.io/202508.1.0/) for more information.
 
 <div id="digital-commerce-for-rest-api-developers"/>
 

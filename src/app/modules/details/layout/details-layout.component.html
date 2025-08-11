@@ -17,22 +17,25 @@
         </div>
       </div>
 
-      <div class="d-flex align-items-end px-3" *ngIf="sections.length > 0">
-        <div *ngFor="let tab of sections; let i = index;" (click)="scrollTo(tab)">
+      <div class="d-flex align-items-end px-3" *ngIf="filteredSections.length > 0">
+        <div *ngFor="let tab of filteredSections; let i = index;">
           <a class="nav-link text-capitalize border-0 mb-0" [class.active]="tab.active" href="javascript:void(0)"
-            *ngIf="tab?.element?.nativeElement?.offsetTop > 0" [class.d-none]="i > 2" [class.d-md-block]="i === 2"
-            [class.d-lg-block]="i === 3" [class.d-xl-block]="i === 4">
+            *ngIf="tab?.element?.nativeElement?.offsetTop >= 0 && !tab.hideLink" [class.d-none]="i > 2"
+            [class.d-md-block]="i === 2" [class.d-lg-block]="i === 3" [class.d-xl-block]="i === 4"
+            (click)="scrollTo(tab)">
             {{tab.title}}
           </a>
         </div>
-        <div dropdown class="position-relative" [ngClass]="sections.length > 3 ? 'd-block': 'd-none'" [class.d-xl-none]="sections?.length < 6"
-          [class.d-lg-none]="sections?.length < 5" [class.d-md-none]="sections?.length < 4">
+        <div dropdown class="position-relative" [ngClass]="getVisibleSections().length > 3 ? 'd-block': 'd-none'"
+          [class.d-xl-none]="getVisibleSections()?.length < 6" [class.d-lg-none]="getVisibleSections()?.length < 5"
+          [class.d-md-none]="getVisibleSections()?.length < 4">
           <a class="nav-link dropdown-toggle border-0 mb-0" dropdownToggle href="javascript:void(0)"><i
               class="fa fa-ellipsis-v"></i></a>
           <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu" role="menu" aria-labelledby="button-basic">
-            <li role="menuitem" *ngFor="let tab of sections; let i = index" class="d-none" [class.d-block]="i > 2"
-              [class.d-xl-none]="i < 5" [class.d-lg-none]="i < 4" [class.d-md-none]="i < 3">
-              <a class="dropdown-item" [class.active]="tab.active" href="javascript:void(0)" (click)="scrollTo(tab)">{{
+            <li role="menuitem" *ngFor="let tab of filteredSections; let i = index" class="d-none"
+              [class.d-block]="i > 2" [class.d-xl-none]="i < 5" [class.d-lg-none]="i < 4" [class.d-md-none]="i < 3">
+              <a class="dropdown-item" [class.active]="tab.active" href="javascript:void(0)" (click)="scrollTo(tab)"
+                *ngIf="!tab.hideLink">{{
                 tab.title }}</a>
             </li>
           </ul>
