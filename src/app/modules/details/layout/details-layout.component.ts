@@ -1,4 +1,5 @@
-import { Component, ContentChildren, AfterContentInit, QueryList, ElementRef, HostListener, Input, ViewChild } from '@angular/core';
+import { Component, ContentChildren, AfterContentInit, OnDestroy, OnChanges, SimpleChanges, QueryList, ElementRef, HostListener, Input, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { get, set, findIndex } from 'lodash';
 import { AObject } from '@congarevenuecloud/core';
 import { DetailSectionComponent } from '../detail-section/detail-section.component';
@@ -10,9 +11,13 @@ import { DetailSectionComponent } from '../detail-section/detail-section.compone
   templateUrl: './details-layout.component.html',
   styleUrls: ['./details-layout.component.scss']
 })
-export class DetailsLayoutComponent implements AfterContentInit {
+export class DetailsLayoutComponent implements AfterContentInit, OnDestroy, OnChanges {
 
-  @ContentChildren(DetailSectionComponent) sections: QueryList<DetailSectionComponent>;
+  @ContentChildren(DetailSectionComponent, { descendants: true }) sections: QueryList<DetailSectionComponent>;
+
+  filteredSections: DetailSectionComponent[] = [];
+  private sectionsSubscription: Subscription;
+  
   @ViewChild('primaryActions', { static: true }) primaryActions: any;
   @ViewChild('secondaryActions', { static: true }) secondaryActions: any;
   @ViewChild('headerNav', { static: true }) headerNav: ElementRef<any>;
@@ -21,16 +26,45 @@ export class DetailsLayoutComponent implements AfterContentInit {
   @Input() subtitle: string;
   @Input() context: AObject;
   @Input() route: string;
+  @Input() hideLink: boolean = false;
 
   private activeTabIndex = 0;
 
   hidePrimaryActions: boolean = false;
   hideSecondaryActions: boolean = false;
 
+  ngOnChanges(changes: SimpleChanges) {
+    // If hideLink input property changes, update filtered sections
+    if (changes['hideLink'] && this.sections) {
+      this.updateFilteredSections();
+    }
+  }
+
   ngAfterContentInit() {
+    this.updateFilteredSections();
+
+    // Subscribe to changes in the sections QueryList
+    this.sectionsSubscription = this.sections.changes.subscribe(() => {
+      this.updateFilteredSections();
+    });
     this.hidePrimaryActions = get(this, 'primaryActions.nativeElement.children.length', 0) <= 0;
     this.hideSecondaryActions = get(this, 'secondaryActions.nativeElement.children.length', 0) <= 0;
-    set(this, 'sections.first.active', true);
+    
+    // Set the first visible section as active
+    const visibleSections = this.getVisibleSections();
+    if (visibleSections.length > 0) {
+      visibleSections[0].active = true;
+    }
+  }
+
+  private updateFilteredSections() {
+    // Show all sections in the filtered list
+    this.filteredSections = this.sections.toArray();
+  }
+
+  getVisibleSections(): DetailSectionComponent[] {
+    const visible = this.filteredSections.filter(section => !section.hideLink);
+    return visible;
   }
 
   /**
@@ -58,22 +92,42 @@ export class DetailsLayoutComponent implements AfterContentInit {
    * scrollTo method scrolls the page to the specified tab content.
    */
   scrollTo(tab: DetailSectionComponent) {
-    const index = findIndex(this.sections.toArray(), t => t.title === tab.title);
-    if (index === 0)
+    // Find the index of the tab in the original sections array
+    const allSections = this.sections.toArray();
+    const tabIndex = allSections.findIndex(section => section.title === tab.title);
+    
+    // If it's the first tab (index 0), scroll to top
+    if (tabIndex === 0) {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    else
-      window.scrollTo({ top: tab.element.nativeElement.offsetTop - this.headerNav.nativeElement.offsetHeight, left: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    // For other tabs, calculate the absolute position
+    let elementTop = tab.element.nativeElement.offsetTop;
+    let element = tab.element.nativeElement;
+    
+    // Get the absolute position by traversing up the offset parent chain
+    while (element.offsetParent) {
+      element = element.offsetParent;
+      elementTop += element.offsetTop;
+    }
+    
+    const headerHeight = this.headerNav.nativeElement.offsetHeight;
+    const scrollPosition = Math.max(0, elementTop - headerHeight - 10);
+    
+    window.scrollTo({ top: scrollPosition, left: 0, behavior: 'smooth' });
   }
 
   setActiveTab() {
     let index = 0;
-    if (this.sections) {
-      const amounts = this.sections.map(s => this.getElementPercentage(s.element.nativeElement));
+    const visibleSections = this.getVisibleSections();
+    if (visibleSections && visibleSections.length > 0) {
+      const amounts = visibleSections.map(s => this.getElementPercentage(s.element.nativeElement));
       index = amounts.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
 
       if (index !== this.activeTabIndex) {
-        this.sections.forEach(t => t.active = false);
-        this.sections.toArray()[index].active = true;
+        this.filteredSections.forEach(t => t.active = false);
+        visibleSections[index].active = true;
         this.activeTabIndex = index;
       }
     }
@@ -108,4 +162,9 @@ export class DetailsLayoutComponent implements AfterContentInit {
     }
   }
 
+  ngOnDestroy() {
+    if (this.sectionsSubscription) {
+      this.sectionsSubscription.unsubscribe();
+    }
+  }
 }

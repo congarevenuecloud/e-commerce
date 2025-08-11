@@ -8,6 +8,7 @@ import { Component, OnInit, Input, ElementRef } from '@angular/core';
 export class DetailSectionComponent implements OnInit {
 
   @Input() title: string;
+  @Input() hideLink: boolean = false;
 
   public active: boolean = false;
 

@@ -7,17 +7,18 @@
 
     <ng-container *ngIf="storefront$ | async as storefront; else errorPageHeader">
       <button class="navbar-brand btn btn-link d-none d-md-inline-block p-0 mr-2 d-lg-block d-sm-none"
-        [routerLink]="['/']" *ngIf="storefront?.Logo">
-        <img class="pl-2" [src]="storefront?.Logo | image" />
+        [routerLink]="['/']" *ngIf="storeLogo$ | async as storeLogo; else defaultStoreLogo">
+        <img class="pl-2" [src]="storeLogo | image" />
       </button>
-      <span class="mr-1 mt-1 d-none d-md-block d-lg-block d-sm-none">
-        <img src="./assets/images/conga.png" alt="" srcset="" height="24">
-      </span>
       <span class="sf-label mb-0 d-lg-block d-md-block d-sm-none d-none">{{storefront?.Name}}</span>
       <span tooltip="{{storefront?.Name}}" class="sf-label m-0 d-lg-none d-md-none d-sm-block d-block">
         {{storefront?.Name | truncate:5}}
       </span>
     </ng-container>
+
+    <ng-template #defaultStoreLogo>
+      <img class="pl-2" src="./assets/images/logo.png" height="24" />
+    </ng-template>
 
     <ng-template #errorPageHeader>
       <button class="navbar-brand btn btn-link d-none d-md-inline-block p-0 mr-2 d-lg-block d-sm-none"
