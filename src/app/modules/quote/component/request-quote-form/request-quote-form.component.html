@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-12 col-md-6">
         <div class="form-group">
-          <apt-input-field [entity]="quote" [field]="'ProposalName'" [(ngModel)]="quote.ProposalName"
+          <apt-input-field [entity]="quote" [field]="'ProposalName'" [(ngModel)]="quote.ProposalName" [required]="true" [errorMsg]="errMessages.requiredProposalName"
             (ngModelChange)="quoteChange()" [label]="'CREATE_QUOTE.QUOTE_TITLE' | translate"></apt-input-field>
         </div>
         <div class="form-group">
@@ -124,7 +124,7 @@
               </div>
             </div>
             <apt-address [(ngModel)]="primaryContact" (addressChange)="quoteChange()" type="Billing" [form]="form"
-              name="billingAddress">
+              name="billingAddress" [required]="true">
             </apt-address>
 
           </tab>
