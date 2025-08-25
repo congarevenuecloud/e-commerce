@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { of, Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { switchMap, take, map as rmap, catchError } from 'rxjs/operators';
-import { get, groupBy, isArray, map, omit, sumBy, zipObject, mapValues } from 'lodash';
-import { Operator, ApiService, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
+import { get, groupBy, omit, sumBy, mapValues } from 'lodash';
+import { Operator, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import { OrderService, Order, AccountService, FieldFilter, OrderResult, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
 import { TableOptions, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
 @Component({
@@ -49,7 +49,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
     ]
   };
 
-  constructor(private orderService: OrderService, private accountService: AccountService, private apiService: ApiService, private exceptionService: ExceptionService, private dateFormatPipe: DateFormatPipe) { }
+  constructor(private orderService: OrderService, private accountService: AccountService, private exceptionService: ExceptionService, private dateFormatPipe: DateFormatPipe) { }
 
   ngOnInit() {
     this.loadView();
@@ -76,7 +76,6 @@ export class OrderListComponent implements OnInit, OnDestroy {
                 },
                 {
                   prop: 'PriceList',
-                  label: 'CUSTOM_LABELS.PRICELIST'
                 },
                 {
                   prop: 'BillToAccount',
@@ -109,7 +108,14 @@ export class OrderListComponent implements OnInit, OnDestroy {
                 'OrderNumber'
               ],
               filters: this.filterList$.value.concat(this.getFilters()),
-              routingLabel: 'orders'
+              routingLabel: 'orders',
+              callback: (recordList?: Array<Order>) => {
+                if (recordList && recordList.length > 0) {
+                  return combineLatest(
+                    recordList.map((record) => this.updateOrderValue(record)));
+                }
+                return of([]);
+              }
             }
           }
           this.fetchOrderTotals();
@@ -160,6 +166,15 @@ export class OrderListComponent implements OnInit, OnDestroy {
 
   getDateFormat(record: Order) {
     return this.dateFormatPipe.transform(get(record, 'CreatedDate'));
+  }
+
+  updateOrderValue(order: Order): Observable<Order> {
+    return this.orderService.updateOrderValue(order).pipe(
+      take(1),
+      rmap((updatedOrder: Order) => {
+        return updatedOrder;
+      })
+    );
   }
 
   ngOnDestroy() {

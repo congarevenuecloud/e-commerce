@@ -4,8 +4,8 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, of, BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { get, isNil, isEmpty, toString, toNumber, set, isEqual, remove, debounce } from 'lodash';
-import { FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
+import { get, isNil, isEmpty, toString, toNumber, set, isEqual } from 'lodash';
+import { FilterOperator, PlatformConstants, ConfigurationService } from '@congarevenuecloud/core';
 import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, FavoriteService, Product, FacetFilter, FacetFilterPayload, Quote, CartService, StorefrontService, FavoriteResult, Favorite } from '@congarevenuecloud/ecommerce';
 import { BatchSelectionService, ExceptionService } from '@congarevenuecloud/elements';
 /**
@@ -75,6 +75,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   // Object to hold the loading state of the favorite records being added to the cart.
   isLoading: Object = {};
 
+  private searchDebounceTimer: any;
+
   /**
    * Control over button's text/label of pagination component for Multi-Language Support
    */
@@ -99,7 +101,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   constructor(private activatedRoute: ActivatedRoute, private sanitizer: DomSanitizer,
     private router: Router, private categoryService: CategoryService, public batchSelectionService: BatchSelectionService,
     public productService: ProductService, private translateService: TranslateService, private accountService: AccountService, private cartService: CartService,
-    private storefrontService: StorefrontService, private favoriteService: FavoriteService, private exceptionService: ExceptionService) { }
+    private storefrontService: StorefrontService, private favoriteService: FavoriteService, private exceptionService: ExceptionService, private configurationService: ConfigurationService) { }
 
 
   ngOnInit() {
@@ -141,6 +143,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
   }
 
   getResults(type: 'product' | 'favorite' = 'product') {
@@ -225,10 +230,20 @@ export class ProductListComponent implements OnInit, OnDestroy {
   searchFavorites(evt: string) {
     this.favoriteSearchString = evt.trim();
     this.page = 1;
+
     if (!this.favoriteSearchString) {
       this.favorites$.next(null);
     }
-    debounce(() => this.getResults('favorite'), 1000)();
+
+    // Clear previous timeout
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+
+    // Set new timeout
+    this.searchDebounceTimer = setTimeout(() => {
+      this.getResults('favorite');
+    }, this.configurationService.get('debounceTime', 1000));
   }
 
   /**

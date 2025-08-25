@@ -82,7 +82,7 @@
             <div *ngFor="let favorite of favorites.FavoriteList"
               class="mb-2 border px-md-4 py-md-3 p-3 d-flex justify-content-between align-items-center">
               <div class="mr-3">
-                <a *ngIf="favorite?.Name" [routerLink]="['/my-account/favorites', favorite?.Id]" target="_blank"
+                <a *ngIf="favorite?.Name" [routerLink]="['/favorites', favorite?.Id]" target="_blank"
                   class="mr-2 text-wrap text-break">
                   {{ favorite?.Name }}
                 </a>

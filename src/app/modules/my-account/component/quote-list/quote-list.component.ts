@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { map as rmap, switchMap, take, catchError } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of, combineLatest } from 'rxjs';
+import { map as rmap, switchMap, take, catchError, map } from 'rxjs/operators';
 import moment from 'moment';
 import { get, sumBy, map as _map, mapValues, groupBy, omit } from 'lodash';
 import { Operator, ApiService, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
@@ -72,6 +72,7 @@ export class QuoteListComponent implements OnInit {
     }
   ];
   businessObjectFields: string[];
+
   constructor(private quoteService: QuoteService, private currencyPipe: LocalCurrencyPipe, private dateFormatPipe: DateFormatPipe, private accountService: AccountService, private apiService: ApiService, private exceptionService: ExceptionService) { }
 
   ngOnInit() {
@@ -103,7 +104,6 @@ export class QuoteListComponent implements OnInit {
                 },
                 {
                   prop: 'PriceList',
-                  label: 'CUSTOM_LABELS.PRICELIST'
                 },
                 {
                   prop: 'GrandTotal',
@@ -123,7 +123,14 @@ export class QuoteListComponent implements OnInit {
                 }
               ],
               filters: this.filterList$.value.concat(this.getFilters()),
-              routingLabel: 'proposals'
+              routingLabel: 'proposals',
+              callback: (recordList?: Array<Quote>) => {
+                if (recordList && recordList.length > 0) {
+                  return combineLatest(
+                    recordList.map((record) => this.updateQuoteValue(record)));
+                }
+                return of([]);
+              }
             }
           }
           this.fetchQuoteTotals();
@@ -184,6 +191,15 @@ export class QuoteListComponent implements OnInit {
           return of(error);
         })
       ).subscribe();
+  }
+
+  updateQuoteValue(quote: Quote): Observable<Quote> {
+    return this.quoteService.updateQuoteValue(quote).pipe(
+      take(1),
+      map((updatedQuote: Quote) => {
+        return updatedQuote;
+      })
+    );
   }
 }
 

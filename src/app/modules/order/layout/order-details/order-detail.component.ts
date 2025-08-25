@@ -2,11 +2,11 @@ import { Component, OnInit, ViewEncapsulation, OnDestroy, ChangeDetectorRef, Aft
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { filter, map, switchMap, mergeMap, take } from 'rxjs/operators';
-import { get, set, indexOf, sum, cloneDeep, find, defaultTo, first, isNil, map as _map, join, split, trim } from 'lodash';
+import { get, set, indexOf, sum, cloneDeep, first, isNil, map as _map, join, split, trim } from 'lodash';
 import {
   Order, OrderLineItem, OrderService, UserService,
-  ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService, QuoteService,
-  Contact, Cart, ContactService, AttachmentService, ProductInformationService, AttachmentDetails
+  ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService,
+   Cart, AttachmentService, ProductInformationService, AttachmentDetails
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, FileOutput } from '@congarevenuecloud/elements';
 @Component({
@@ -100,9 +100,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     private accountService: AccountService,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
-    private contactService: ContactService,
     private attachmentService: AttachmentService,
-    private quoteService: QuoteService,
     private productInformationService: ProductInformationService
   ) { }
 
@@ -181,25 +179,14 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     })
   }
 
-  updateOrderValue(order): Observable<Order> {
-    return combineLatest([of(order),
-    get(order, 'Proposal') ? this.quoteService.getQuote(`${get(order.Proposal, 'Id')}`) : of(null),
-    get(order.BillToAccount, 'Id') ? this.accountService.getAccount(get(order.BillToAccount, 'Id')) : of(null),
-    get(order.ShipToAccount, 'Id') ? this.accountService.getAccount(get(order.ShipToAccount, 'Id')) : of(null),
-    get(order.PrimaryContact, 'Id') ? this.contactService.fetch(get(order.PrimaryContact, 'Id')) : of(null),
-    this.accountService.getCurrentAccount()])
-      .pipe(
-        map(([order, quote, billToAccount, shipToAccount, contact, soldToAccount]) => {
-          order.Proposal = quote;
-          order.SoldToAccount = defaultTo(find([soldToAccount], acc => acc.Id === order.SoldToAccount.Id), order.SoldToAccount);
-          order.BillToAccount = defaultTo(billToAccount, order.BillToAccount);
-          order.ShipToAccount = defaultTo(shipToAccount, order.ShipToAccount);
-          order.PrimaryContact = defaultTo(contact, order.PrimaryContact) as Contact;
-          set(order, 'PrimaryContact.Account', find(billToAccount, acc => order.PrimaryContact && get(acc, 'Id') === get(order.PrimaryContact.Account, 'Id')));
-          this.order = order;
-          return order;
-        })
-      );
+  updateOrderValue(order: Order): Observable<Order> {
+    return this.orderService.updateOrderValue(order).pipe(
+      take(1),
+      map((updatedOrder: Order) => {
+        this.order = updatedOrder;
+        return updatedOrder;
+      })
+    );
   }
 
   editOrderItems(order: Order) {
