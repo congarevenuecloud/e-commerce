@@ -56,15 +56,15 @@
         <span class="d-flex align-items-baseline">
           <apt-output-field [record]="order" field="Name" [label]="'MY_ACCOUNT.ORDER_DETAIL.ORDER_ID' | translate"
             layout="inline" [editable]="false" [showQuickView]="true"></apt-output-field>
-          <span class="badge badge-light ml-1 py-0">
-            <apt-output-field [record]="order" [field]="'Status'" [valueOnly]="true" [valueClass]="'p-0'"
-              [editable]="false">
+          <span class="badge badge-light ml-1 py-0"> 
+            <apt-output-field [record]="order" [field]="'Status'" [valueOnly]="true"
+              [valueClass]="'p-0'" [editable]="false">
             </apt-output-field></span>
         </span>
       </div>
     </div>
-    <app-progress class="status-bar" *ngIf="isLoggedIn && quoteStatusLabelMap[quote.ApprovalStage]"
-      [steps]="quoteStatusStepsLabels" [currentStep]="quoteStatusLabelMap[quote.ApprovalStage]">
+    <app-progress class="status-bar" *ngIf="isLoggedIn && quoteStatusLabelMap[quote.ApprovalStage]" [steps]="quoteStatusStepsLabels"
+      [currentStep]="quoteStatusLabelMap[quote.ApprovalStage]">
     </app-progress>
   </div>
 
@@ -129,7 +129,7 @@
                     [label]="'MY_ACCOUNT.ORDER_DETAIL.BILL_TO_ACCOUNT' | translate" [showQuickView]="true"
                     (onChange)="refreshQuote($event, quote, 'BillToAccount')"></apt-output-field>
                 </div>
-
+                
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="Requestor" [displayValue]="'Requestor'" [editable]="false"
                     [showQuickView]="true"></apt-output-field>
@@ -167,7 +167,8 @@
                 {{'DETAILS.LINE_ITEMS' | translate}}
                 <button class="btn text-primary px-2 ml-1 py-0"
                   *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented')"
-                  [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black" (click)="editQuoteItems(quote)">
+                  [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black"
+                  (click)="editQuoteItems(quote)">
                   <i *ngIf="quote?.Items?.length > 0" class="fa fa-edit"></i>
                   {{(quoteLineItems?.length > 0 ? 'COMMON.EDIT' : 'COMMON.ADD' ) | translate }}</button>
               </h5>
