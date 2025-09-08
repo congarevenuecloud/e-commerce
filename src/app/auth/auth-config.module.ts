@@ -18,6 +18,7 @@ export const httpLoaderFactory = () => {
         redirectUri = redirectUri.slice(0, -1);
       }
       return {
+        configId: 'default',
         authority: authOptions.authEndpoint,
         redirectUrl: redirectUri,
         postLogoutRedirectUri: redirectUri,
