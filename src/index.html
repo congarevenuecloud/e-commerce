@@ -9,10 +9,19 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 
-<body>
-  <app-root></app-root>
-  <app-redirect></app-redirect>
-  <script src="https://docgen.congamerge.com/telemetry/panoptos-0.1.9.min.js"></script>
-</body>
+  <body>
+    <app-root></app-root>
+    <app-redirect></app-redirect>
+    <script>
+      const match = window.location.pathname.match(/^\/ecom\/([^\/]+)\/?/);
+      if (match) {
+        // Decode the matched part first to handle any existing encoding
+        const decodedStorefront = decodeURIComponent(match[1]);
+        const encodedBase = "/ecom/" + encodeURIComponent(decodedStorefront) + "/";
+        document.querySelector("base").setAttribute("href", encodedBase);
+      }
+    </script>
+    <script src="https://docgen.congamerge.com/telemetry/panoptos-0.1.9.min.js"></script>
+  </body>
 
 </html>
