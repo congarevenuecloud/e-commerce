@@ -15,5 +15,6 @@ export const environment: Configuration = {
   endpoint: 'Enter your endpoint URL here',
   clientId: 'Enter your client ID here',
   authority: 'Enter your authority URL here',
-  translationModule: 'Enter your translation module here'
+  translationModule: 'Enter your translation module here',
+  applicationType: 'Enter your application type ( like E-commerce Or Partner-commerce )',
  };

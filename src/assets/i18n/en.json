@@ -322,6 +322,7 @@
   "ERROR.INVALID_GUEST_MESSAGE": "You need to login to continue to this store. Redirecting to login screen…",
   "ERROR.INVALID_QUANTITY": "Cannot add a quantity less than 1",
   "ERROR.INVALID_STOREFRONT": "This is an invalid storefront, please contact your System Administrator.",
+  "ERROR.NO_CATEGORY_FOUND": "No categories defined in the pricelist.",
   "ERROR.OPTION_GROUP.ERROR": "Option Group Errors",
   "ERROR.PAGE_ERROR": "Something's not right",
   "ERROR.PROMOTION.INVALID_COUPON_TITLE": "Coupon Not Applied",

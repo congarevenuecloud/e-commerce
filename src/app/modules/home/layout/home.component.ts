@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { first, get, slice, reverse, sortBy, last, forEach, isNil } from 'lodash';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, skip } from 'rxjs/operators';
+import { first, get, forEach, isNil } from 'lodash';
 import { Product, CategoryService, ProductService, Category, UserService, ItemRequest, GuestUserService, CartService } from '@congarevenuecloud/ecommerce';
 
 @Component({
@@ -15,7 +15,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   productListB$: Observable<Array<ItemRequest>>;
 
-  categories: Array<Category>;
+  categories: Array<Category> = [];
+  isCategoryLoading: boolean = true;
   subscriptions: Array<Subscription> = new Array();
   listItem: Array<ItemRequest> = [];
   counter: number = 3;
@@ -40,12 +41,18 @@ export class HomeComponent implements OnInit, OnDestroy {
         }, 1000);
       }
     }));
-    this.subscriptions.push(this.categoryService.getCategories()
+    this.isCategoryLoading = true;
+    this.subscriptions.push(this.categoryService.getCategories().pipe(skip(1))
       .subscribe(categoryList => {
-        if(!isNil(categoryList)) {
+        if (!isNil(categoryList)) {
           this.categories = categoryList
+          this.isCategoryLoading = false;
           this.productListA$ = this.categories.length > 0 ? this.productService.getProducts([get(first(this.categories), 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
           this.productListB$ = this.categories.length > 1 ? this.productService.getProducts([get(this.categories[1], 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
+        }
+        else {
+          this.categories = [];
+          this.isCategoryLoading = false;
         }
       }));
   }

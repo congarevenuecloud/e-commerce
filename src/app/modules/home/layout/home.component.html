@@ -3,12 +3,15 @@
     <apt-alert [autoRun]="false"></apt-alert>
     <apt-jumbotron></apt-jumbotron>
     <div class="container pb-4 px-md-3 px-4">
-      <div>
-        <apt-product-carousel *ngIf="productListA$ | async as productListA; else loading" [productList]="productListA"
-          slides="4" [title]="categories[0]?.Label" [subtitle]="categories[0]?.Description"></apt-product-carousel>
+      <div *ngIf="!isCategoryLoading; else loading">
+        <ng-container *ngIf="categories.length > 0; else noCategoryFoundTemplate">
 
-        <apt-product-carousel *ngIf="productListB$ | async as productListB; else loading" [productList]="productListB"
+          <apt-product-carousel *ngIf="productListA$ | async as productListA; else loading" [productList]="productListA"
+            slides="4" [title]="categories[0]?.Label" [subtitle]="categories[0]?.Description"></apt-product-carousel>
+
+          <apt-product-carousel *ngIf="productListB$ | async as productListB; else loading" [productList]="productListB"
             slides="4" [title]="categories[1]?.Label" [subtitle]="categories[1]?.Description"></apt-product-carousel>
+        </ng-container>
       </div>
     </div>
     <app-footer [categories]="categories"></app-footer>
@@ -19,6 +22,14 @@
   <div class="d-flex justify-content-center align-items-center vh-100 font-weight-bold">
     <span class="mb-1">{{ 'ERROR.INVALID_GUEST_MESSAGE' | translate }} </span>
     <h4><span class="ml-1">{{counter}}</span></h4>
+  </div>
+</ng-template>
+
+<ng-template #noCategoryFoundTemplate>
+  <div class="d-flex justify-content-center align-items-center my-5">
+    <div class="text-center mt-5">
+      <h4 class="mb-3 text-dark">{{ 'ERROR.NO_CATEGORY_FOUND' | translate }}</h4>
+    </div>
   </div>
 </ng-template>
 
