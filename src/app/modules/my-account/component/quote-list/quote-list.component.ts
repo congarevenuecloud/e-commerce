@@ -104,6 +104,7 @@ export class QuoteListComponent implements OnInit {
                 },
                 {
                   prop: 'PriceList',
+                  sortable: false
                 },
                 {
                   prop: 'GrandTotal',
@@ -114,7 +115,8 @@ export class QuoteListComponent implements OnInit {
                 },
                 {
                   prop: 'Account',
-                  label: 'CUSTOM_LABELS.ACCOUNT'
+                  label: 'CUSTOM_LABELS.ACCOUNT',
+                  sortable: false
                 },
                 {
                   prop: 'ModifiedDate',
