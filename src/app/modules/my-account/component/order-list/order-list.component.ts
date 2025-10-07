@@ -76,14 +76,17 @@ export class OrderListComponent implements OnInit, OnDestroy {
                 },
                 {
                   prop: 'PriceList',
+                  sortable: false
                 },
                 {
                   prop: 'BillToAccount',
-                  label: 'CUSTOM_LABELS.BILL_TO'
+                  label: 'CUSTOM_LABELS.BILL_TO',
+                  sortable: false
                 },
                 {
                   prop: 'ShipToAccount',
-                  label: 'CUSTOM_LABELS.SHIP_TO'
+                  label: 'CUSTOM_LABELS.SHIP_TO',
+                  sortable: false
                 },
                 {
                   prop: 'OrderAmount'
