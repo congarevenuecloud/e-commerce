@@ -8,7 +8,7 @@ import { get, lowerCase } from 'lodash';
 import { TabsetComponent } from 'ngx-bootstrap/tabs';
 import {
   AccountService, ContactService, UserService, Quote, QuoteService, PriceListService, Cart,
-  Note, Account, Contact, PriceList, StorefrontService
+  Account, Contact, PriceList, StorefrontService
 } from '@congarevenuecloud/ecommerce';
 import { LookupOptions } from '@congarevenuecloud/elements';
 
@@ -32,8 +32,6 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
   bsConfig: Partial<BsDatepickerConfig>;
   startDate: Date = new Date();
   rfpDueDate: Date = new Date();
-  note: Note = new Note();
-  comments: any = [];
 
   shipToAccount$: Observable<Account>;
   billToAccount$: Observable<Account>;
@@ -118,16 +116,6 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
-  }
-
-  /**
-   * This method adds comments to requesting quote.
-   */
-  addComment() {
-    if (this.quote) {
-      this.quote.Description = this.note.Description;
-      this.onQuoteUpdate.emit(this.quote);
-    }
   }
 
   /**

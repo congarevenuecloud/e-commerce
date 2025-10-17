@@ -5,8 +5,8 @@ import { filter, map, switchMap, mergeMap, take } from 'rxjs/operators';
 import { get, set, indexOf, sum, cloneDeep, first, isNil, map as _map, join, split, trim } from 'lodash';
 import {
   Order, OrderLineItem, OrderService, UserService,
-  ItemGroup, LineItemService, Note, NoteService, EmailService, AccountService,
-   Cart, AttachmentService, ProductInformationService, AttachmentDetails
+  ItemGroup, LineItemService, EmailService, AccountService,
+  Cart, AttachmentService, ProductInformationService, AttachmentDetails
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, FileOutput } from '@congarevenuecloud/elements';
 @Component({
@@ -22,12 +22,10 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
    */
   order$: BehaviorSubject<Order> = new BehaviorSubject<Order>(null);
   orderLineItems$: BehaviorSubject<Array<ItemGroup>> = new BehaviorSubject<Array<ItemGroup>>(null);
-  noteList$: BehaviorSubject<Array<Note>> = new BehaviorSubject<Array<Note>>(null);
   attachmentList$: BehaviorSubject<Array<AttachmentDetails>> = new BehaviorSubject<Array<AttachmentDetails>>(null);
 
-  noteSubscription: Subscription;
   orderSubscription: Subscription;
-  attachemntSubscription: Subscription;
+  attachmentSubscription: Subscription;
 
   @ViewChild('attachmentSection') attachmentSection: ElementRef;
   @ViewChild('fileInput') fileInput: ElementRef;
@@ -68,10 +66,6 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
 
   isLoading: boolean = false;
 
-  note: Note = new Note();
-
-  commentsLoader: boolean = false;
-
   lineItemLoader: boolean = false;
 
   attachmentsLoader = false;
@@ -94,7 +88,6 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     private orderService: OrderService,
     private userService: UserService,
     private exceptionService: ExceptionService,
-    private noteService: NoteService,
     private router: Router,
     private emailService: EmailService,
     private accountService: AccountService,
@@ -247,39 +240,12 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       }), take(1)).subscribe(() => { this.getOrder(); });
   }
 
-  addComment(orderId: string) {
-    this.commentsLoader = true;
-    set(this.note, 'ParentId', orderId);
-    set(this.note, 'OwnerId', get(this.userService.me(), 'Id'));
-    if (!this.note.Name) {
-      set(this.note, 'Name', 'Notes Title');
-    }
-    this.noteService.create([this.note])
-      .subscribe(r => {
-        this.clear();
-        this.commentsLoader = false;
-      },
-        err => {
-          this.exceptionService.showError(err);
-          this.commentsLoader = false;
-        });
-  }
-
-  clear() {
-    set(this.note, 'Body', null);
-    set(this.note, 'Title', null);
-    set(this.note, 'Id', null);
-  }
 
   ngOnDestroy() {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
 
     if (this.orderSubscription) {
       this.orderSubscription.unsubscribe();
-    }
-
-    if (this.noteSubscription) {
-      this.noteSubscription.unsubscribe();
     }
   }
 
@@ -288,8 +254,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   }
 
   getAttachments() {
-    if (this.attachemntSubscription) this.attachemntSubscription.unsubscribe();
-    this.attachemntSubscription = this.activatedRoute.params
+    if (this.attachmentSubscription) this.attachmentSubscription.unsubscribe();
+    this.attachmentSubscription = this.activatedRoute.params
       .pipe(
         switchMap(params => this.attachmentService.getAttachments(get(params, 'id'), 'order'))
       ).subscribe((attachments: Array<AttachmentDetails>) => this.ngZone.run(() => this.attachmentList$.next(attachments)));

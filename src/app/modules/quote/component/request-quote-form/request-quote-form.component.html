@@ -44,38 +44,6 @@
             </apt-address>
           </small>
         </div>
-
-        <div>
-          <!-- <h5 class="py-2" *ngIf="cart.Proposald">//Add back when the API is available
-            {{'COMMON.COMMENTS' | translate}} <span *ngIf="comments?.length > 0">({{comments?.length}})</span>
-          </h5> -->
-          <!-- <div>//Add back when the API is available
-            <div class="note-container" *ngIf="cart?.Proposald">
-              <ng-scrollbar>
-                <ng-container *ngIf="comments?.length > 0; else emptyNotes">
-                  <div class="my-3 pb-3 border-bottom" *ngFor="let note of comments">
-                    <div class="text-muted d-block mb-2"><strong>{{note?.CreatedBy?.Name}}</strong> {{'COMMON.ON' |
-                      translate }}
-                      {{note?.CreatedDate | date:'medium'}}</div>
-                    <div>
-                      {{note?.Body}}
-                    </div>
-                  </div>
-                </ng-container>
-                <ng-template #emptyNotes>
-                  <div class="d-flex align-items-center justify-content-center flex-column h-100 text-muted">
-                    <i class="fa fa-4x fa-comments-o mb-2"></i>
-                    {{ 'COMMON.NO_COMMENTS_TO_DISPLAY' | translate}}
-                  </div>
-                </ng-template>
-              </ng-scrollbar>
-            </div>
-            <div class="form-group">
-              <apt-input-field [entity]="note" [field]="'Body'" rows="5" label="{{'COMMON.COMMENTS' | translate }}"
-                [(ngModel)]="note.Description" name="body" (ngModelChange)="addComment()"></apt-input-field>
-            </div>
-          </div> -->
-        </div>
       </div>
     </div>
   </div>
