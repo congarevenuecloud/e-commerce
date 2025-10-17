@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
-import { map, skip } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, Subscription, combineLatest } from 'rxjs';
+import { map, take, switchMap } from 'rxjs/operators';
 import { first, get, forEach, isNil } from 'lodash';
-import { Product, CategoryService, ProductService, Category, UserService, ItemRequest, GuestUserService, CartService } from '@congarevenuecloud/ecommerce';
+import { Product, CategoryService, ProductService, Category, UserService, ItemRequest, GuestUserService } from '@congarevenuecloud/ecommerce';
 
 @Component({
   selector: 'app-home',
@@ -22,9 +22,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   counter: number = 3;
   isInvalidGuest: boolean = false;
   loadData$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  hasProducts: boolean = false;
+  productsLoading: boolean = false;
 
   constructor(private userService: UserService, private guestUserService: GuestUserService,
-    private categoryService: CategoryService, private productService: ProductService, private cartService: CartService) {
+    private categoryService: CategoryService, private productService: ProductService) {
   }
 
   ngOnInit() {
@@ -42,19 +44,38 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     }));
     this.isCategoryLoading = true;
-    this.subscriptions.push(this.categoryService.getCategories().pipe(skip(1))
-      .subscribe(categoryList => {
-        if (!isNil(categoryList)) {
-          this.categories = categoryList
-          this.isCategoryLoading = false;
-          this.productListA$ = this.categories.length > 0 ? this.productService.getProducts([get(first(this.categories), 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
-          this.productListB$ = this.categories.length > 1 ? this.productService.getProducts([get(this.categories[1], 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
-        }
-        else {
-          this.categories = [];
-          this.isCategoryLoading = false;
-        }
-      }));
+    this.productsLoading = true;
+
+    this.subscriptions.push(
+      // Load first 7 categories to populate home page content and footer navigation
+      this.categoryService.retrieveCategories(1, 7)
+        .pipe(
+          switchMap((categories) => {
+            this.categories = Array.isArray(categories) ? categories : [];
+            this.isCategoryLoading = false;
+
+            if (this.categories.length > 0) {
+              // Load products if categories exist
+              this.productListA$ = this.productService.getProducts([get(this.categories[0], 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products'))));
+              this.productListB$ = this.categories.length > 1 ? this.productService.getProducts([get(this.categories[1], 'Id')], 5, 1).pipe(map(results => this.createItemRequest(get(results, 'Products')))) : of([]);
+
+              // Return combined product observables
+              return combineLatest([this.productListA$, this.productListB$]);
+            } else {
+              this.hasProducts = false;
+              this.productsLoading = false;
+              return of([[], []]);
+            }
+          }),
+          take(1)
+        )
+        .subscribe(([productsA, productsB]) => {
+          if (this.categories.length > 0) {
+            this.hasProducts = (productsA && productsA.length > 0) || (productsB && productsB.length > 0);
+            this.productsLoading = false;
+          }
+        })
+    );
   }
 
   createItemRequest(products: Array<Product>): Array<ItemRequest> {

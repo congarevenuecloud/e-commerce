@@ -36,3 +36,15 @@ app-quote-details {
   opacity: 0.5;
   z-index: 9999;
 }
+
+
+ ::-webkit-scrollbar {
+    width: 0.375rem !important;
+    height: 0.375rem !important;
+    background: #fff !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #A8B2BB !important;
+    border-radius: 0.25rem !important;
+  }

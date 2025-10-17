@@ -8,11 +8,11 @@ import { Observable, of, BehaviorSubject, Subscription, combineLatest } from 'rx
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {
-  UserService, QuoteService, Quote, Order, OrderService, Note, AttachmentService,
+  UserService, QuoteService, Quote, Order, OrderService, AttachmentService,
   AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService,
-  CartService, Cart
+  CartService, Cart, DateFormat
 } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, LookupOptions, ToasterPosition, FileOutput } from '@congarevenuecloud/elements';
+import { ExceptionService, LookupOptions, ToasterPosition, FileOutput, AddCommentsConfig, ViewCommentsConfig } from '@congarevenuecloud/elements';
 
 @Component({
   selector: 'app-quote-details',
@@ -25,16 +25,11 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   quote$: BehaviorSubject<Quote> = new BehaviorSubject<Quote>(null);
   quoteLineItems$: BehaviorSubject<Array<ItemGroup>> = new BehaviorSubject<Array<ItemGroup>>(null);
   attachmentList$: BehaviorSubject<Array<AttachmentDetails>> = new BehaviorSubject<Array<AttachmentDetails>>(null);
-  noteList$: BehaviorSubject<Array<Note>> = new BehaviorSubject<Array<Note>>(null);
   order$: Observable<Order>;
   quote
 
   @ViewChild('attachmentSection') attachmentSection: ElementRef;
   @ViewChild('fileInput') fileInput: ElementRef;
-
-  note: Note = new Note();
-
-  newlyGeneratedOrder: Order;
 
   intimationModal: BsModalRef;
 
@@ -46,21 +41,35 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   rejectLoader = false;
 
-  commentsLoader = false;
-
   attachmentsLoader = false;
 
   finalizeLoader = false;
 
   quoteGenerated: boolean = false;
 
-  notesSubscription: Subscription;
-
   attachemntSubscription: Subscription;
 
   quoteSubscription: Subscription[] = [];
 
   showPresentTemplate = false;
+
+  showReqChangesModal = false;
+
+  showViewCommentsComponent = true;
+
+  viewCommentsConfig: ViewCommentsConfig = {
+    modalOptions: { 'class': 'modal-lg', 'backdrop': 'static', 'keyboard': true },
+    showTypeFilter: true,
+    pageSize: 10,
+    enablePagination: true,
+    dateFormat: DateFormat.Medium
+  };
+
+  requestChangesConfig: AddCommentsConfig;
+
+  addCommentsConfig: AddCommentsConfig = {
+    showCommentType: true,
+  }
 
   quoteStatusSteps: Array<string> = [
     'STATUS.DRAFT',
@@ -121,6 +130,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    this.initializeTranslationsComments();
     this.getQuote();
     this.quoteSubscription.push(this.userService.isLoggedIn().pipe(switchMap((value: boolean) => {
       this.isLoggedIn = value;
@@ -142,6 +152,26 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
         })
     );
     this.translateQuoteStatusLabels(this.quoteStatusMap);
+  }
+
+  private initializeTranslationsComments(): void {
+    const commentTranslationKeys = [
+      'COMMENTS.SEND_REQUEST',
+      'COMMENTS.ENTER_COMMENTS',
+      'COMMON.CANCEL'
+    ];
+
+    this.quoteSubscription.push(
+      this.translateService.stream(commentTranslationKeys).subscribe(translations => {
+        this.requestChangesConfig = {
+          modalOptions: { 'class': 'modal-md', 'backdrop': 'static', 'keyboard': true },
+          showCommentType: true,
+          submitButtonText: translations['COMMENTS.SEND_REQUEST'],
+          cancelButtonText: translations['COMMON.CANCEL'],
+          placeholder: translations['COMMENTS.ENTER_COMMENTS']
+        };
+      })
+    );
   }
 
   getQuote() {
@@ -391,12 +421,51 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     );
   }
 
+  openRequestChangesModal() {
+    this.showReqChangesModal = false;
+
+    setTimeout(() => {
+      this.showReqChangesModal = true;
+    }, 10);
+  }
+
+  handleRequestChangesAction(event: any) {
+    if (event && event.action === 'close') {
+      this.showReqChangesModal = false;
+    }
+    if (event && event.action === 'submit') {
+      this.showReqChangesModal = false;
+
+      this.showViewCommentsComponent = false;
+      setTimeout(() => {
+        this.showViewCommentsComponent = true;
+      }, 100);
+    }
+  }
+
+  handleAddCommentsChanges(event: any) {
+    if (event && event.action === 'submit') {
+      this.showViewCommentsComponent = false;
+      setTimeout(() => {
+        this.showViewCommentsComponent = true;
+      }, 100);
+    }
+  }
+
+  handleViewCommentsAction(event: any) {
+    if (event && event.action === 'close') {
+      this.showReqChangesModal = false;
+    }
+  }
+
   ngOnDestroy() {
-    if (this.notesSubscription)
-      this.notesSubscription.unsubscribe();
     if (this.attachemntSubscription)
       this.attachemntSubscription.unsubscribe();
     this.quoteSubscription.forEach(subscription => subscription.unsubscribe());
+
+    if (this.intimationModal) {
+      this.intimationModal.hide();
+    }
   }
 }
 

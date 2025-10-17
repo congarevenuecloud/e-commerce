@@ -3,9 +3,16 @@
     <apt-alert [autoRun]="false"></apt-alert>
     <apt-jumbotron></apt-jumbotron>
     <div class="container pb-4 px-md-3 px-4">
-      <div *ngIf="!isCategoryLoading; else loading">
-        <ng-container *ngIf="categories.length > 0; else noCategoryFoundTemplate">
+      <div *ngIf="!isCategoryLoading && !productsLoading; else loading">
+        <ng-container *ngIf="categories.length === 0">
+          <ng-container *ngTemplateOutlet="noCategoryFoundTemplate"></ng-container>
+        </ng-container>
 
+        <ng-container *ngIf="categories.length > 0 && !hasProducts">
+          <ng-container *ngTemplateOutlet="noProductsFoundTemplate"></ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="categories.length > 0 && hasProducts">
           <apt-product-carousel *ngIf="productListA$ | async as productListA; else loading" [productList]="productListA"
             slides="4" [title]="categories[0]?.Label" [subtitle]="categories[0]?.Description"></apt-product-carousel>
 
@@ -29,6 +36,14 @@
   <div class="d-flex justify-content-center align-items-center my-5">
     <div class="text-center mt-5">
       <h4 class="mb-3 text-dark">{{ 'ERROR.NO_CATEGORY_FOUND' | translate }}</h4>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #noProductsFoundTemplate>
+  <div class="d-flex justify-content-center align-items-center my-5">
+    <div class="text-center mt-5">
+      <h4 class="mb-3 text-dark">{{ 'ERROR.NO_PRODUCTS_FOUND' | translate }}</h4>
     </div>
   </div>
 </ng-template>
