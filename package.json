@@ -1,6 +1,6 @@
 {
   "name": "conga.ui.ecom.rc",
-  "version": "202510.1.4",
+  "version": "202510.2.3",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
