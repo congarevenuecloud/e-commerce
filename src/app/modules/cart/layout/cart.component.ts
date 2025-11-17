@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, TemplateRef, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, TemplateRef, OnDestroy, NgZone, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subscription, combineLatest, of } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
@@ -8,19 +8,21 @@ import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { get, uniqueId, find, defaultTo, isNil, set } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigurationService } from '@congarevenuecloud/core';
-import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, PriceSummaryComponent } from '@congarevenuecloud/elements';
+import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate, AttachmentService, ProductInformationService } from '@congarevenuecloud/ecommerce';
+import { ExceptionService, PriceSummaryComponent, FileOutput } from '@congarevenuecloud/elements';
 
 @Component({
   selector: 'app-cart',
   templateUrl: './cart.component.html',
-  styleUrls: ['./cart.component.scss']
+  styleUrls: ['./cart.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class CartComponent implements OnInit, OnDestroy {
   @ViewChild('addressTabs') addressTabs: any;
   @ViewChild('addressInfo') addressInfo: ElementRef;
   @ViewChild('staticTabs') staticTabs: TabsetComponent;
   @ViewChild('confirmationTemplate') confirmationTemplate: TemplateRef<any>;
+  @ViewChild('POTemplate') POTemplate: TemplateRef<any>;
   @ViewChild('priceSummary') priceSummary: PriceSummaryComponent;
 
   /**
@@ -40,18 +42,22 @@ export class CartComponent implements OnInit, OnDestroy {
    */
   orderConfirmation: Order;
   /**
-   * Loading flag for spinner
+   * Map to maintain loading state for all payment type buttons
    */
-  loading: boolean = false;
+  paymentLoadingStates: Map<string, boolean> = new Map([
+    ['PONUMBER', false],
+    ['PAYLATER', false],
+    ['PLACEORDER', false]
+  ]);
   /**
    * Unique Id
    */
   uniqueId: string;
   /**
-   * Payment state such as Card and Invoice
-   * Default is blank
+   * Payment state such as Card, Pay Later and PO Number
+   * Optional - only set when a specific payment method is needed
    */
-  paymentState: 'PONUMBER' | 'INVOICE' | 'PAYNOW' | '' = '';
+  paymentState?: 'PONUMBER' | 'PAYLATER';
   /**
    * Stores confirmation model
    */
@@ -88,6 +94,8 @@ export class CartComponent implements OnInit, OnDestroy {
    * order amount to charge on payment
   */
   orderAmount: string;
+
+  POModalRef: BsModalRef;
   errMessages: any = {
     requiredFirstName: '',
     requiredLastName: '',
@@ -104,6 +112,8 @@ export class CartComponent implements OnInit, OnDestroy {
   disableSubmit: boolean = false;
   showCaptcha: boolean = false;
   displayCaptcha: boolean;
+  supportedFileTypes = '.pdf,.doc,.docx,.jpeg,.jpg,.png';
+  poAttachmentFile: File = null;
 
   private subscriptions: Subscription[] = [];
 
@@ -118,7 +128,9 @@ export class CartComponent implements OnInit, OnDestroy {
     private emailService: EmailService,
     private router: Router,
     private ngZone: NgZone,
-    private exceptionService: ExceptionService) {
+    private exceptionService: ExceptionService,
+    private attachmentService: AttachmentService,
+    private productInformationService: ProductInformationService) {
     this.uniqueId = uniqueId();
   }
 
@@ -127,13 +139,13 @@ export class CartComponent implements OnInit, OnDestroy {
     this.subscriptions.push(this.userService.getCurrentUserLocale(false).subscribe((currentLocale) => this.currentUserLocale = currentLocale));
     this.primaryContact = new Contact();
     this.order = new Order();
-    this.subscriptions.push(combineLatest(this.cartService.getMyCart(),this.accountService.getCurrentAccount()).subscribe(([cart, account]) => {
+    this.subscriptions.push(combineLatest(this.cartService.getMyCart(), this.accountService.getCurrentAccount()).subscribe(([cart, account]) => {
       this.cart = cart;
       // Setting default values
       this.order.Name = 'New Order'
-      this.order.SoldToAccount = isNil(get(cart, 'Account')) ? account: get(cart, 'Account');
-      this.order.BillToAccount = isNil(get(cart, 'Account')) ? account: get(cart, 'Account');
-      this.order.ShipToAccount = isNil(get(cart, 'Account')) ? account: get(cart, 'Account');
+      this.order.SoldToAccount = isNil(get(cart, 'Account')) ? account : get(cart, 'Account');
+      this.order.BillToAccount = isNil(get(cart, 'Account')) ? account : get(cart, 'Account');
+      this.order.ShipToAccount = isNil(get(cart, 'Account')) ? account : get(cart, 'Account');
       this.order.PriceList = get(cart, 'PriceList');
 
     }));
@@ -176,6 +188,37 @@ export class CartComponent implements OnInit, OnDestroy {
     this.isButtonDisabled();
   }
 
+  /**
+   * Gets the loading state for a specific payment type
+   * @param paymentType The payment type to check
+   * @returns boolean indicating if the payment type is in loading state
+   * @ignore
+   */
+  getPaymentLoadingState(paymentType?: string): boolean {
+    const key = paymentType || 'PLACEORDER';
+    return this.paymentLoadingStates.get(key) || false;
+  }
+
+  /**
+   * Resets all payment loading states to false
+   * @ignore
+   */
+  resetAllPaymentLoadingStates(): void {
+    this.paymentLoadingStates.clear();
+    this.paymentLoadingStates.set('PONUMBER', false);
+    this.paymentLoadingStates.set('PAYLATER', false);
+    this.paymentLoadingStates.set('PLACEORDER', false);
+  }
+
+  /**
+   * Checks if any payment type is currently in loading state
+   * @returns boolean indicating if any payment is loading
+   * @ignore
+   */
+  isAnyPaymentLoading(): boolean {
+    return Array.from(this.paymentLoadingStates.values()).some(loading => loading);
+  }
+
   isButtonDisabled() {
     this.disableSubmit = this.isLoggedIn ? (isNil(this.order.PrimaryContact) || isNil(this.order.ShipToAccount)) : isNil(get(this.primaryContact, 'FirstName')) || isNil(get(this.primaryContact, 'LastName')) || isNil(get(this.primaryContact, 'Email')) || isNil(get(this.order, 'Name'));
   }
@@ -193,9 +236,8 @@ export class CartComponent implements OnInit, OnDestroy {
 
   /**
    * Allow to switch address tabs if billing and shipping address are diffrent.
-   *
    * @param evt Event that identifies if Shipping and billing addresses are same.
-   *
+   * @ignore
    */
   selectTab(evt) {
     if (evt)
@@ -212,11 +254,23 @@ export class CartComponent implements OnInit, OnDestroy {
 
   /**
    * Allows user to submit order. Convert a cart to order and submit it.
+   * @param paymentState - Optional payment state indicating the payment method (PAYLATER, PONUMBER, etc.)
+   * @ignore
    */
-  submitOrder() {
+  submitOrder(paymentState?: 'PONUMBER' | 'PAYLATER') {
     const orderAmountGroup = find(get(this.cart, 'SummaryGroups'), c => get(c, 'LineType') === 'Grand Total');
     this.orderAmount = defaultTo(get(orderAmountGroup, 'NetPrice', 0).toString(), '0');
-    this.loading = true;
+
+    // Set loading state for the specific payment type (only if not already set)
+    const key = paymentState || 'PLACEORDER';
+    if (!this.paymentLoadingStates.get(key)) {
+      this.paymentLoadingStates.set(key, true);
+    }
+
+    if (paymentState === 'PAYLATER') {
+      this.order.PaymentStatus = 'Pending';
+    }
+
     if (this.isLoggedIn) {
       this.convertCartToOrder(this.order, this.order.PrimaryContact);
     }
@@ -258,19 +312,52 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   convertCartToOrder(order: Order, primaryContact: Contact, cart?: Cart, selectedAccount?: AccountInfo, acceptOrder?: boolean) {
-    this.loading = true;
     this.orderService.convertCartToOrder(order, primaryContact).pipe(
       take(1)
     ).subscribe(orderResponse => {
-      this.loading = false;
       this.orderConfirmation = orderResponse;
       this.orderConfirmation.PrimaryContact = primaryContact;
-      this.onOrderConfirmed();
+
+      // Check if this is a PO order with attachment
+      if (order.PONumber && this.poAttachmentFile) {
+        // Upload PO attachment after order creation
+        this.attachmentService.uploadAttachment(
+          this.poAttachmentFile,
+          false,
+          orderResponse.Id,
+          'Order'
+        ).pipe(take(1)).subscribe(
+          res => {
+            this.poAttachmentFile = null;
+            this.completeOrderProcess();
+          },
+          err => {
+            this.exceptionService.showError(err);
+            this.poAttachmentFile = null;
+            this.completeOrderProcess();
+          }
+        );
+      } else {
+        this.completeOrderProcess();
+      }
     },
       err => {
         this.exceptionService.showError(err);
-        this.loading = false;
+        this.completeOrderProcess();
+        this.poAttachmentFile = null;
       });
+  }
+
+  /**
+   * Complete the order process by resetting loading states and showing confirmation
+   * @ignore
+   */
+  private completeOrderProcess() {
+    // Reset all loading states
+    this.resetAllPaymentLoadingStates();
+
+    // Show order confirmation
+    this.onOrderConfirmed();
   }
 
   /**
@@ -310,14 +397,60 @@ export class CartComponent implements OnInit, OnDestroy {
 
   captchaSuccess(cart: Cart) {
     this.showCaptcha = false;
-    this.submitOrder();
+    // Set loading state when captcha is successful and proceeding with order
+    const key = this.paymentState || 'PLACEORDER';
+    this.paymentLoadingStates.set(key, true);
+    this.submitOrder(this.paymentState);
   }
 
-  orderPlacement() {
-    if (this.displayCaptcha)
+  orderPlacement(paymentState?: 'PONUMBER' | 'PAYLATER') {
+    this.paymentState = paymentState ?? null;
+
+    // Set loading state for the specific payment type
+    const key = paymentState || 'PLACEORDER';
+    this.paymentLoadingStates.set(key, true);
+
+    if (this.displayCaptcha) {
       this.showCaptcha = true;
+    }
     else {
-      this.submitOrder();
+      this.submitOrder(paymentState);
+    }
+  }
+
+  openPOModal() {
+    const ngbModalOptions: ModalOptions = {
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-md'
+    };
+    this.POModalRef = this.modalService.show(this.POTemplate, ngbModalOptions);
+  }
+
+  uploadPOAttachment(fileInput: FileOutput) {
+    const fileList = fileInput.files;
+    this.poAttachmentFile = fileList && fileList.length > 0 ? fileList[0] : null;
+  }
+
+  savePONumber() {
+    this.paymentLoadingStates.set('PONUMBER', true);
+
+    if (this.POModalRef) {
+      this.POModalRef.hide();
+      this.POModalRef = null;
+    }
+
+    this.order.PaymentStatus = 'Processed';
+    this.submitOrder('PONUMBER');
+  }
+
+  closePOModal() {
+    if (this.POModalRef) {
+      this.POModalRef.hide();
+      this.POModalRef = null;
+      this.order.PONumber = null;
+      this.paymentLoadingStates.set('PONUMBER', false);
+      this.poAttachmentFile = null;
     }
   }
 

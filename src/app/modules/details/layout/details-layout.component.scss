@@ -10,6 +10,16 @@
   }
 }
 
+.headerContainer {
+  /* Reserve space when header becomes fixed to prevent layout shift */
+  min-height: 0;
+  
+  .navbar.fixed-top {
+    /* Smooth transition when becoming fixed */
+    will-change: top, transform;
+  }
+}
+
 .navbar {
   transition: all 0.2s ease 0s;
 
@@ -20,6 +30,7 @@
     animation-name: slide;
     animation-duration: 0.2s;
     background-color: $light;
+    position: fixed;
   }
 
   &.expand {
