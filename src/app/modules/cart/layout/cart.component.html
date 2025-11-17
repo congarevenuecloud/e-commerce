@@ -6,18 +6,30 @@
 <ng-container *ngIf="cart">
   <div class="container-fluid px-md-4 p-2" id="checkout-form">
     <apt-mini-profile #profile></apt-mini-profile>
-    
+
     <div class="d-flex justify-content-between align-items-center flex-row flex-wrap w-100">
       <h4 class="text-black mb-0 pl-md-0 pl-3">{{'CART.CHECKOUT' | translate}}</h4>
-      <div class="d-flex justify-content-end">
+      <div class="d-flex justify-content-end align-items-center">
         <apt-captcha *ngIf="showCaptchaOnCheckoutPage" (onCaptchaSuccess)="captchaSuccess(cart)"></apt-captcha>
-        <button class="btn btn-link py-0" [routerLink]="['/carts/active']" [hidden]="loading">
+        <button class="btn btn-link py-0" [routerLink]="['/carts/active']" [hidden]="isAnyPaymentLoading()">
           {{'COMMON.CANCEL' | translate }}
         </button>
+        <button class="btn btn-outline-primary mr-3" [ladda]="getPaymentLoadingState('PONUMBER')" data-style="zoom-in"
+          [disabled]="(disableSubmit || (cart?.LineItems?.length < 1)) || isAnyPaymentLoading()" (click)="openPOModal()">
+          {{ 'PAYMENT.PO_NUMBER' | translate }}
+        </button>
+        <button class="btn btn-outline-primary btn-raised mr-2" *ngIf="isLoggedIn" [ladda]="getPaymentLoadingState('PAYLATER')"
+          data-style="zoom-in" [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
+          (click)="orderPlacement('PAYLATER')">
+          <span>{{ 'PAYMENT.PAY_LATER' | translate }}</span>
+        </button>
+        
         <div class="d-flex" *ngIf="!showCaptchaOnCheckoutPage">
           <ng-content select=".cancel-button"></ng-content>
-          <button class="btn btn-primary btn-block btn-raised" [ladda]="loading" data-style="zoom-in"
-            [disabled]="(disableSubmit || (cart?.LineItems?.length < 1))" (click)="orderPlacement()">
+          
+          <button class="btn btn-primary btn-raised" [ladda]="getPaymentLoadingState('PLACEORDER')" data-style="zoom-in"
+            [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
+            (click)="orderPlacement()">
             <span>{{ 'COMMON.PLACE_ORDER' | translate }}</span>
           </button>
         </div>
@@ -25,8 +37,8 @@
     </div>
     <div class="row py-2">
       <div class="col-md-4 order-md-2 mb-4">
-        <apt-price-summary [record]="cart" [form]="form" [page]="pricingSummaryType" [loading]="loading" [showCaptcha]="false"
-        (onSubmitOrder)="submitOrder()" (onShowCaptcha)="loadCaptcha()" #priceSummary>
+        <apt-price-summary [record]="cart" [form]="form" [page]="pricingSummaryType" [loading]="isAnyPaymentLoading()"
+          [showCaptcha]="false" (onSubmitOrder)="submitOrder()" (onShowCaptcha)="loadCaptcha()" #priceSummary>
         </apt-price-summary>
         <cart-summary [cart]="cart"></cart-summary>
       </div>
@@ -39,7 +51,7 @@
             <div class="row pt-3" *ngIf="!isLoggedIn">
               <div class="col-12 col-md-6">
                 <apt-input-field name="orderName" [entity]="order" [field]="'Name'" [(ngModel)]="order.Name"
-                  [required]="true" [label]="'MY_ACCOUNT.DASHBOARD.ORDER_NAME' | translate" 
+                  [required]="true" [label]="'MY_ACCOUNT.DASHBOARD.ORDER_NAME' | translate"
                   [errorMsg]="errMessages.requiredOrderName"></apt-input-field>
               </div>
             </div>
@@ -49,21 +61,23 @@
                 <div *ngIf="!isLoggedIn else showBillingAddressTemplate">
                   <div class="row mt-3">
                     <div class="col-md-6">
-                      <apt-input-field name="firstName" [labelClass]="'font-weight-normal'" [entity]="primaryContact" (ngModelChange)="updatePrimaryContact('FirstName',$event)"
-                        [field]="'FirstName'" [required]="true" [(ngModel)]="primaryContact.FirstName"
+                      <apt-input-field name="firstName" [labelClass]="'font-weight-normal'" [entity]="primaryContact"
+                        (ngModelChange)="updatePrimaryContact('FirstName',$event)" [field]="'FirstName'"
+                        [required]="true" [(ngModel)]="primaryContact.FirstName"
                         [errorMsg]="errMessages.requiredFirstName">
                       </apt-input-field>
                     </div>
                     <div class="col-md-6">
-                      <apt-input-field name="lastName" [labelClass]="'font-weight-normal'" [entity]="primaryContact" (ngModelChange)="updatePrimaryContact('LastName',$event)"
-                        [field]="'LastName'" [required]="true" [(ngModel)]="primaryContact.LastName"
-                        [errorMsg]="errMessages.requiredLastName">
+                      <apt-input-field name="lastName" [labelClass]="'font-weight-normal'" [entity]="primaryContact"
+                        (ngModelChange)="updatePrimaryContact('LastName',$event)" [field]="'LastName'" [required]="true"
+                        [(ngModel)]="primaryContact.LastName" [errorMsg]="errMessages.requiredLastName">
                       </apt-input-field>
                     </div>
                     <div class="col-md-6">
-                      <apt-input-field name="email" [labelClass]="'font-weight-normal'" (ngModelChange)="updatePrimaryContact('Email',$event)"
-                        [placeholder]="'you@example.com'" [entity]="primaryContact" [field]="'Email'" [required]="true"
-                        [(ngModel)]="primaryContact.Email" [errorMsg]="errMessages.requiredEmail">
+                      <apt-input-field name="email" [labelClass]="'font-weight-normal'"
+                        (ngModelChange)="updatePrimaryContact('Email',$event)" [placeholder]="'you@example.com'"
+                        [entity]="primaryContact" [field]="'Email'" [required]="true" [(ngModel)]="primaryContact.Email"
+                        [errorMsg]="errMessages.requiredEmail">
                       </apt-input-field>
                     </div>
                   </div>
@@ -79,9 +93,10 @@
                       <apt-address [value]="billAccount" [type]="'Billing'" [readonly]="true"></apt-address>
                     </div>
                     <div class="pt-3">
-                      <apt-input-field name="primaryContact" [labelClass]="'font-weight-normal'" [entity]="order" (ngModelChange)="onPrimaryContactChange($event)"
-                        [field]="'PrimaryContact'" [(ngModel)]="order.PrimaryContact" [lookupOptions]="lookupOptions"
-                        [required]="true" [errorMsg]="errMessages.requiredPrimaryContact">
+                      <apt-input-field name="primaryContact" [labelClass]="'font-weight-normal'" [entity]="order"
+                        (ngModelChange)="onPrimaryContactChange($event)" [field]="'PrimaryContact'"
+                        [(ngModel)]="order.PrimaryContact" [lookupOptions]="lookupOptions" [required]="true"
+                        [errorMsg]="errMessages.requiredPrimaryContact">
                       </apt-input-field>
                     </div>
                   </div>
@@ -138,6 +153,42 @@
         [translateParams]="{orderName: orderConfirmation?.Name}"></h5>
       <button class="btn btn-outline-primary w-25 mx-auto" (click)="closeModal()">{{ 'DETAILS.VIEW_YOUR_ORDER' |
         translate }}</button>
+    </div>
+  </ng-template>
+
+  <ng-template #POTemplate>
+    <div class="modal-header align-items-center d-flex flex-row-reverse p-0 pb-2 mt-3 border-bottom border-secondary">
+      <button type="button" class="close close-button pull-right pr-3 pl-0" aria-label="Close" (click)="closePOModal()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body bg-white d-flex flex-column justify-content-center py-4">
+      <h6 class="modal-title pull-left font-weight-bold pb-2">
+        {{ 'PAYMENT.ADD_PO_NUMBER' | translate }}
+      </h6>
+      <div class="mt-3">
+        <apt-input-field name="poNumber" [entity]="order" [field]="'PONumber'" [(ngModel)]="order.PONumber"
+          [label]="'PAYMENT.PO_NUMBER' | translate" [placeholder]="'PAYMENT.ENTER_PO_NUMBER' | translate"
+          [required]="true">
+        </apt-input-field>
+      </div>
+      <div class="mt-3">
+        <label class="mb-1 d-block">{{ 'PAYMENT.PO_DOCUMENT_OPTIONAL' | translate }}</label>
+        <apt-file-uploader [supportedFileTypes]="supportedFileTypes" [showSelectedFilesList]="true"
+          [showActionButtons]="false" [maximumFilesAllowed]="1" (onFileUpload)="uploadPOAttachment($event)">
+        </apt-file-uploader>
+      </div>
+      <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-outline-secondary mr-2" [disabled]="getPaymentLoadingState('PONUMBER')"
+          (click)="closePOModal()">
+          {{ 'COMMON.CANCEL' | translate }}
+        </button>
+        <button class="btn btn-primary" [ladda]="getPaymentLoadingState('PONUMBER')" data-style="zoom-in"
+          [disabled]="!order.PONumber || !order.PONumber.trim() || getPaymentLoadingState('PONUMBER')"
+          (click)="savePONumber()">
+          {{ 'COMMON.SUBMIT' | translate }}
+        </button>
+      </div>
     </div>
   </ng-template>
 

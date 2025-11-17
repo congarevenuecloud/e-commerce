@@ -29,6 +29,7 @@ export class DetailsLayoutComponent implements AfterContentInit, OnDestroy, OnCh
   @Input() hideLink: boolean = false;
 
   private activeTabIndex = 0;
+  private cachedHeaderHeight: number | null = null; // Cache header height
 
   hidePrimaryActions: boolean = false;
   hideSecondaryActions: boolean = false;
@@ -55,6 +56,13 @@ export class DetailsLayoutComponent implements AfterContentInit, OnDestroy, OnCh
     if (visibleSections.length > 0) {
       visibleSections[0].active = true;
     }
+    
+    // Cache header height once after content init to avoid repeated offsetHeight reads
+    setTimeout(() => {
+      if (this.headerNav?.nativeElement) {
+        this.cachedHeaderHeight = this.headerNav.nativeElement.offsetHeight;
+      }
+    }, 100);
   }
 
   private updateFilteredSections() {
@@ -72,21 +80,45 @@ export class DetailsLayoutComponent implements AfterContentInit, OnDestroy, OnCh
    * event occurs. Here attaches listener to window on scroll event.
    * In onScroll method assigns headerClass property with the class "'fixed-top' | 'fixed-top expand'" based on window 
    * pageYOffset and set the tab active.
+   * Performance optimized: Uses cached header height to avoid layout thrashing on every scroll.
    */
   @HostListener('window:scroll', ['$event'])
   onScroll(event) {
+    const previousHeaderClass = this.headerClass;
+    const headerElement = this.headerNav?.nativeElement;
+    
     if (this.headerClass != null && window.pageYOffset < 35) {
-      this.headerClass = 'fixed-top  position-fixed expand';
-      setTimeout(() => this.headerClass = null, 200);
+      this.headerClass = 'fixed-top position-fixed expand';
+      setTimeout(() => {
+        this.headerClass = null;
+        // Remove placeholder height when header returns to normal flow
+        if (headerElement) {
+          headerElement.style.minHeight = '';
+        }
+      }, 200);
     } else if (window.pageYOffset >= 35) {
+      // Only set min-height on the transition to fixed (not on every scroll event)
+      if (previousHeaderClass !== 'fixed-top position-fixed' && headerElement) {
+        // Use cached height to avoid expensive offsetHeight read during scroll
+        // If cache is null, read once and cache it
+        if (this.cachedHeaderHeight === null) {
+          this.cachedHeaderHeight = headerElement.offsetHeight;
+        }
+        // Set min-height to maintain space when position becomes fixed
+        headerElement.style.minHeight = `${this.cachedHeaderHeight}px`;
+      }
       this.headerClass = 'fixed-top position-fixed';
     } else {
       this.headerClass = null;
+      // Remove placeholder height when scrolled back to top
+      if (headerElement) {
+        headerElement.style.minHeight = '';
+      }
     }
 
     this.setActiveTab();
   }
-  headerClass: 'fixed-top position-fixed' | 'fixed-top  position-fixed expand' = null;
+  headerClass: 'fixed-top position-fixed' | 'fixed-top position-fixed expand' = null;
 
   /**
    * scrollTo method scrolls the page to the specified tab content.

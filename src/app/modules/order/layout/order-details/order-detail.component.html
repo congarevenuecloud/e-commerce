@@ -82,6 +82,16 @@
                   [showQuickView]="true"
                   (onChange)="refreshOrder($event.Description, order, 'Description')"></apt-output-field>
               </div>
+
+              <div class="flex-shrink-1 col-md-4 mb-2">
+                <div class="d-flex align-items-end">
+                  <apt-output-field [record]="order" field="PaymentStatus" [editable]="false"></apt-output-field>
+                </div>
+              </div>
+
+              <div class="flex-shrink-1 col-md-4 mb-2">
+                <apt-output-field [record]="order" field="PONumber" [editable]="false"></apt-output-field>
+              </div>
             </div>
             <div class="d-flex justify-content-start">
               <a href="javascript:void(0)" (click)="isExpanded = !isExpanded" class="text-decoration-none">
