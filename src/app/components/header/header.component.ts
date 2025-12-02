@@ -5,10 +5,10 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
-import { map, switchMap, take, tap, catchError } from 'rxjs/operators';
+import { Router, NavigationEnd } from '@angular/router';
+import { BehaviorSubject, Observable, combineLatest, of, merge } from 'rxjs';
+import { map, switchMap, take, tap, filter, startWith } from 'rxjs/operators';
 import { first, defaultTo, get, cloneDeep, isEqual } from 'lodash';
-import { ApiService } from '@congarevenuecloud/core';
 import {
   Storefront,
   StorefrontService,
@@ -18,6 +18,8 @@ import {
   Cart,
   AccountService,
   Account,
+  CollaborationRequestService,
+  CollaborationAccessType,
 } from '@congarevenuecloud/ecommerce';
 @Component({
   selector: 'app-header',
@@ -39,15 +41,44 @@ export class HeaderComponent implements OnInit {
   cart: Cart;
   loading: boolean = true;
 
+  // Observable for read-only collaboration mode (Proposal with AcceptReject access)
+  // null until collaboration request is loaded, then evaluates to true/false
+  isReadOnlyCollaborationMode$: Observable<boolean | null>;
+
   constructor(
     private userService: UserService,
     private storefrontService: StorefrontService,
     private cartService: CartService,
     private accountService: AccountService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private collaborationService: CollaborationRequestService,
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) { }
 
   ngOnInit() {
+    // Check if user is in read-only collaboration mode (Proposal with AcceptReject access on collaborative URL)
+    const currentUrl$: Observable<string> = this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(() => this.router.url),
+      startWith(this.router.url)
+    );
+
+    // Check collaboration mode when collaboration request exists
+    // null until collaboration request is loaded
+    this.isReadOnlyCollaborationMode$ = merge(
+      of(null),
+      combineLatest([
+        this.collaborationService.getMyCollaborationRequest(),
+        currentUrl$
+      ]).pipe(
+        map(([request, url]) =>
+          url.includes('/collaborative') &&
+          request.ParentBusinessObjectType === 'Proposal' &&
+          request.AccessType === CollaborationAccessType.AcceptReject
+        )
+      )
+    );
+
     this.updateCartView();
     this.storefront$ = this.storefrontService.getStorefront();
     this.storeLogo$ = combineLatest([

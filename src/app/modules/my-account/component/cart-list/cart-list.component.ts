@@ -5,7 +5,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { Observable, of, Subscription } from 'rxjs';
 import { catchError, map, take } from 'rxjs/operators';
 import { ClassType } from 'class-transformer/ClassTransformer';
-import { find, first, get, isNil } from 'lodash';
+import { find, first, get, includes, isNil } from 'lodash';
 import { AObject, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import { CartService, Cart, PriceService, CartResult, FieldFilter, SummaryGroup, LocalCurrencyPipe, DateFormatPipe, AccountService } from '@congarevenuecloud/ecommerce';
 import { TableOptions, TableAction, ExceptionService } from '@congarevenuecloud/elements';
@@ -116,7 +116,7 @@ export class CartListComponent implements OnInit {
                   massAction: false,
                   label: 'CART.SET_EFFECTIVE_DATE',
                   theme: 'primary',
-                  validate: (record: Cart) => this.canPerformAction(record),
+                  validate: (record: Cart) => this.canSetEffectiveDate(record),
                   action: (recordList: Array<Cart>) => this.showEffectiveDateModal(first(recordList), this.effectiveDateTemplate),
                   disableReload: true
                 } as TableAction,
@@ -241,9 +241,12 @@ export class CartListComponent implements OnInit {
     return (cart.Status !== 'Finalized');
   }
 
+  canSetEffectiveDate(cart: Cart) {
+    return !includes(['Finalized', 'Superseded'], get(cart, 'Status'));
+  }
 
   canActivate(cartToActivate: Cart) {
-    return (this.cartService.getCurrentCartId() !== cartToActivate.Id && cartToActivate.Status !== 'Finalized');
+    return (this.cartService.getCurrentCartId() !== cartToActivate.Id && !includes(['Finalized', 'Superseded'], get(cartToActivate, 'Status')));
   }
 
   showEffectiveDateModal(cart: Cart, template: TemplateRef<any>) {

@@ -10,7 +10,7 @@
     <div class="d-flex justify-content-between align-items-center flex-row flex-wrap w-100">
       <h4 class="text-black mb-0 pl-md-0 pl-3">{{'CART.CHECKOUT' | translate}}</h4>
       <div class="d-flex justify-content-end align-items-center">
-        <apt-captcha *ngIf="showCaptchaOnCheckoutPage" (onCaptchaSuccess)="captchaSuccess(cart)"></apt-captcha>
+        <apt-captcha *ngIf="showCaptcha" (onCaptchaSuccess)="captchaSuccess(cart)"></apt-captcha>
         <button class="btn btn-link py-0" [routerLink]="['/carts/active']" [hidden]="isAnyPaymentLoading()">
           {{'COMMON.CANCEL' | translate }}
         </button>
@@ -24,7 +24,7 @@
           <span>{{ 'PAYMENT.PAY_LATER' | translate }}</span>
         </button>
         
-        <div class="d-flex" *ngIf="!showCaptchaOnCheckoutPage">
+        <div class="d-flex" *ngIf="!showCaptcha">
           <ng-content select=".cancel-button"></ng-content>
           
           <button class="btn btn-primary btn-raised" [ladda]="getPaymentLoadingState('PLACEORDER')" data-style="zoom-in"

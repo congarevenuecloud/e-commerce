@@ -172,7 +172,11 @@ export class OrderListComponent implements OnInit, OnDestroy {
   }
 
   updateOrderValue(order: Order): Observable<Order> {
-    return this.orderService.updateOrderValue(order).pipe(
+    return this.orderService.updateOrderValue(order, {
+      fetchQuote: false,
+      fetchContact: false,
+      fetchSoldToAccount: false
+    }).pipe(
       take(1),
       rmap((updatedOrder: Order) => {
         return updatedOrder;
