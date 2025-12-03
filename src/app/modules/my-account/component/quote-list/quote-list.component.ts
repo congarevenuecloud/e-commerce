@@ -196,7 +196,11 @@ export class QuoteListComponent implements OnInit {
   }
 
   updateQuoteValue(quote: Quote): Observable<Quote> {
-    return this.quoteService.updateQuoteValue(quote).pipe(
+    return this.quoteService.updateQuoteValue(quote, {
+      fetchContact: false,
+      fetchBillToAccount: false,
+      fetchShipToAccount: false
+    }).pipe(
       take(1),
       map((updatedQuote: Quote) => {
         return updatedQuote;

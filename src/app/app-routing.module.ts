@@ -64,6 +64,10 @@ import { AuthenticationGuard } from './services/authentication.guard';
             path: 'favorites',
             loadChildren: () => import('./modules/favorite/favorite.module').then(m => m.FavoriteModule),
             data: { title: 'Favorites' }
+          },
+          {
+            path:'collaborative',
+            loadChildren: () => import('./modules/collaborative/collaborative.module').then(m => m.CollaborativeModule)
           }
         ]
       },

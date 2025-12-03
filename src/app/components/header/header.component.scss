@@ -4,6 +4,17 @@
   img {
     max-height: 2rem;
   }
+  
+  // Disabled state for collaborative mode
+  &.cursor-default {
+    cursor: default !important;
+    pointer-events: none;
+    opacity: 0.9;
+    
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
 .navbar {

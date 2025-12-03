@@ -1,13 +1,18 @@
 <div class="navbar navbar-light bg-light border-bottom py-0">
   <div class="d-flex align-items-center">
-    <button class="navbar-toggler px-2 border-0" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    <!-- Hide hamburger menu in collaborative mode -->
+    <button *ngIf="!(isReadOnlyCollaborationMode$ | async)" class="navbar-toggler px-2 border-0" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       (click)="menuModal.show()">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <ng-container *ngIf="storefront$ | async as storefront; else errorPageHeader">
+      <!-- Disable logo navigation in collaborative mode -->
       <button class="navbar-brand btn btn-link d-none d-md-inline-block p-0 mr-2 d-lg-block d-sm-none"
-        [routerLink]="['/']" *ngIf="storeLogo$ | async as storeLogo; else defaultStoreLogo">
+        [routerLink]="(isReadOnlyCollaborationMode$ | async) ? null : ['/']" 
+        [disabled]="(isReadOnlyCollaborationMode$ | async)"
+        [class.cursor-default]="(isReadOnlyCollaborationMode$ | async)"
+        *ngIf="storeLogo$ | async as storeLogo; else defaultStoreLogo">
         <img class="pl-2" [src]="storeLogo | image" />
       </button>
       <span class="sf-label mb-0 d-lg-block d-md-block d-sm-none d-none">{{storefront?.Name}}</span>
@@ -32,9 +37,11 @@
   </div>
 
   <div class="actions d-flex align-items-center m-0">
-    <apt-product-search *ngIf="storefront$ | async" [typeAheadLimit]="7"></apt-product-search>
-    <apt-mini-cart></apt-mini-cart>
-    <apt-cr-constraint-icon class="d-block position-relative"></apt-cr-constraint-icon>
+    <!-- Hide search, cart, and constraint icon in collaborative mode -->
+    <apt-product-search *ngIf="!(isReadOnlyCollaborationMode$ | async) && (storefront$ | async)" [typeAheadLimit]="7"></apt-product-search>
+    <apt-mini-cart *ngIf="!(isReadOnlyCollaborationMode$ | async)"></apt-mini-cart>
+    <apt-cr-constraint-icon *ngIf="!(isReadOnlyCollaborationMode$ | async)" class="d-block position-relative"></apt-cr-constraint-icon>
+    
     <ng-container *ngIf="user$ | async as user">
       <div class="d-flex user-action flex-column text-primary align-items-flex-start exclude-border pl-2">
         <strong>
@@ -61,42 +68,50 @@
                   <div>{{user?.Title}}</div>
                 </div>
               </div>
-              <div class="text-nowrap px-3 d-flex" *ngIf="cartView$ | async as cartView">
-                <div class="cursor-pointer" (click)="loadAccountDetails()"><b>{{ 'COMMON.ACCOUNT' | translate }}:</b>
-                  <span class="account-section text-primary pl-1"><u>{{cart?.Account?.Name}}</u></span>
+              
+              <!-- Hide account selection and menu items in collaborative mode -->
+              <ng-container *ngIf="!(isReadOnlyCollaborationMode$ | async)">
+                <div class="text-nowrap px-3 d-flex" *ngIf="cartView$ | async as cartView">
+                  <div class="cursor-pointer" (click)="loadAccountDetails()"><b>{{ 'COMMON.ACCOUNT' | translate }}:</b>
+                    <span class="account-section text-primary pl-1"><u>{{cart?.Account?.Name}}</u></span>
+                  </div>
                 </div>
-              </div>
-              <div dropdown-item class="nav flex-column nav-pills pl-3" id="v-pills-tab" role="tablist"
-                aria-orientation="vertical">
-                <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/orders']"
-                  [routerLinkActive]="'active'">
-                  <i class="fas fa-list-ul pr-1"></i>
-                  {{'COMMON.MY_ORDERS' | translate}}
-                </a>
-                <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/quotes']"
-                  [routerLinkActive]="'active'">
-                  <i class="fas fa-pencil-alt pr-1"></i>
-                  {{'COMMON.MY_QUOTES' | translate}}
-                </a>
-                <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/carts']"
-                  [routerLinkActive]="'active'">
-                  <i class="fas fa-shopping-cart pr-1"></i>
-                  {{'COMMON.MY_CARTS' | translate}}
-                </a>
-                <a class="pt-3" href="javascript:void(0)" *ngIf="showFavorites$ | async"
-                  [routerLink]="['/my-account/favorites']" [routerLinkActive]="'active'">
-                  <i class="fas fa-star pr-1"></i>
-                  {{'COMMON.FAVORITES' | translate}}
-                </a>
-                <a class="pt-3" href="javascript:void(0)" [routerLink]="['/assets']" routerLinkActive="active" class="pt-3">
-                  <i class = "fa fa-shopping-bag pr-2"></i>
-                  {{'COMMON.INSTALLED_PRODUCTS' | translate}}
-                 </a>
-                <a class="pt-3 d-lg-none d-md-none d-sm-block d-block" href="javascript:void(0)" [routerLink]="['/my-account/settings']"
-                  [routerLinkActive]="'active'">
-                  <i class="fas fa-cog pr-2"></i>
-                  {{'MY_ACCOUNT.SETTINGS' | translate}}
-                </a>
+                <div dropdown-item class="nav flex-column nav-pills pl-3" id="v-pills-tab" role="tablist"
+                  aria-orientation="vertical">
+                  <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/orders']"
+                    [routerLinkActive]="'active'">
+                    <i class="fas fa-list-ul pr-1"></i>
+                    {{'COMMON.MY_ORDERS' | translate}}
+                  </a>
+                  <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/quotes']"
+                    [routerLinkActive]="'active'">
+                    <i class="fas fa-pencil-alt pr-1"></i>
+                    {{'COMMON.MY_QUOTES' | translate}}
+                  </a>
+                  <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/carts']"
+                    [routerLinkActive]="'active'">
+                    <i class="fas fa-shopping-cart pr-1"></i>
+                    {{'COMMON.MY_CARTS' | translate}}
+                  </a>
+                  <a class="pt-3" href="javascript:void(0)" *ngIf="showFavorites$ | async"
+                    [routerLink]="['/my-account/favorites']" [routerLinkActive]="'active'">
+                    <i class="fas fa-star pr-1"></i>
+                    {{'COMMON.FAVORITES' | translate}}
+                  </a>
+                  <a class="pt-3" href="javascript:void(0)" [routerLink]="['/assets']" routerLinkActive="active" class="pt-3">
+                    <i class = "fa fa-shopping-bag pr-2"></i>
+                    {{'COMMON.INSTALLED_PRODUCTS' | translate}}
+                   </a>
+                  <a class="pt-3 d-lg-none d-md-none d-sm-block d-block" href="javascript:void(0)" [routerLink]="['/my-account/settings']"
+                    [routerLinkActive]="'active'">
+                    <i class="fas fa-cog pr-2"></i>
+                    {{'MY_ACCOUNT.SETTINGS' | translate}}
+                  </a>
+                </div>
+              </ng-container>
+              
+              <!-- Always show logout option -->
+              <div class="nav flex-column nav-pills pl-3">
                 <a class="pt-3" href="javascript:void(0)" (click)="doLogout()">
                   <i class="fas fa-sign-out-alt pr-2"></i>
                   {{'HEADER.LOG_OUT' | translate}}
@@ -115,7 +130,9 @@
             </ng-template>
           </div>
         </div>
-        <div class="dropdown">
+        
+        <!-- Hide account info dropdown in collaborative mode -->
+        <div class="dropdown" *ngIf="!(isReadOnlyCollaborationMode$ | async)">
           <div class="dropdown-menu account-info p-3" [ngClass]="showAccountInfo ? 'show' : ''">
             <a *ngIf="!loading" class="position-absolute back-icon" href="javascript:void(0)"
               (click)="navigateToAccountHome()"><i class="fa fa-chevron-left mr-1"></i>{{ 'HEADER.BACK' | translate |

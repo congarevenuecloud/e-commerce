@@ -1,0 +1,496 @@
+<!-- Custom Breadcrumb with disabled links -->
+<nav aria-label="breadcrumb" class="container-fluid py-2 w-100 d-block bg-white border-bottom custom-breadcrumb">
+  <div class="row align-items-center justify-content-between">
+    <ol class="col-lg-auto col-md-auto col-sm-9 col-9 breadcrumb m-0">
+      <li class="breadcrumb-item active">
+        {{'BREADCRUMB.HOME' | translate}}
+      </li>
+      <li class="breadcrumb-item active">
+        {{'AOBJECTS.PROPOSALS' | translate}}
+      </li>
+      <li class="breadcrumb-item active" *ngIf="quote?.Name">
+        {{quote?.Name}}
+      </li>
+    </ol>
+  </div>
+</nav>
+
+<app-detail *ngIf="quote; else loading" [context]="quote" [route]="'proposals'" [hideLink]="true">
+
+  <apt-alert [record]="quote" message="ERROR.UPDATE_QUOTE_FAILED_ON_DETAILS_PAGE" [showOnlyMessage]="false">
+  </apt-alert>
+
+  <div class="detail-header">
+    <div
+      [ngClass]="quote.ApprovalStage !== 'Accepted' ?  'd-flex justify-content-between' :' d-flex flex-column flex-sm-row justify-content-between'">
+      <div class="d-flex align-items-center">
+        <span class="page-header d-lg-block d-md-block d-sm-none d-none">{{quote?.Name}}</span>
+        <span tooltip="{{quote?.Name}}" class="page-header d-block d-sm-block d-md-none d-lg-none">{{quote?.Name |
+          truncate:13}}</span>
+        <span class="badge badge-light ml-1 px-2 py-0 text-uppercase" *ngIf="quote?.ApprovalStage">
+          <apt-output-field [record]="quote" [field]="'ApprovalStage'" [valueOnly]="true" [valueClass]="'p-0'"
+            [editable]="false">
+          </apt-output-field>
+        </span>
+      </div>
+      <!-- Desktop Button Layout -->
+      <div class="align-items-center d-lg-flex d-md-flex d-sm-none d-none" *ngIf="!showPresentTemplate">
+        <!-- Logged In User Buttons -->
+        <ng-container *ngIf="isLoggedIn">
+          <!-- Draft Stage: Show Generate Button -->
+          <apt-generate-document *ngIf="quote.ApprovalStage === 'Draft'" [record]="quote" class="ml-auto"
+            (onStatusUpdate)="onGenerateQuote()">
+          </apt-generate-document>
+
+          <!-- Generated Stage: Show Present as Primary and Generate as Secondary button -->
+          <ng-container *ngIf="quote.ApprovalStage === 'Generated'">
+            <apt-generate-document [record]="quote" class="ml-auto mr-3" (onStatusUpdate)="onGenerateQuote()">
+            </apt-generate-document>
+            <button type="button" class="btn btn-primary btn-raised px-3" (click)="showPresentTemplateFun()">
+              {{'DETAILS.PRESENT_QUOTE' | translate}}
+            </button>
+          </ng-container>
+
+          <!-- Presented Stage: Show Request Changes, Accept, Reject as Primary Buttons -->
+          <ng-container *ngIf="quote.ApprovalStage === 'Presented'">
+            <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary mr-3 ml-auto"
+              data-style="zoom-in" (click)="rejectQuote(quote?.Id)">
+              {{'COMMON.REJECT' | translate}}
+            </button>
+            <button type="button" *ngIf="quote?.Items?.length > 0" class="btn btn-primary btn-raised mr-3"
+              [ladda]="acceptLoader" data-style="zoom-in" (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+              {{'COMMON.ACCEPT_QUOTE' | translate}}
+            </button>
+          </ng-container>
+        </ng-container>
+
+        <!-- Guest User Buttons -->
+        <ng-container *ngIf="!isLoggedIn">
+          <ng-container *ngIf="quote.ApprovalStage === 'Presented'">
+            <!-- Guest users with collaboration request and Accept/Reject access -->
+            <ng-container *ngIf="collaborationRequest">
+              <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary mr-3 ml-auto"
+                data-style="zoom-in" (click)="rejectQuote(quote?.Id)">
+                {{'COMMON.REJECT' | translate}}
+              </button>
+              <button type="button" *ngIf="quote?.Items?.length > 0" class="btn btn-primary btn-raised mr-3"
+                [ladda]="acceptLoader" data-style="zoom-in" (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+                {{'COMMON.ACCEPT_QUOTE' | translate}}
+              </button>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+
+        <!-- Desktop Kebab Menu for Secondary Actions -->
+        <div class="dropdown ml-3 d-lg-block d-md-block d-sm-none d-none"
+          *ngIf="(isLoggedIn && quote?.ApprovalStage === 'Presented') || (!isLoggedIn && collaborationRequest && quote?.ApprovalStage === 'Presented')">
+          <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="desktopDropdownMenuLink"
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          </a>
+          <div class="dropdown-menu dropdown-menu-right px-3" aria-labelledby="desktopDropdownMenuLink">
+            <ng-container *ngTemplateOutlet="desktopKebabButtons"></ng-container>
+          </div>
+        </div>
+      </div>
+      <!-- TO do : remove comment add back the changes when we integrate the functionality -->
+      <!-- <button type="button" class="btn btn-primary btn-raised py-2" [ladda]="finalizeLoader"
+        *ngIf="quote?.ApprovalStage === 'Draft'" (click)="finalizeQuote(quote?.Id)"
+        [disabled]="true">{{'MY_ACCOUNT.QUOTE_DETAIL.FINALIZE'
+        |translate}}</button>
+      <div class="align-items-stretch d-flex" *ngIf="quote?.ApprovalStage === 'Generated'">
+        <apt-present-document [record]="quote"></apt-present-document>
+      </div> -->
+
+      <div class="d-sm-block d-block ml-auto d-md-none d-lg-none pt-2"
+        *ngIf="(quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented' || quote?.ApprovalStage === 'Approved') && (isLoggedIn || (collaborationRequest && quote?.ApprovalStage === 'Presented'))">
+        <div class="dropdown pr-4">
+          <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          </a>
+          <div class="dropdown-menu dropdown-menu-right px-3" aria-labelledby="dropdownMenuButton">
+            <ng-container *ngTemplateOutlet="mobileActionButtons"></ng-container>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="quote?.ApprovalStage === 'Accepted' && order$ | async as order">
+        <span class="d-flex align-items-baseline">
+          <apt-output-field [record]="order" field="Name" [label]="'MY_ACCOUNT.ORDER_DETAIL.ORDER_ID' | translate"
+            layout="inline" [editable]="false" [showQuickView]="false"></apt-output-field>
+          <span class="badge badge-light ml-1 py-0">
+            <apt-output-field [record]="order" [field]="'Status'" [valueOnly]="true" [valueClass]="'p-0'"
+              [editable]="false">
+            </apt-output-field></span>
+        </span>
+      </div>
+    </div>
+    <app-progress class="status-bar" *ngIf="isLoggedIn && quoteStatusLabelMap[quote.ApprovalStage]"
+      [steps]="quoteStatusStepsLabels" [currentStep]="quoteStatusLabelMap[quote.ApprovalStage]">
+    </app-progress>
+  </div>
+
+  <ng-container *ngIf="!showPresentTemplate;else presentDocumentTemplate">
+    <app-detail-section [title]="'DETAILS.QUOTE_SUMMARY' | translate">
+      <div class="row pt-3">
+        <div class="col-12 col-md-8  pl-lg-3 pl-md-3">
+          <div class="card">
+            <div class="card-header border-bottom py-2">
+              <h5>{{'DETAILS.QUOTE_SUMMARY' | translate}}</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="ProposalNumber" [editable]="false">
+                  </apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="Name" [label]="'CREATE_QUOTE.QUOTE_TITLE' | translate"
+                    [DisplayName]="ProposalName"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    (onChange)="refreshQuote($event.Name, quote, 'Name')">
+                  </apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="CreatedDate" [editable]="false">
+                  </apt-output-field>
+                </div>
+              </div>
+              <div class="row">
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote.CreatedBy" field="Name" [label]="'COMMON.CREATED_BY' | translate"
+                    [editable]="false"></apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="SourceChannel" [editable]="false"></apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" [field]="'PrimaryContact'"
+                    [label]="'MY_ACCOUNT.QUOTE_DETAIL.PRIMARY_CONTACT' | translate" [displayValue]="'PrimaryContact'"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    [showQuickView]="true" [lookupOptions]="lookupOptions"
+                    (onChange)="refreshQuote($event, quote, 'PrimaryContact')">
+                  </apt-output-field>
+                </div>
+              </div>
+              <div class="row" *ngIf="isExpanded">
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="Account" [displayValue]="'Account'"
+                    [label]="'MY_ACCOUNT.ORDER_DETAIL.ACCOUNT_NAME' | translate" [editable]="false"
+                    [showQuickView]="true"></apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="ShipToAccount" [displayValue]="'ShipToAccount'"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    [label]="'MY_ACCOUNT.ORDER_DETAIL.SHIP_TO_ACCOUNT' | translate" [showQuickView]="true"
+                    (onChange)="refreshQuote($event, quote, 'ShipToAccount')"></apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="BillToAccount" [displayValue]="'BillToAccount'"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    [label]="'MY_ACCOUNT.ORDER_DETAIL.BILL_TO_ACCOUNT' | translate" [showQuickView]="true"
+                    (onChange)="refreshQuote($event, quote, 'BillToAccount')"></apt-output-field>
+                </div>
+
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="Requestor" [displayValue]="'Requestor'" [editable]="false"
+                    [showQuickView]="true"></apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="RFPResponseDueDate"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    (onChange)="refreshQuote($event.RFPResponseDueDate, quote, 'RFPResponseDueDate')">
+                  </apt-output-field>
+                </div>
+              </div>
+              <div class="d-flex justify-content-start">
+                <a href="javascript:void(0)" (click)="isExpanded = !isExpanded" class="text-decoration-none">
+                  <span>
+                    {{ isExpanded ? ('COMMON.SHOW_LESS' | translate) : ('COMMON.SHOW_MORE' | translate) }}
+                    <i class="fas" [ngClass]="isExpanded ? 'fa-angle-double-up' : 'fa-angle-double-down'"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 pt-lg-0 pt-md-0 pt-sm-4 pt-4">
+          <apt-price-summary [record]="quote" [page]="'quotes'"></apt-price-summary>
+        </div>
+      </div>
+    </app-detail-section>
+
+    <div class="pt-4">
+      <app-detail-section [title]="'DETAILS.LINE_ITEMS' | translate" class="mt-3">
+        <div class="card">
+          <div *ngIf="quoteLineItems$ | async as quoteLineItems">
+            <div class="card-header border-bottom py-2">
+              <h5>
+                {{'DETAILS.LINE_ITEMS' | translate}}
+                <button class="btn text-primary px-2 ml-1 py-0"
+                  *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented')"
+                  [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black" (click)="editQuoteItems(quote)">
+                  <i *ngIf="quote?.Items?.length > 0" class="fa fa-edit"></i>
+                  {{(quoteLineItems?.length > 0 ? 'COMMON.EDIT' : 'COMMON.ADD' ) | translate }}</button>
+              </h5>
+            </div>
+            <div class="card-body">
+              <ng-container *ngIf="quoteLineItems?.length >0; else showMessage">
+                <table class="table">
+                  <tbody>
+                    <ng-container *ngFor="let item of quoteLineItems; let i = index">
+                      <apt-line-item-table-row [cart]="cartRecord" [index]="i" [parent]="item.MainLine"
+                        [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false">
+                      </apt-line-item-table-row>
+                    </ng-container>
+                  </tbody>
+                </table>
+              </ng-container>
+              <ng-template #showMessage>
+                <div class="d-flex align-items-center justify-content-center">
+                  <h6 class="text-muted mr-2 mb-0">
+                    {{ 'COMMON.NO_LINE_ITEMS_MESSAGE' | translate: { record: 'quote' } }}
+                  </h6>
+                  <button class="btn text-primary p-0" *ngIf="isLoggedIn" [ladda]="editLoader" data-style="zoom-in"
+                    data-spinner-color="black" (click)="editQuoteItems(quote)">
+                    {{ 'COMMON.ADD' | translate }}
+                  </button>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </app-detail-section>
+    </div>
+
+    <div class="pt-4">
+      <app-detail-section [title]="'DETAILS.ATTACHMENTS' | translate" class="mt-3">
+        <div class="card" #attachmentSection *ngIf="attachmentList$ | async as attachmentList; else loading">
+          <div class="card-header border-bottom py-2">
+            <h5>
+              {{'DETAILS.ATTACHMENTS' | translate}}
+              <span *ngIf="attachmentList?.length > 0">({{attachmentList?.length}})</span>
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row d-flex justify-content-between">
+              <div
+                [ngClass]="isLoggedIn && quote?.ApprovalStage !== 'Denied'? 'col-lg-6 col-md-6' :'col-lg-12 col-md-12'">
+                <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
+                  <div class="table-container overflow-auto">
+                    <table class="table table-sm">
+                      <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata" field="Name"
+                              [labelOnly]="true">
+                            </apt-output-field></th>
+                          <th scope="col" class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">
+                            <apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileSize"
+                              [labelOnly]="true">
+                            </apt-output-field>
+
+                          </th>
+                          <th scope="col" class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">
+                            <apt-output-field [record]="attachmentList[0].DocumentMetadata" field="FileType"
+                              [labelOnly]="true">
+                            </apt-output-field>
+
+                          </th>
+                          <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
+                              field="CreatedBy" [labelOnly]="true">
+                            </apt-output-field></th>
+                          <th scope="col"><apt-output-field [record]="attachmentList[0].DocumentMetadata"
+                              field="CreatedDate" [labelOnly]="true">
+                            </apt-output-field></th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let attachment of attachmentList; let i = index">
+                          <th scope="row">{{i + 1}}</th>
+                          <td>
+                            <a class="text-underline" (click)="downloadAttachment(attachment?.DocumentMetadata?.Id)"
+                              target="_self">{{attachment?.DocumentMetadata?.Name}}</a>
+                          </td>
+                          <td class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">
+                            {{(attachment?.DocumentMetadata?.FileSize/1024).toFixed(2)}}KB</td>
+                          <td class="d-lg-table-cell d-md-table-cell d-sm-none d-none text-nowrap">
+                            {{getFileType(attachment?.DocumentMetadata?.FileType)}}</td>
+                          <td>
+                          <td>{{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
+                          <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
+                          <td><button *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied'"
+                              class="btn btn-link p-0 m-0" (click)="deleteAttachment(attachment)"
+                              [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
+                              data-spinner-color="black">
+                              <span class="fa fa-trash"></span>
+                            </button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </ng-container>
+                <ng-template #emptyAttachments>
+                  <div class="d-flex align-items-center justify-content-center flex-column h-100 text-muted">
+                    <i class="fa fa-4x fa-file-o mb-2"></i>
+                    {{'COMMON.ATTACHMENT_DETAILS.NO_ATTACHMENTS' | translate}}
+                  </div>
+                </ng-template>
+              </div>
+              <span class="d-lg-block d-md-block d-sm-none d-none border-left"
+                *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied'"></span>
+              <div class="col-12 col-md-5 pt-lg-0 pt-md-0 pt-sm-3 pt-3" *ngIf="isLoggedIn">
+                <ng-container *ngTemplateOutlet="addAttachments"></ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </app-detail-section>
+    </div>
+
+    <div class="pt-4">
+      <app-detail-section [title]="'Comments'" class="mt-3">
+        <div class="card">
+          <div class="card-header border-bottom py-2">
+            <h5> {{ 'COMMENTS.COMMENTS' |
+              translate }}</h5>
+          </div>
+          <div class="card-body">
+            <div class="row d-flex justify-content-between">
+              <div class="col-12 col-lg-6 mb-3 mb-lg-0">
+                <apt-view-comments *ngIf="showViewCommentsComponent" [record]="quote" [layout]="'inline'"
+                  [config]="viewCommentsConfig" [customClass]="'quote-view-comments-modal'"
+                  (onAction)="handleViewCommentsAction($event)">
+                </apt-view-comments>
+              </div>
+              <span class="d-lg-block d-md-block d-sm-none d-none border-left"></span>
+              <div class="col-12 col-lg-5 mt-2">
+                <apt-add-comments [record]="quote" [layout]="'inline'" [title]="'COMMENTS.ADD_NEW_COMMENT' | translate"
+                  [config]="addCommentsConfig" [customClass]="'quote-request-changes-modal'"
+                  (onAction)="handleAddCommentsChanges($event)">
+                </apt-add-comments>
+              </div>
+            </div>
+          </div>
+        </div>
+      </app-detail-section>
+    </div>
+  </ng-container>
+
+
+  <ng-template #presentDocumentTemplate>
+    <div *ngIf="attachmentList$ | async as attachmentList">
+      <apt-present-document *ngIf="showPresentTemplate" [record]="quote" (onPresentDoc)="onPresentDoc($event)"
+        [attachmentList]="attachmentList">
+      </apt-present-document>
+    </div>
+  </ng-template>
+  <ng-template #intimationTemplate>
+    <div class="modal-header align-items-center d-flex flex-row-reverse pb-0 border-bottom border-secondary">
+      <button type="button" class="close close-button pull-right pr-0" aria-label="Close" (click)="closeModal()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body bg-white d-flex flex-column justify-content-center py-4">
+      <h6 class="modal-title pull-left font-weight-bold pb-2">
+        {{'COMMON.ACCEPT_QUOTE' | translate}}
+      </h6>
+      <p class="text-center"><strong>{{ 'MODAL.THANK_YOU' | translate }}!</strong></p>
+      <span class="text-center" [translate]="'DETAILS.SUCCESSFUL_QUOTE_ACCEPTANCE_MESSAGE'"
+        [translateParams]="{quoteName: quote?.Name}"></span>
+    </div>
+  </ng-template>
+</app-detail>
+
+<ng-template #desktopKebabButtons>
+  <!-- Guest User: Request Changes in Kebab Menu (when Accept/Reject buttons are visible) -->
+  <ng-container *ngIf="!isLoggedIn && collaborationRequest && quote.ApprovalStage === 'Presented'">
+    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+    </button>
+  </ng-container>
+
+  <!-- Logged-in User: Presented Stage actions in Desktop Kebab Menu -->
+  <ng-container *ngIf="isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate">
+    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+    </button>
+    <apt-generate-document [record]="quote" [buttonClasses]="'dropdown-item'" (onStatusUpdate)="onGenerateQuote()">
+    </apt-generate-document>
+    <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
+      {{'DETAILS.PRESENT_QUOTE' | translate}}
+    </button>
+  </ng-container>
+</ng-template>
+
+<ng-template #mobileActionButtons>
+  <!-- Draft Stage: Show Generate Button -->
+  <ng-container *ngIf="quote.ApprovalStage === 'Draft' && isLoggedIn && !showPresentTemplate">
+    <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
+    </apt-generate-document>
+  </ng-container>
+
+  <!-- Generated Stage: Show both Generate and Present Buttons -->
+  <ng-container *ngIf="quote.ApprovalStage === 'Generated' && isLoggedIn && !showPresentTemplate">
+    <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
+    </apt-generate-document>
+    <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
+      {{'DETAILS.PRESENT_QUOTE' | translate}}
+    </button>
+  </ng-container>
+
+  <!-- Presented Stage: Show all buttons for logged in users in mobile kebab menu -->
+  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && isLoggedIn && !showPresentTemplate">
+    <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
+    </apt-generate-document>
+    <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
+      {{'DETAILS.PRESENT_QUOTE' | translate}}
+    </button>
+    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+    </button>
+    <button type="button" [ladda]="rejectLoader" class="dropdown-item" (click)="rejectQuote(quote?.Id)">
+      {{'COMMON.REJECT' | translate}}
+    </button>
+    <button type="button" [ladda]="acceptLoader" class="dropdown-item" *ngIf="quote?.Items?.length > 0"
+      (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+      {{'COMMON.ACCEPT_QUOTE' | translate}}
+    </button>
+  </ng-container>
+
+  <!-- Guest User Actions (Mobile) -->
+  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !isLoggedIn && !showPresentTemplate">
+    <!-- Guest users with collaboration request and Accept/Reject access -->
+    <ng-container *ngIf="collaborationRequest">
+      <button type="button" [ladda]="acceptLoader" class="dropdown-item" *ngIf="quote?.Items?.length > 0"
+        (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+        {{'COMMON.ACCEPT_QUOTE' | translate}}
+      </button>
+      <button type="button" [ladda]="rejectLoader" class="dropdown-item" (click)="rejectQuote(quote?.Id)">
+        {{'COMMON.REJECT' | translate}}
+      </button>
+      <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+        {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+      </button>
+    </ng-container>
+  </ng-container>
+
+</ng-template>
+
+<ng-template #loading>
+  <div class="d-flex justify-content-center pt-4">
+    <apt-dots></apt-dots>
+  </div>
+</ng-template>
+
+<ng-template #addAttachments>
+  <apt-file-uploader *ngIf="quote?.ApprovalStage !== 'Denied'"
+    [fileUploadLabel]="'COMMON.ATTACHMENT_DETAILS.TITLE' | translate" [supportedFileTypes]="supportedFileTypes"
+    [maxFileSize]="maxFileSizeLimit" (onFileUpload)="uploadAttachments($event)">
+  </apt-file-uploader>
+</ng-template>
+
+<!-- View Comments Component -->
+<apt-add-comments *ngIf="showReqChangesModal" [record]="quote" [layout]="'modal'"
+  [title]="'COMMENTS.REQUEST_CHANGES' | translate" [config]="requestChangesConfig"
+  [customClass]="'quote-request-changes-modal'" (onAction)="handleRequestChangesAction($event)">
+</apt-add-comments>
