@@ -2,22 +2,14 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
+import { PlatformConstants, FilterOperator } from '@congarevenuecloud/core';
 import { UserService, CollaborationRequestService, CollaborationRequest, CollaborationAuthenticationType } from '@congarevenuecloud/ecommerce';
 import { ExceptionService } from '@congarevenuecloud/elements';
-import { TranslateService } from '@ngx-translate/core';
-
-/**
- * CollaborativeQuoteAccessGuard
- * 
- * Guards the collaborative quote route and enforces authentication based on CollaborationRequest settings
- * - If AuthenticationType = 'AuthenticatedWithLogin': Redirects to login if user is not authenticated
- * - If AuthenticationType = 'Anonymous': Allows access without authentication
- * - Validates collaboration request exists and is not expired
- */
 @Injectable({
   providedIn: 'root'
 })
-export class CollaborativeQuoteAccessGuard implements CanActivate {
+export class CollaborationAuthGuard implements CanActivate {
 
   constructor(
     private userService: UserService,
@@ -39,20 +31,16 @@ export class CollaborativeQuoteAccessGuard implements CanActivate {
       return this.router.createUrlTree(['/']);
     }
 
-    // Otherwise, validate by quoteId
+    // Validate collaboration request and check authentication requirement
     return this.validateByQuoteId(quoteId, state);
   }
 
-  /**
-   * Validates collaboration request by quoteId and checks authentication requirement
-   * @ignore
-   */
   private validateByQuoteId(quoteId: string, state: RouterStateSnapshot): Observable<boolean | UrlTree> {
-    return this.collaborationService.getCollaborationRequest('Proposal', quoteId).pipe(
+    return this.collaborationService.getCollaborationRequest('Proposal', quoteId, [{ field: 'CollaborationType', value: 'Digital Commerce', filterOperator: FilterOperator.EQUAL }]).pipe(
       switchMap((collabRequest: CollaborationRequest) => {
         if (!collabRequest) {
-          this.exceptionService.showError(this.translateService.instant('COLLABORATION.NOT_FOUND'));
-          return of(this.router.createUrlTree(['/']));
+          // No collaboration request exists - allow normal quote access
+          return of(true);
         }
 
         // Check authentication requirement
@@ -61,9 +49,9 @@ export class CollaborativeQuoteAccessGuard implements CanActivate {
           return this.userService.isLoggedIn().pipe(
             map((isLoggedIn: boolean) => {
               if (!isLoggedIn) {
-                // Trigger login flow
+                localStorage.setItem(PlatformConstants.REDIRECT_URL, state.url);
                 this.exceptionService.showInfo(this.translateService.instant('COLLABORATION.LOGIN_REQUIRED'));
-                this.userService.login();
+                this.userService.login(false);
                 return false;
               }
               return true;

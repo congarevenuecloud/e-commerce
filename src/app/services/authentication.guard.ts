@@ -28,7 +28,7 @@ export class AuthenticationGuard {
                     const userConfirmed = confirm(message);
 
                     if (userConfirmed) {
-                      this.userService.login();
+                      this.userService.login(false);
                       return of(false);
                     } else {
                       this.router.navigate(['/']);
@@ -39,7 +39,7 @@ export class AuthenticationGuard {
               }
               // If the cart is empty, redirect to login
               else {
-                this.userService.login();
+                this.userService.login(false);
                 return of(false);
               }
             })

@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.counter--;
           if (this.counter <= 1) {
             clearInterval(interval);
-            this.userService.login();
+            this.userService.login(false);
           }
         }, 1000);
       }

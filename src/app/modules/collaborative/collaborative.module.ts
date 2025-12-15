@@ -20,7 +20,6 @@ import {
 } from '@congarevenuecloud/elements';
 
 import { CollaborativeRoutingModule } from './collaborative-routing.module';
-import { CollaborativeQuoteDetailsComponent } from './layout/collaborative-quote/collaborative-quote-details.component';
 import { CollaborativeCartComponent } from './layout/collaborative-cart/collaborative-cart.component';
 import { ComponentModule } from '../../components/component.module';
 import { QuoteModule } from '../quote/quote.module';
@@ -29,7 +28,6 @@ import { DetailsModule } from '../details/details.module';
 
 @NgModule({
   declarations: [
-    CollaborativeQuoteDetailsComponent,
     CollaborativeCartComponent
   ],
   imports: [

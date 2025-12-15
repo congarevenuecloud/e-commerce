@@ -1,16 +1,17 @@
 import { Component, OnInit, ViewChild, TemplateRef, NgZone, ChangeDetectorRef, OnDestroy, ViewEncapsulation, ElementRef, Inject, Renderer2 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, } from '@ngx-translate/core';
 import { filter, map, take, switchMap } from 'rxjs/operators';
-import { get, set, first, map as _map, isEmpty, join, split, trim } from 'lodash';
-import { Observable, of, BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { get, set, first, map as _map, isEmpty, join, split, trim, isNil } from 'lodash';
+import { Observable, of, BehaviorSubject, Subscription, combineLatest, forkJoin } from 'rxjs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import { FilterOperator } from '@congarevenuecloud/core';
 import {
   UserService, QuoteService, Quote, Order, OrderService, AttachmentService,
-  AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService,
-  CartService, Cart, DateFormat
+  AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService, EmailRequestPayload,
+  CartService, Cart, DateFormat, FieldFilter, ContactService, CollaborationRequestService, CollaborationRequest, CollaborationAccessType, CollaborationAuthenticationType
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, ToasterPosition, FileOutput, AddCommentsConfig, ViewCommentsConfig } from '@congarevenuecloud/elements';
 
@@ -22,7 +23,6 @@ import { ExceptionService, LookupOptions, ToasterPosition, FileOutput, AddCommen
 })
 export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
-  quote$: BehaviorSubject<Quote> = new BehaviorSubject<Quote>(null);
   quoteLineItems$: BehaviorSubject<Array<ItemGroup>> = new BehaviorSubject<Array<ItemGroup>>(null);
   attachmentList$: BehaviorSubject<Array<AttachmentDetails>> = new BehaviorSubject<Array<AttachmentDetails>>(null);
   order$: Observable<Order>;
@@ -94,6 +94,13 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   };
 
   isLoggedIn: boolean;
+  collaborationRequest: CollaborationRequest = null;
+  isRecordOwner: boolean = true;
+  currentUserId: string;
+  isAnonymous: boolean = false;
+  canEditLineItems: boolean = true;
+  canEditQuoteFields: boolean = true;
+  canShowCollaborationActions: boolean = false;
 
   @ViewChild('intimationTemplate') intimationTemplate: TemplateRef<any>;
 
@@ -110,6 +117,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   isExpanded: boolean = false;
   quoteStatusLabelMap: Record<string, string> = {};
   quoteStatusStepsLabels: Array<string> = [];
+  acceptQuoteEmailTemplateName = 'DC Accept Quote Default email template';
+  rejectQuoteEmailTemplateName = 'DC Reject Quote Default email template';
 
   constructor(private activatedRoute: ActivatedRoute,
     private quoteService: QuoteService,
@@ -126,7 +135,9 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     private cartService: CartService,
     @Inject(DOCUMENT) private document: Document,
     private renderer: Renderer2,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private collaborationService: CollaborationRequestService,
+    private contactService: ContactService
   ) { }
 
   ngOnInit() {
@@ -180,23 +191,41 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
       .pipe(
         filter(params => get(params, 'id') != null),
         map(params => get(params, 'id')),
-        switchMap(quoteId => this.quoteService.getQuoteById(quoteId)),
-        switchMap((quote) => {
+        switchMap(quoteId => {
+          return combineLatest([
+            this.loadCollaborationRequest(quoteId),
+            this.quoteService.getQuoteById(quoteId)
+          ]);
+        }),
+        switchMap(([collaborationRequest, quote]) => {
           const quoteLineItems = LineItemService.groupItems(get(quote, 'Items'));
           this.quoteLineItems$.next(quoteLineItems);
-          set(this.cartRecord, 'Id', get(get(first(this.quoteLineItems$.value), 'MainLine.Configuration'), 'Id'));
-          return combineLatest([isEmpty(quoteLineItems) ? of(null) : (this.cartService.addAdjustmentInfoToLineItems(this.cartRecord?.Id)), of(quote)])
+
+          const firstLineItem = this.quoteLineItems$.value && this.quoteLineItems$.value.length > 0
+            ? first(this.quoteLineItems$.value)
+            : null;
+          const configId = firstLineItem ? get(firstLineItem, 'MainLine.Configuration.Id') : null;
+          if (configId) {
+            this.cartRecord.Id = configId;
+          }
+
+          const lineItemsObservable = isEmpty(quoteLineItems)
+            ? of(null)
+            : this.cartService.addAdjustmentInfoToLineItems(this.cartRecord?.Id);
+
+          return combineLatest([lineItemsObservable, of(quote)]);
         }),
-        take(1),
         switchMap(([lineItems, quote]) => {
           this.cartRecord.LineItems = lineItems;
           this.cartRecord.BusinessObjectType = 'Proposal';
           return this.updateQuoteValue(quote);
-        })
+        }),
+        take(1)
       ).subscribe());
     this.getAttachments();
   }
 
+  // TO DO:: output field need to handle update of buisnessObject
   refreshQuote(fieldValue, quote, fieldName) {
     set(quote, fieldName, fieldValue);
     const quoteItems = get(quote, 'Items');
@@ -225,6 +254,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
       res => {
         if (res) {
           this.acceptLoader = false;
+          this.sendEmailWithTemplate(this.acceptQuoteEmailTemplateName);
           const ngbModalOptions: ModalOptions = {
             backdrop: 'static',
             keyboard: false
@@ -240,12 +270,90 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     );
   }
 
+  sendEmailWithTemplate(emailTemplateName: string) {
+    const userIds = [get(this.quote, 'Owner.Id'), get(this.quote, 'Requestor.Id')]
+      .filter(id => !isNil(id));
+    
+    const getUsersObservable = userIds.length > 0 
+      ? this.userService.isGuest().pipe(
+          switchMap(isGuest => 
+            isGuest ? of([]) : this.userService.getUsers([{
+              field: 'Id',
+              value: userIds.join(","),
+              filterOperator: userIds.length > 1 ? FilterOperator.IN : FilterOperator.EQUAL
+            }])
+          )
+        )
+      : of([]);
+
+    forkJoin([
+      getUsersObservable,
+      this.emailService.getEmailTemplateByName(emailTemplateName),
+      this.contactService.getContactById(get(this.quote, 'PrimaryContact.Id'))
+    ]).pipe(
+      take(1),
+      switchMap(([users, emailTemplate, primaryContact]: any) => {
+
+        const emailWrappers = users.map(user => {
+          return {
+            EmailTemplateParameters: {
+              ObjectName: "Proposal",
+              RecordId: get(this.quote, 'Id'),
+              TemplateData: {
+                ProposalPageRoute: `proposals/${this.quote.Id}`,
+                RecipientName: get(user, 'Name')
+              }
+            },
+            EmailParameters: {
+              To: [{
+                Address: get(user, 'Email'),
+                DisplayName: get(user, 'Name')
+              }]
+            }
+          };
+        });
+
+        if (!isNil(primaryContact) && !isEmpty(primaryContact)) {
+          emailWrappers.push({
+            EmailTemplateParameters: {
+              ObjectName: "Proposal",
+              RecordId: get(this.quote, 'Id'),
+              TemplateData: {
+                ProposalPageRoute: `proposals/${this.quote.Id}`,
+                RecipientName: get(primaryContact, 'Name')
+              }
+            },
+            EmailParameters: {
+              To: [{
+                Address: get(primaryContact, 'Email'),
+                DisplayName: get(primaryContact, 'Name')
+              }]
+            }
+          });
+        }
+
+        // Guard check: only send email if there are recipients
+        if (isEmpty(emailWrappers)) {
+          return of(false);
+        }
+
+        const emailRequestPayload: EmailRequestPayload = {
+          EmailTemplateId: emailTemplate.Id,
+          EmailRequestWrappers: emailWrappers
+        };
+
+        return this.emailService.sendEmailByTemplate(emailRequestPayload);
+      })
+    ).subscribe(() => { });
+  }
+
   rejectQuote(quoteId: string) {
     this.rejectLoader = true;
     this.quoteService.rejectQuote(quoteId).pipe(take(1)).subscribe(
       {
         next: () => {
           this.getQuote();
+          this.sendEmailWithTemplate(this.rejectQuoteEmailTemplateName);
         },
         complete: () => {
           this.rejectLoader = false;
@@ -265,7 +373,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
       this.quoteService.convertQuoteToCart(quote).pipe(take(1)).subscribe(value => {
         set(value, 'Proposald', this.quote);
         this.hideProcessingOverlay();
-        this.ngZone.run(() => this.router.navigate(['/carts', 'active']));
+        this.navigateToCartBasedOnAccessType();
       },
         err => {
           this.hideProcessingOverlay();
@@ -281,7 +389,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     this.editLoader = true;
     this.cartService.createCartFromQuote(quote.Id).pipe(take(1)).subscribe(value => {
       set(value, 'Proposald', this.quote);
-      this.ngZone.run(() => this.router.navigate(['/carts', 'active']));
+      this.navigateToCartBasedOnAccessType();
     },
       err => {
         this.exceptionService.showError(err);
@@ -289,6 +397,15 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
       })
   }
 
+  private navigateToCartBasedOnAccessType(): void {
+    const accessType = get(this.collaborationRequest, 'AccessType');
+    if (accessType === CollaborationAccessType.RestrictedEdit) {
+      this.ngZone.run(() => this.router.navigate(['/collaborative/cart']));
+    } else {
+      // For FullEdit, AcceptReject or other access types, navigate to normal cart
+      this.ngZone.run(() => this.router.navigate(['/carts', 'active']));
+    }
+  }
 
   finalizeQuote(quoteId: string) {
     this.finalizeLoader = true;
@@ -455,6 +572,67 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   handleViewCommentsAction(event: any) {
     if (event && event.action === 'close') {
       this.showReqChangesModal = false;
+    }
+  }
+
+  private loadCollaborationRequest(quoteId: string): Observable<CollaborationRequest> {
+    return combineLatest([
+      this.userService.me(),
+      this.userService.isLoggedIn(),
+      this.collaborationService.getCollaborationRequest('Proposal', quoteId, [{ field: 'CollaborationType', value: 'Digital Commerce', filterOperator: FilterOperator.EQUAL }])
+    ]).pipe(
+      take(1),
+      map(([user, isLoggedIn, request]) => {
+        this.isLoggedIn = isLoggedIn;
+
+        if (request) {
+          this.collaborationRequest = request;
+          this.currentUserId = get(user, 'Id');
+          const recordOwnerId = get(request, 'RecordOwner.Id');
+          this.isRecordOwner = recordOwnerId === this.currentUserId;
+          this.isAnonymous = request.AuthenticationType === CollaborationAuthenticationType.Anonymous;
+        } else {
+          this.collaborationRequest = null;
+          this.isRecordOwner = true;
+          this.isAnonymous = false;
+        }
+
+        this.updateComputedProperties();
+        this.cdr.detectChanges();
+        return request;
+      })
+    );
+  }
+
+  private updateComputedProperties(): void {
+    // No collaboration request means full access for the user
+    if (!this.collaborationRequest) {
+      this.canEditLineItems = true;
+      this.canEditQuoteFields = true;
+      this.canShowCollaborationActions = true;
+      return;
+    }
+
+    const accessType = get(this.collaborationRequest, 'AccessType');
+    const authType = get(this.collaborationRequest, 'AuthenticationType');
+
+    // Line items: editable only by record owner, except for AcceptReject access type
+    this.canEditLineItems = this.isRecordOwner && accessType !== CollaborationAccessType.AcceptReject;
+
+    // Quote fields: editable by logged-in record owners, but not for anonymous users who logged in or restricted access types
+    const isAnonymousWithLoggedInUser = authType === CollaborationAuthenticationType.Anonymous && this.isLoggedIn;
+    const isRestrictedAccess = accessType === CollaborationAccessType.RestrictedEdit || accessType === CollaborationAccessType.AcceptReject;
+    this.canEditQuoteFields = this.isLoggedIn && this.isRecordOwner && !isAnonymousWithLoggedInUser && !isRestrictedAccess;
+
+    // For Anonymous auth: Hide all actions once they log in
+    if (authType === CollaborationAuthenticationType.Anonymous && this.isLoggedIn) {
+      this.canShowCollaborationActions = false;
+    // For AuthenticatedWithLogin: Only show for record owner
+    } else if (authType === CollaborationAuthenticationType.AuthenticatedWithLogin && !this.isRecordOwner) {
+      this.canShowCollaborationActions = false;
+    // For other auth types: Show for all users
+    } else {
+      this.canShowCollaborationActions = true;
     }
   }
 

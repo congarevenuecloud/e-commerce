@@ -19,7 +19,8 @@ import {
   AccountService,
   Account,
   CollaborationRequestService,
-  CollaborationAccessType,
+  CollaborationRequest,
+  CollaborationAuthenticationType,
 } from '@congarevenuecloud/ecommerce';
 @Component({
   selector: 'app-header',
@@ -41,9 +42,7 @@ export class HeaderComponent implements OnInit {
   cart: Cart;
   loading: boolean = true;
 
-  // Observable for read-only collaboration mode (Proposal with AcceptReject access)
-  // null until collaboration request is loaded, then evaluates to true/false
-  isReadOnlyCollaborationMode$: Observable<boolean | null>;
+  isReadOnlyCollaborationMode$: Observable<boolean>;
 
   constructor(
     private userService: UserService,
@@ -56,27 +55,34 @@ export class HeaderComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    // Check if user is in read-only collaboration mode (Proposal with AcceptReject access on collaborative URL)
     const currentUrl$: Observable<string> = this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       map(() => this.router.url),
       startWith(this.router.url)
     );
 
-    // Check collaboration mode when collaboration request exists
-    // null until collaboration request is loaded
-    this.isReadOnlyCollaborationMode$ = merge(
-      of(null),
-      combineLatest([
-        this.collaborationService.getMyCollaborationRequest(),
-        currentUrl$
-      ]).pipe(
-        map(([request, url]) =>
-          url.includes('/collaborative') &&
-          request.ParentBusinessObjectType === 'Proposal' &&
-          request.AccessType === CollaborationAccessType.AcceptReject
-        )
-      )
+    this.isReadOnlyCollaborationMode$ = currentUrl$.pipe(
+      switchMap(url => {
+        // For collaborative cart route - always hide header
+        if (url.includes('/collaborative/cart')) {
+          return of(true);
+        }
+
+        if (url.includes('/proposals/')) {
+          // Extract quoteId from URL
+          const quoteId = url.match(/\/proposals\/([^\/\?]+)/)?.[1];
+          if (quoteId) {
+            return this.collaborationService.getMyCollaborationRequest('Proposal', quoteId).pipe(
+              take(1),
+              map((request: CollaborationRequest | null) => {
+                return request?.AuthenticationType === CollaborationAuthenticationType.Anonymous;
+              })
+            );
+          }
+        }
+
+        return of(false);
+      })
     );
 
     this.updateCartView();
@@ -110,7 +116,7 @@ export class HeaderComponent implements OnInit {
   }
 
   login() {
-    this.userService.login();
+    this.userService.login(false);
   }
 
   doLogout() {

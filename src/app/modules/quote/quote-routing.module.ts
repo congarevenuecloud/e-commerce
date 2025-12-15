@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { CreateQuoteComponent } from './layout/quote-create/create-quote.component';
 import { QuoteDetailsComponent } from './layout/quote-details/quote-details.component';
+import { CollaborationAuthGuard } from '../collaborative/guards/collaboration-auth.guard';
 
 const routes: Routes = [
   {
@@ -17,6 +18,7 @@ const routes: Routes = [
   {
     path: ':id',
     component: QuoteDetailsComponent,
+    canActivate: [CollaborationAuthGuard]
   },
   {
     path: '',
