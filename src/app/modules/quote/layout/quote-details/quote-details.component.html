@@ -1,4 +1,7 @@
-<app-detail *ngIf="quote; else loading" [context]="quote" [route]="'proposals'">
+<apt-breadcrumb *ngIf="isAnonymous && !isLoggedIn" class="border-bottom" [sobject]="quote" [route]="'proposals'"
+  [readOnly]="true"></apt-breadcrumb>
+
+<app-detail *ngIf="quote; else loading" [context]="quote" [route]="'proposals'" [hideLink]="isAnonymous && !isLoggedIn">
 
   <apt-alert [record]="quote" message="ERROR.UPDATE_QUOTE_FAILED_ON_DETAILS_PAGE" [showOnlyMessage]="false">
   </apt-alert>
@@ -6,27 +9,34 @@
   <div class="detail-header">
     <div
       [ngClass]="quote.ApprovalStage !== 'Accepted' ?  'd-flex justify-content-between' :' d-flex flex-column flex-sm-row justify-content-between'">
-      <div class="d-flex align-items-center">
+      <div class="d-flex align-items-center flex-wrap">
         <span class="page-header d-lg-block d-md-block d-sm-none d-none">{{quote?.Name}}</span>
         <span tooltip="{{quote?.Name}}" class="page-header d-block d-sm-block d-md-none d-lg-none">{{quote?.Name |
           truncate:13}}</span>
-        <span class="badge badge-light ml-1 px-2 py-0 text-uppercase" *ngIf="quote?.ApprovalStage">
+        <span class="badge badge-light ml-1 px-2 py-0 text-uppercase"
+          *ngIf="quote?.ApprovalStage && (!collaborationRequest || quote?.ApprovalStage !== 'Presented')">
           <apt-output-field [record]="quote" [field]="'ApprovalStage'" [valueOnly]="true" [valueClass]="'p-0'"
             [editable]="false">
           </apt-output-field>
+        </span>
+        <span class="badge badge-success ml-1 px-2 py-1 text-uppercase"
+          *ngIf="collaborationRequest && quote?.ApprovalStage === 'Presented'">
+          {{quote?.ApprovalStage}} - {{ 'COLLABORATION.IN_PROGRESS' | translate }}
         </span>
       </div>
       <!-- Desktop Button Layout -->
       <div class="align-items-center d-lg-flex d-md-flex d-sm-none d-none" *ngIf="!showPresentTemplate">
         <!-- Logged In User Buttons -->
         <ng-container *ngIf="isLoggedIn">
-          <!-- Draft Stage: Show Generate Button -->
-          <apt-generate-document *ngIf="quote.ApprovalStage === 'Draft'" [record]="quote" class="ml-auto"
-            (onStatusUpdate)="onGenerateQuote()">
+          <!-- Draft Stage: Show Generate Button (visible when no collaboration OR FullEdit access) -->
+          <apt-generate-document
+            *ngIf="quote.ApprovalStage === 'Draft' && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')"
+            [record]="quote" class="ml-auto" (onStatusUpdate)="onGenerateQuote()">
           </apt-generate-document>
 
-          <!-- Generated Stage: Show Present as Primary and Generate as Secondary button -->
-          <ng-container *ngIf="quote.ApprovalStage === 'Generated'">
+          <!-- Generated Stage: Show Present as Primary and Generate as Secondary button (visible when no collaboration OR FullEdit access) -->
+          <ng-container
+            *ngIf="quote.ApprovalStage === 'Generated' && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')">
             <apt-generate-document [record]="quote" class="ml-auto mr-3" (onStatusUpdate)="onGenerateQuote()">
             </apt-generate-document>
             <button type="button" class="btn btn-primary btn-raised px-3" (click)="showPresentTemplateFun()">
@@ -34,31 +44,31 @@
             </button>
           </ng-container>
 
-          <!-- Presented Stage: Show Request Changes, Accept, Reject as Primary Buttons -->
-          <ng-container *ngIf="quote.ApprovalStage === 'Presented'">
-            <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary mr-3 ml-auto"
-              data-style="zoom-in" (click)="rejectQuote(quote?.Id)">
-              {{'COMMON.REJECT' | translate}}
-            </button>
-            <button type="button" *ngIf="quote?.Items?.length > 0" class="btn btn-primary btn-raised mr-3"
-              [ladda]="acceptLoader" data-style="zoom-in" (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
-              {{'COMMON.ACCEPT_QUOTE' | translate}}
-            </button>
-          </ng-container>
         </ng-container>
 
-        <!-- Guest User Buttons -->
-        <ng-container *ngIf="!isLoggedIn">
-          <!-- Presented Stage: Show only Request Changes Button for Guest -->
-          <button type="button" *ngIf="quote.ApprovalStage === 'Presented'" class="btn btn-outline-primary ml-auto"
-            (click)="openRequestChangesModal()">
+        <!-- Guest user without collaboration: Show Request Changes button -->
+        <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !isLoggedIn && !collaborationRequest">
+          <button type="button" class="btn btn-outline-primary btn-raised ml-auto" (click)="openRequestChangesModal()">
             {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
           </button>
         </ng-container>
 
-        <!-- Desktop Kebab Menu for Secondary Actions -->
+        <!-- Presented Stage: Show Accept/Reject for logged-in users or guests with collaboration -->
+        <!-- Hide if: (1) AuthenticatedWithLogin + non-owner, (2) Anonymous auth + logged in user, (3) Guest without collaboration -->
+        <ng-container *ngIf="quote.ApprovalStage === 'Presented' && canShowCollaborationActions && (isLoggedIn || collaborationRequest)">
+          <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary mr-3 ml-auto" data-style="zoom-in"
+            (click)="rejectQuote(quote?.Id)">
+            {{'COMMON.REJECT' | translate}}
+          </button>
+          <button type="button" *ngIf="quote?.Items?.length > 0" class="btn btn-primary btn-raised mr-3"
+            [ladda]="acceptLoader" data-style="zoom-in" (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+            {{'COMMON.ACCEPT_QUOTE' | translate}}
+          </button>
+        </ng-container>
+
+        <!-- Desktop Kebab Menu for Secondary Actions (only for logged-in users or collaboration scenarios) -->
         <div class="dropdown ml-3 d-lg-block d-md-block d-sm-none d-none"
-          *ngIf="isLoggedIn && quote?.ApprovalStage === 'Presented'">
+          *ngIf="quote?.ApprovalStage === 'Presented' && canShowCollaborationActions && (isLoggedIn || collaborationRequest)">
           <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="desktopDropdownMenuLink"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           </a>
@@ -79,7 +89,7 @@
         </div>
       </div>
       <div *ngIf="quote?.ApprovalStage === 'Accepted' && order$ | async as order">
-        <span class="d-flex align-items-baseline">
+        <span class="d-flex align-items-baseline flex-wrap">
           <apt-output-field [record]="order" field="Name" [label]="'MY_ACCOUNT.ORDER_DETAIL.ORDER_ID' | translate"
             layout="inline" [editable]="false" [showQuickView]="true"></apt-output-field>
           <span class="badge badge-light ml-1 py-0">
@@ -88,6 +98,12 @@
             </apt-output-field></span>
         </span>
       </div>
+    </div>
+    <!-- Collaboration In Progress Banner for non-record owners (show for logged-in users viewing any collaboration) -->
+    <div class="alert alert-warning d-flex align-items-center my-2 py-2" role="alert"
+      *ngIf="collaborationRequest && !isRecordOwner && isLoggedIn && quote?.ApprovalStage === 'Presented'">
+      <i class="fa fa-exclamation-triangle mr-3"></i>
+      <div class="mb-0">{{ 'COLLABORATION.IN_PROGRESS_MESSAGE' | translate }}</div>
     </div>
     <app-progress class="status-bar" *ngIf="isLoggedIn && quoteStatusLabelMap[quote.ApprovalStage]"
       [steps]="quoteStatusStepsLabels" [currentStep]="quoteStatusLabelMap[quote.ApprovalStage]">
@@ -111,7 +127,7 @@
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="Name" [label]="'CREATE_QUOTE.QUOTE_TITLE' | translate"
                     [DisplayName]="ProposalName"
-                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented') && canEditQuoteFields"
                     (onChange)="refreshQuote($event.Name, quote, 'Name')">
                   </apt-output-field>
                 </div>
@@ -131,7 +147,7 @@
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" [field]="'PrimaryContact'"
                     [label]="'MY_ACCOUNT.QUOTE_DETAIL.PRIMARY_CONTACT' | translate" [displayValue]="'PrimaryContact'"
-                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented') && canEditQuoteFields"
                     [showQuickView]="true" [lookupOptions]="lookupOptions"
                     (onChange)="refreshQuote($event, quote, 'PrimaryContact')">
                   </apt-output-field>
@@ -145,13 +161,13 @@
                 </div>
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="ShipToAccount" [displayValue]="'ShipToAccount'"
-                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented') && canEditQuoteFields"
                     [label]="'MY_ACCOUNT.ORDER_DETAIL.SHIP_TO_ACCOUNT' | translate" [showQuickView]="true"
                     (onChange)="refreshQuote($event, quote, 'ShipToAccount')"></apt-output-field>
                 </div>
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="BillToAccount" [displayValue]="'BillToAccount'"
-                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented') && canEditQuoteFields"
                     [label]="'MY_ACCOUNT.ORDER_DETAIL.BILL_TO_ACCOUNT' | translate" [showQuickView]="true"
                     (onChange)="refreshQuote($event, quote, 'BillToAccount')"></apt-output-field>
                 </div>
@@ -162,7 +178,7 @@
                 </div>
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="RFPResponseDueDate"
-                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented')"
+                    [editable]="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented') && canEditQuoteFields"
                     (onChange)="refreshQuote($event.RFPResponseDueDate, quote, 'RFPResponseDueDate')">
                   </apt-output-field>
                 </div>
@@ -191,8 +207,9 @@
             <div class="card-header border-bottom py-2">
               <h5>
                 {{'DETAILS.LINE_ITEMS' | translate}}
+                <!-- Show Edit/Add button when no collaboration OR when collaboration allows line item editing -->
                 <button class="btn text-primary px-2 ml-1 py-0"
-                  *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented')"
+                  *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented') && (!collaborationRequest || canEditLineItems)"
                   [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black" (click)="editQuoteItems(quote)">
                   <i *ngIf="quote?.Items?.length > 0" class="fa fa-edit"></i>
                   {{(quoteLineItems?.length > 0 ? 'COMMON.EDIT' : 'COMMON.ADD' ) | translate }}</button>
@@ -239,7 +256,7 @@
           <div class="card-body">
             <div class="row d-flex justify-content-between">
               <div
-                [ngClass]="isLoggedIn && quote?.ApprovalStage !== 'Denied'? 'col-lg-6 col-md-6' :'col-lg-12 col-md-12'">
+                [ngClass]="isLoggedIn && quote?.ApprovalStage !== 'Denied' && (!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner)) ? 'col-lg-6 col-md-6' :'col-lg-12 col-md-12'">
                 <ng-container *ngIf="attachmentList?.length > 0; else emptyAttachments">
                   <div class="table-container overflow-auto">
                     <table class="table table-sm">
@@ -284,7 +301,8 @@
                           <td>
                             {{attachment?.DocumentMetadata?.CreatedBy.Name}}</td>
                           <td>{{attachment?.DocumentMetadata?.CreatedDate | date:'short'}}</td>
-                          <td><button *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied'"
+                          <td><button
+                              *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied' && (!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner))"
                               class="btn btn-link p-0 m-0" (click)="deleteAttachment(attachment)"
                               [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
                               data-spinner-color="black">
@@ -303,8 +321,9 @@
                 </ng-template>
               </div>
               <span class="d-lg-block d-md-block d-sm-none d-none border-left"
-                *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied'"></span>
-              <div class="col-12 col-md-5 pt-lg-0 pt-md-0 pt-sm-3 pt-3" *ngIf="isLoggedIn">
+                *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied' && (!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner))"></span>
+              <div class="col-12 col-md-5 pt-lg-0 pt-md-0 pt-sm-3 pt-3"
+                *ngIf="isLoggedIn && (!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner))">
                 <ng-container *ngTemplateOutlet="addAttachments"></ng-container>
               </div>
             </div>
@@ -368,28 +387,40 @@
 </app-detail>
 
 <ng-template #desktopKebabButtons>
-  <!-- Presented Stage: Show Request Changes, Generate and Present in Desktop Kebab Menu -->
-  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !showPresentTemplate">
+  <!-- Guest user without collaboration - show only Request Changes -->
+  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !isLoggedIn && !showPresentTemplate && !collaborationRequest">
     <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
       {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
     </button>
-    <apt-generate-document [record]="quote" [buttonClasses]="'dropdown-item'" (onStatusUpdate)="onGenerateQuote()">
-    </apt-generate-document>
-    <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
-      {{'DETAILS.PRESENT_QUOTE' | translate}}
+  </ng-container>
+
+  <!-- Logged-in users or collaboration scenarios - show Request Changes plus Generate/Present for authorized users -->
+  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !showPresentTemplate && canShowCollaborationActions && (isLoggedIn || collaborationRequest)">
+    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
     </button>
+    <!-- Generate and Present buttons visible when no collaboration, or for FullEdit record owners when collaboration exists -->
+    <ng-container *ngIf="!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner)">
+      <apt-generate-document [record]="quote" [buttonClasses]="'dropdown-item'" (onStatusUpdate)="onGenerateQuote()">
+      </apt-generate-document>
+      <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
+        {{'DETAILS.PRESENT_QUOTE' | translate}}
+      </button>
+    </ng-container>
   </ng-container>
 </ng-template>
 
 <ng-template #mobileActionButtons>
-  <!-- Draft Stage: Show Generate Button -->
-  <ng-container *ngIf="quote.ApprovalStage === 'Draft' && isLoggedIn && !showPresentTemplate">
+  <!-- Draft Stage: Show Generate Button (visible when no collaboration OR FullEdit access) -->
+  <ng-container
+    *ngIf="quote.ApprovalStage === 'Draft' && isLoggedIn && !showPresentTemplate && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')">
     <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
     </apt-generate-document>
   </ng-container>
 
-  <!-- Generated Stage: Show both Generate and Present Buttons -->
-  <ng-container *ngIf="quote.ApprovalStage === 'Generated' && isLoggedIn && !showPresentTemplate">
+  <!-- Generated Stage: Show Generate as Secondary and Present as Primary button (visible when no collaboration OR FullEdit access) -->
+  <ng-container
+    *ngIf="quote.ApprovalStage === 'Generated' && isLoggedIn && !showPresentTemplate && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')">
     <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
     </apt-generate-document>
     <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
@@ -397,8 +428,17 @@
     </button>
   </ng-container>
 
-  <!-- Presented Stage: Show all buttons for logged in users in mobile kebab menu -->
-  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && isLoggedIn && !showPresentTemplate">
+  <!-- Presented Stage: Guest user on non-collaboration quote - show only Request Changes -->
+  <ng-container
+    *ngIf="quote.ApprovalStage === 'Presented' && !isLoggedIn && !showPresentTemplate && !collaborationRequest">
+    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+    </button>
+  </ng-container>
+
+  <!-- Presented Stage: Logged-in users on non-collaboration quote - show all buttons -->
+  <ng-container
+    *ngIf="quote.ApprovalStage === 'Presented' && isLoggedIn && !showPresentTemplate && !collaborationRequest">
     <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
     </apt-generate-document>
     <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
@@ -416,10 +456,26 @@
     </button>
   </ng-container>
 
-  <!-- Presented Stage: Show only Request Changes for guest users -->
-  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !isLoggedIn && !showPresentTemplate">
+  <!-- Presented Stage: Collaboration scenarios - use canShowCollaborationActions logic -->
+  <ng-container
+    *ngIf="quote.ApprovalStage === 'Presented' && !showPresentTemplate && collaborationRequest && canShowCollaborationActions">
+    <!-- Generate and Present buttons visible for FullEdit record owners (logged-in only) -->
+    <ng-container *ngIf="isLoggedIn && collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner">
+      <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
+      </apt-generate-document>
+      <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
+        {{'DETAILS.PRESENT_QUOTE' | translate}}
+      </button>
+    </ng-container>
     <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
       {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+    </button>
+    <button type="button" [ladda]="rejectLoader" class="dropdown-item" (click)="rejectQuote(quote?.Id)">
+      {{'COMMON.REJECT' | translate}}
+    </button>
+    <button type="button" [ladda]="acceptLoader" class="dropdown-item" *ngIf="quote?.Items?.length > 0"
+      (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+      {{'COMMON.ACCEPT_QUOTE' | translate}}
     </button>
   </ng-container>
 

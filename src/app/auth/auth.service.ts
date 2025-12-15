@@ -18,10 +18,20 @@ export class AuthService {
   }
 
   isAuthorized(): Observable<boolean> {
-    return this.oidcSecurityService.checkAuth().pipe(
+    // Use isAuthenticated$ to check auth state without calling checkAuth()
+    // checkAuth() creates authorization state that conflicts with authorize() when called in quick succession
+    return this.oidcSecurityService.isAuthenticated$.pipe(
       take(1),
-      map(({ isAuthenticated, accessToken, errorMessage }) => {
-        return (isAuthenticated && accessToken && !errorMessage);
+      map((result) => {
+        // Handle null, boolean, and AuthenticatedResult types
+        if (!result) {
+          return false;
+        }
+        if (typeof result === 'boolean') {
+          return result;
+        }
+        // AuthenticatedResult includes isAuthenticated, userData, accessToken, idToken, configId, etc.; only isAuthenticated is used here
+        return result.isAuthenticated;
       })
     )
   }

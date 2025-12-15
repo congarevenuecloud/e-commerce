@@ -34,7 +34,6 @@ export class CollaborativeCartComponent {
   searchText: string;
   cartName: string;
   selectedCount: number = 0;
-  hasFullAcess = false;
   customButtonActions: Array<ButtonAction> = [
     {
       label: 'MY_ACCOUNT.CART_LIST.CLONE_CART',
@@ -45,7 +44,7 @@ export class CollaborativeCartComponent {
   showSideNav: boolean = false;
 
   /**
-   * Field editability map for collaborative mode - only Quantity and SellingTerm are editable
+   * Field editability map for collaborative mode - only Quantity, StartDate, and EndDate are editable
    */
   collaborativeFieldEditability: { [field: string]: boolean } = {
     BasePrice: false,
@@ -54,9 +53,9 @@ export class CollaborativeCartComponent {
     Quantity: true,
     SellingFrequency: false,
     PriceType: false,
-    SellingTerm: true,
-    StartDate: false,
-    EndDate: false,
+    SellingTerm: false,
+    StartDate: true,
+    EndDate: true,
     ChargeType: false,
     ExtendedPrice: false,
     AdjustmentType: false,
@@ -85,7 +84,8 @@ export class CollaborativeCartComponent {
     private ngZone: NgZone,
     private modalService: BsModalService,
     private exceptionService: ExceptionService,
-    public batchSelectionService: BatchSelectionService) { }
+    public batchSelectionService: BatchSelectionService) {
+  }
 
   ngOnInit() {
     this.subscriptions.push(combineLatest([
@@ -142,6 +142,7 @@ export class CollaborativeCartComponent {
       ).subscribe(cartState => this.view$.next(cartState)))
   }
 
+
   trackById(index, record): string {
     return get(record, 'MainLine.Id');
   }
@@ -165,8 +166,7 @@ export class CollaborativeCartComponent {
       res => {
         this.quoteConfirmation = res;
         this.ngZone.run(() => {
-          // this.router.navigate(['/proposals', this.quoteConfirmation.Id]);
-          this.router.navigate(['/collaborative/proposals', this.quoteConfirmation.Id]);
+          this.router.navigate(['/proposals', this.quoteConfirmation.Id]);
         });
       }
     );
@@ -225,8 +225,7 @@ export class CollaborativeCartComponent {
         this.loading = false;
         this.quoteConfirmation = res;
         this.ngZone.run(() => {
-          // this.router.navigate(['/proposals', this.quoteConfirmation.Id]);
-          this.router.navigate(['/collaborative/proposals', this.quoteConfirmation.Id]);
+          this.router.navigate(['/proposals', this.quoteConfirmation.Id]);
         });
       },
       err => {
