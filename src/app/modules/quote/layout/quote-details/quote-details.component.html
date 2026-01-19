@@ -19,7 +19,7 @@
             [editable]="false">
           </apt-output-field>
         </span>
-        <span class="badge badge-success ml-1 px-2 py-1 text-uppercase"
+        <span class="badge badge-light ml-1 px-2 py-1 text-uppercase"
           *ngIf="collaborationRequest && quote?.ApprovalStage === 'Presented'">
           {{quote?.ApprovalStage}} - {{ 'COLLABORATION.IN_PROGRESS' | translate }}
         </span>
@@ -54,7 +54,6 @@
         </ng-container>
 
         <!-- Presented Stage: Show Accept/Reject for logged-in users or guests with collaboration -->
-        <!-- Hide if: (1) AuthenticatedWithLogin + non-owner, (2) Anonymous auth + logged in user, (3) Guest without collaboration -->
         <ng-container *ngIf="quote.ApprovalStage === 'Presented' && canShowCollaborationActions && (isLoggedIn || collaborationRequest)">
           <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary mr-3 ml-auto" data-style="zoom-in"
             (click)="rejectQuote(quote?.Id)">
@@ -66,7 +65,7 @@
           </button>
         </ng-container>
 
-        <!-- Desktop Kebab Menu for Secondary Actions (only for logged-in users or collaboration scenarios) -->
+        <!-- Desktop Kebab Menu for Secondary Actions -->
         <div class="dropdown ml-3 d-lg-block d-md-block d-sm-none d-none"
           *ngIf="quote?.ApprovalStage === 'Presented' && canShowCollaborationActions && (isLoggedIn || collaborationRequest)">
           <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="desktopDropdownMenuLink"
@@ -78,7 +77,9 @@
         </div>
       </div>
       <div class="d-sm-block d-block ml-auto d-md-none d-lg-none pt-2"
-        *ngIf="(quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented' || quote?.ApprovalStage === 'Approved') && (isLoggedIn || (!isLoggedIn && quote?.ApprovalStage === 'Presented'))">
+      *ngIf="(['Draft','Generated','Presented','Approved'].includes(quote?.ApprovalStage))
+       && (isLoggedIn || quote?.ApprovalStage === 'Presented')
+       && (quote?.ApprovalStage !== 'Presented' || canShowCollaborationActions)">
         <div class="dropdown pr-4">
           <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -207,9 +208,9 @@
             <div class="card-header border-bottom py-2">
               <h5>
                 {{'DETAILS.LINE_ITEMS' | translate}}
-                <!-- Show Edit/Add button when no collaboration OR when collaboration allows line item editing -->
+                <!-- Show Edit/Add button -->
                 <button class="btn text-primary px-2 ml-1 py-0"
-                  *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved'|| quote?.ApprovalStage === 'Presented') && (!collaborationRequest || canEditLineItems)"
+                  *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Presented') && canManageLineItems"
                   [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black" (click)="editQuoteItems(quote)">
                   <i *ngIf="quote?.Items?.length > 0" class="fa fa-edit"></i>
                   {{(quoteLineItems?.length > 0 ? 'COMMON.EDIT' : 'COMMON.ADD' ) | translate }}</button>
@@ -232,8 +233,10 @@
                   <h6 class="text-muted mr-2 mb-0">
                     {{ 'COMMON.NO_LINE_ITEMS_MESSAGE' | translate: { record: 'quote' } }}
                   </h6>
-                  <button class="btn text-primary p-0" [ladda]="editLoader" data-style="zoom-in"
-                    data-spinner-color="black" (click)="editQuoteItems(quote)">
+                  <button class="btn text-primary p-0"
+                    *ngIf="canManageLineItems"
+                    [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black"
+                    (click)="editQuoteItems(quote)">
                     {{ 'COMMON.ADD' | translate }}
                   </button>
                 </div>

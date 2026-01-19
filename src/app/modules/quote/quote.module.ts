@@ -17,7 +17,6 @@ import {
 
 import { DetailsModule } from '../details/details.module';
 import { QuoteRoutingModule } from './quote-routing.module';
-import { CartModule } from '../cart/cart.module';
 import { CreateQuoteComponent } from './layout/quote-create/create-quote.component';
 import { RequestQuoteFormComponent } from './component/request-quote-form/request-quote-form.component';
 import { QuoteDetailsComponent } from './layout/quote-details/quote-details.component';
@@ -47,7 +46,6 @@ import { ComponentModule } from '../../components/component.module';
     LaddaModule,
     NgScrollbarModule,
     PriceSummaryModule,
-    CartModule,
     ButtonModule,
     FileUploaderModule,
     ComponentModule,

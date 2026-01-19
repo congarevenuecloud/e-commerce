@@ -56,7 +56,7 @@
               <div class="flex-shrink-1 col-md-4 mb-2">
                 <apt-output-field [record]="order" field="ShipToAccount" displayValue="ShipToAccount"
                   [label]="'MY_ACCOUNT.ORDER_DETAIL.SHIP_TO_ACCOUNT' | translate"
-                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
+                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented') && order.PaymentStatus !== 'Processed'"
                   [showQuickView]="true" [required]="true" (onChange)="refreshOrder($event, order, 'ShipToAccount')">
                 </apt-output-field>
               </div>
@@ -64,28 +64,33 @@
               <div class="flex-shrink-1 col-md-4 mb-2">
                 <apt-output-field [record]="order" field="BillToAccount" displayValue="BillToAccount"
                   [label]="'MY_ACCOUNT.ORDER_DETAIL.BILL_TO_ACCOUNT' | translate"
-                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
+                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented') && order.PaymentStatus !== 'Processed'"
                   [showQuickView]="true" (onChange)="refreshOrder($event, order, 'BillToAccount')"></apt-output-field>
               </div>
             </div>
             <div class="row" *ngIf="isExpanded">
               <div class="flex-shrink-1 col-md-4 mb-2">
                 <apt-output-field [record]="order" field="PrimaryContact" displayValue="PrimaryContact"
-                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
+                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented') && order.PaymentStatus !== 'Processed'"
                   [showQuickView]="true" [lookupOptions]="lookupOptions" [required]="true"
                   (onChange)="refreshOrder($event, order, 'PrimaryContact')"></apt-output-field>
               </div>
               <div class="flex-shrink-1 col-md-4 mb-2">
                 <apt-output-field [record]="order" field="Description"
                   [label]="'MY_ACCOUNT.ORDER_DETAIL.DESCRIPTION' | translate" field="Description"
-                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented')"
+                  [editable]="isLoggedIn && (orderStatusMap[order.Status] === 'Draft' || orderStatusMap[order.Status] === 'Generated' || orderStatusMap[order.Status] === 'Presented') && order.PaymentStatus !== 'Processed'"
                   [showQuickView]="true"
                   (onChange)="refreshOrder($event.Description, order, 'Description')"></apt-output-field>
               </div>
 
-              <div class="flex-shrink-1 col-md-4 mb-2">
+              <div class="flex-shrink-1 col-md-4 mb-2" *ngIf="order?.PaymentStatus">
                 <div class="d-flex align-items-end">
                   <apt-output-field [record]="order" field="PaymentStatus" [editable]="false"></apt-output-field>
+                  <button *ngIf="isLoggedIn && order?.PaymentStatus === 'Pending'" 
+                          class="btn btn-primary btn-sm ml-2" 
+                          (click)="navigateToPayment(order)">
+                    {{ 'CHECKOUT.PAY_NOW' | translate }}
+                  </button>
                 </div>
               </div>
 
@@ -118,7 +123,7 @@
             <h5>
               {{'DETAILS.LINE_ITEMS' | translate}}
               <button class="btn text-primary px-2 ml-1 py-0" [ladda]="lineItemLoader" data-style="zoom-in"
-                *ngIf="isLoggedIn && (order?.Status === 'Draft' || order?.Status === 'Generated' || order?.Status === 'Presented') && orderLineItems?.length > 0"
+                *ngIf="isLoggedIn && (order?.Status === 'Draft' || order?.Status === 'Generated' || order?.Status === 'Presented') && orderLineItems?.length > 0 && order.PaymentStatus !== 'Processed'"
                 data-spinner-color="black" (click)="editOrderItems(order)">
                 <i class="fa fa-edit"></i>
                 {{'COMMON.EDIT' | translate}}

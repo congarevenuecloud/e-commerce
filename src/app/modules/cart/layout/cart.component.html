@@ -14,25 +14,40 @@
         <button class="btn btn-link py-0" [routerLink]="['/carts/active']" [hidden]="isAnyPaymentLoading()">
           {{'COMMON.CANCEL' | translate }}
         </button>
-        <button class="btn btn-outline-primary mr-3" [ladda]="getPaymentLoadingState('PONUMBER')" data-style="zoom-in"
-          [disabled]="(disableSubmit || (cart?.LineItems?.length < 1)) || isAnyPaymentLoading()" (click)="openPOModal()">
-          {{ 'PAYMENT.PO_NUMBER' | translate }}
-        </button>
-        <button class="btn btn-outline-primary btn-raised mr-2" *ngIf="isLoggedIn" [ladda]="getPaymentLoadingState('PAYLATER')"
-          data-style="zoom-in" [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
-          (click)="orderPlacement('PAYLATER')">
-          <span>{{ 'PAYMENT.PAY_LATER' | translate }}</span>
-        </button>
         
-        <div class="d-flex" *ngIf="!showCaptcha">
-          <ng-content select=".cancel-button"></ng-content>
-          
-          <button class="btn btn-primary btn-raised" [ladda]="getPaymentLoadingState('PLACEORDER')" data-style="zoom-in"
-            [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
-            (click)="orderPlacement()">
-            <span>{{ 'COMMON.PLACE_ORDER' | translate }}</span>
+        <ng-container *ngIf="isPaymentFeatureEnabled; else placeOrderOnly">
+          <button class="btn btn-outline-primary mr-3" [ladda]="getPaymentLoadingState('PONUMBER')" data-style="zoom-in"
+            [disabled]="(disableSubmit || (cart?.LineItems?.length < 1)) || isAnyPaymentLoading()" (click)="openPOModal()">
+            {{ 'PAYMENT.PO_NUMBER' | translate }}
           </button>
-        </div>
+          <button class="btn btn-outline-primary btn-raised mr-2" *ngIf="isLoggedIn" [ladda]="getPaymentLoadingState('PAYLATER')"
+            data-style="zoom-in" [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
+            (click)="orderPlacement('PAYLATER')">
+            <span>{{ 'PAYMENT.PAY_LATER' | translate }}</span>
+          </button>
+          
+          <div class="d-flex" *ngIf="!showCaptcha">
+            <ng-content select=".cancel-button"></ng-content>
+            
+            <button class="btn btn-primary btn-raised" [ladda]="getPaymentLoadingState('PLACEORDER')" data-style="zoom-in"
+              [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
+              (click)="orderPlacement('PAYNOW')">
+              <span>{{ 'CHECKOUT.PAY_NOW' | translate }}</span>
+            </button>
+          </div>
+        </ng-container>
+        
+        <ng-template #placeOrderOnly>
+          <div class="d-flex" *ngIf="!showCaptcha">
+            <ng-content select=".cancel-button"></ng-content>
+            
+            <button class="btn btn-primary btn-raised" [ladda]="getPaymentLoadingState('PLACEORDER')" data-style="zoom-in"
+              [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
+              (click)="orderPlacement()">
+              <span>{{ 'COMMON.PLACE_ORDER' | translate }}</span>
+            </button>
+          </div>
+        </ng-template>
       </div>
     </div>
     <div class="row py-2">

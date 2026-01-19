@@ -95,12 +95,12 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   isLoggedIn: boolean;
   collaborationRequest: CollaborationRequest = null;
-  isRecordOwner: boolean = true;
+  isRecordOwner: boolean = false;
   currentUserId: string;
   isAnonymous: boolean = false;
-  canEditLineItems: boolean = true;
+  canManageLineItems: boolean = true;
   canEditQuoteFields: boolean = true;
-  canShowCollaborationActions: boolean = false;
+  canShowCollaborationActions: boolean = true;
 
   @ViewChild('intimationTemplate') intimationTemplate: TemplateRef<any>;
 
@@ -192,12 +192,11 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
         filter(params => get(params, 'id') != null),
         map(params => get(params, 'id')),
         switchMap(quoteId => {
-          return combineLatest([
-            this.loadCollaborationRequest(quoteId),
-            this.quoteService.getQuoteById(quoteId)
-          ]);
+          // Load collaboration request from cached state (already fetched by guard)
+          this.loadCollaborationRequestFromState(quoteId);
+          return this.quoteService.getQuoteById(quoteId);
         }),
-        switchMap(([collaborationRequest, quote]) => {
+        switchMap((quote) => {
           const quoteLineItems = LineItemService.groupItems(get(quote, 'Items'));
           this.quoteLineItems$.next(quoteLineItems);
 
@@ -218,6 +217,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
         switchMap(([lineItems, quote]) => {
           this.cartRecord.LineItems = lineItems;
           this.cartRecord.BusinessObjectType = 'Proposal';
+          this.updateComputedProperties();
           return this.updateQuoteValue(quote);
         }),
         take(1)
@@ -225,7 +225,6 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     this.getAttachments();
   }
 
-  // TO DO:: output field need to handle update of buisnessObject
   refreshQuote(fieldValue, quote, fieldName) {
     set(quote, fieldName, fieldValue);
     const quoteItems = get(quote, 'Items');
@@ -575,22 +574,27 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadCollaborationRequest(quoteId: string): Observable<CollaborationRequest> {
-    return combineLatest([
+  private loadCollaborationRequestFromState(quoteId: string): void {
+    // Get collaboration request from cached state (already fetched by CollaborationAuthGuard)
+    combineLatest([
       this.userService.me(),
       this.userService.isLoggedIn(),
-      this.collaborationService.getCollaborationRequest('Proposal', quoteId, [{ field: 'CollaborationType', value: 'Digital Commerce', filterOperator: FilterOperator.EQUAL }])
+      this.collaborationService.getMyCollaborationRequest('Proposal', quoteId)
     ]).pipe(
-      take(1),
-      map(([user, isLoggedIn, request]) => {
-        this.isLoggedIn = isLoggedIn;
+      take(1)
+    ).subscribe(([user, isLoggedIn, request]) => {
+      this.isLoggedIn = isLoggedIn;
 
         if (request) {
           this.collaborationRequest = request;
           this.currentUserId = get(user, 'Id');
-          const recordOwnerId = get(request, 'RecordOwner.Id');
-          this.isRecordOwner = recordOwnerId === this.currentUserId;
           this.isAnonymous = request.AuthenticationType === CollaborationAuthenticationType.Anonymous;
+          // For authenticated collaboration, check against RecordOwner
+          if (isLoggedIn && !this.isAnonymous) {
+            const recordOwnerId = get(request, 'RecordOwner.Id');
+            this.isRecordOwner = recordOwnerId === this.currentUserId;
+          }
+          
         } else {
           this.collaborationRequest = null;
           this.isRecordOwner = true;
@@ -599,15 +603,13 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
         this.updateComputedProperties();
         this.cdr.detectChanges();
-        return request;
-      })
-    );
+      });
   }
 
   private updateComputedProperties(): void {
     // No collaboration request means full access for the user
     if (!this.collaborationRequest) {
-      this.canEditLineItems = true;
+      this.canManageLineItems = true;
       this.canEditQuoteFields = true;
       this.canShowCollaborationActions = true;
       return;
@@ -615,9 +617,13 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
     const accessType = get(this.collaborationRequest, 'AccessType');
     const authType = get(this.collaborationRequest, 'AuthenticationType');
+    const hasLineItems = this.quoteLineItems$?.value && this.quoteLineItems$.value.length > 0;
 
-    // Line items: editable only by record owner, except for AcceptReject access type
-    this.canEditLineItems = this.isRecordOwner && accessType !== CollaborationAccessType.AcceptReject;
+    // Edit existing items: Record owner can edit unless access is AcceptReject
+    const canEditExistingItems = this.isRecordOwner && accessType !== CollaborationAccessType.AcceptReject;
+    // Add new items: Only record owner with full authenticated login access.
+    const canAddNewItems = this.isRecordOwner && authType === CollaborationAuthenticationType.AuthenticatedWithLogin && accessType === CollaborationAccessType.FullEdit;
+    this.canManageLineItems = hasLineItems ? canEditExistingItems : canAddNewItems;
 
     // Quote fields: editable by logged-in record owners, but not for anonymous users who logged in or restricted access types
     const isAnonymousWithLoggedInUser = authType === CollaborationAuthenticationType.Anonymous && this.isLoggedIn;

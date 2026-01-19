@@ -19,14 +19,6 @@
 
           <apt-add-to-cart *ngIf="readOnly" [customButtonActions]="customButtonActions"
             [ngClass]="'d-lg-block d-md-block d-sm-none d-none'" [showQuantityControls]="false"></apt-add-to-cart>
-          <div class="d-sm-flex d-flex ml-auto d-md-none d-lg-none mt-2 justify-content-end dropdown">
-            <a class="fa fa-ellipsis-v dropdown-toggle px-1" href="#" role="button" id="dropdownMenuLink"
-              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-              <ng-container *ngTemplateOutlet="cartActionButtons"></ng-container>
-            </div>
-          </div>
         </div>
         <div class="d-sm-flex d-flex ml-auto d-md-none d-lg-none mt-3">
 
@@ -196,18 +188,6 @@
     <apt-promotion class="mt-3" [cart]="view?.cart" [readOnly]="readOnly" [readOnlyPromotions]="true"></apt-promotion>
   </div>
 </ng-container>
-
-<ng-template #cartActionButtons>
-  <div>
-    <button *ngIf="!readOnly" class="btn-link btn text-primary " [routerLink]="['/products']">
-      {{ "COMMON.ADD_PRODUCTS" | translate }}
-    </button>
-  </div>
-  <div>
-    <button *ngIf="readOnly" class="btn-link btn text-primary" (click)="openCloneCartModal()">{{
-      "MY_ACCOUNT.CART_LIST.CLONE_CART" | translate }}</button>
-  </div>
-</ng-template>
 
 <ng-template #loadingTemplate>
   <div class="d-flex justify-content-center pt-5 mt-5">
