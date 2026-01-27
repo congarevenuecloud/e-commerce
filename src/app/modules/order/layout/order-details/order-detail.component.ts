@@ -209,9 +209,9 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   confirmOrder(orderId: string, primaryContactId: string) {
     this.isLoading = true;
     this.subscriptions.push(combineLatest([this.orderService.acceptOrder(orderId), this.emailService.getEmailTemplateByName('DC Order Confirmation Template')]).pipe(
-      switchMap(([res, templateInfo]) => {
+      switchMap(([orderAcceptanceResult, templateInfo]) => {
         this.isLoading = false;
-        if (res) {
+        if (orderAcceptanceResult) {
           this.exceptionService.showSuccess('ACTION_BAR.ORDER_CONFIRMATION_TOASTR_MESSAGE', 'ACTION_BAR.ORDER_CONFIRMATION_TOASTR_TITLE');
         }
         else {
@@ -281,6 +281,27 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   downloadAttachment(attachmentId: string) {
     this.productInformationService.getAttachmentUrl(attachmentId).subscribe((url: string) => {
       window.open(url, '_blank');
+    });
+  }
+
+  navigateToPayment(order: Order) {
+    // Get the order amount - try different sources
+    const orderAmount = order.Proposal?.GrandTotal || get(order, 'OrderAmount.Value', 0) || parseFloat(order.OrderAmount) || 0;
+    // Navigate to secure checkout with order and cart information
+    this.router.navigate(['/checkout/secure-checkout'], {
+      state: {
+        order: order,
+        cart: { 
+          Id: order.Id,
+          GrandTotal: orderAmount,
+          CurrencyIsoCode: order.Currency || 'USD',
+          Account: order.SoldToAccount,
+          PriceList: order.PriceList,
+          BusinessObjectType: 'Order'
+        },
+        primaryContact: order.PrimaryContact,
+        orderAmount: orderAmount
+      }
     });
   }
 

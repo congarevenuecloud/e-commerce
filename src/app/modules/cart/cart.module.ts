@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartRoutingModule } from './cart-routing.module';
 import { CartComponent } from './layout/cart.component';
+import { SecureCheckoutComponent } from './layout/secure-checkout/secure-checkout.component';
 import { SummaryComponent } from './component/summary.component';
 import {
   ConfigurationSummaryModule,
@@ -54,7 +55,7 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     PricingModule,
     FileUploaderModule
   ],
-  declarations: [CartComponent, SummaryComponent],
+  declarations: [CartComponent, SecureCheckoutComponent, SummaryComponent],
   exports : [SummaryComponent]
 })
 

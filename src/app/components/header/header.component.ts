@@ -74,8 +74,13 @@ export class HeaderComponent implements OnInit {
           if (quoteId) {
             return this.collaborationService.getMyCollaborationRequest('Proposal', quoteId).pipe(
               take(1),
-              map((request: CollaborationRequest | null) => {
-                return request?.AuthenticationType === CollaborationAuthenticationType.Anonymous;
+              switchMap((request: CollaborationRequest) => {
+                return this.userService.isLoggedIn().pipe(
+                  map((isLoggedIn: boolean) => {
+                    // Hide header only for anonymous collaboration when user is not logged in
+                    return request?.AuthenticationType === CollaborationAuthenticationType.Anonymous && !isLoggedIn;
+                  })
+                );
               })
             );
           }

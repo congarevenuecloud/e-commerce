@@ -1,14 +1,14 @@
 import { Component, OnInit, ViewChild, ElementRef, TemplateRef, OnDestroy, NgZone, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subscription, combineLatest, of } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+import { switchMap, take, catchError } from 'rxjs/operators';
 import { TabsetComponent } from 'ngx-bootstrap/tabs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { get, uniqueId, find, defaultTo, isNil, set } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigurationService } from '@congarevenuecloud/core';
-import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate, AttachmentService, ProductInformationService } from '@congarevenuecloud/ecommerce';
+import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate, AttachmentService, ProductInformationService, IntegrationService } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, PriceSummaryComponent, FileOutput } from '@congarevenuecloud/elements';
 
 @Component({
@@ -101,7 +101,7 @@ export class CartComponent implements OnInit, OnDestroy {
     requiredLastName: '',
     requiredEmail: '',
     requiredPrimaryContact: '',
-    requiredOrderName: ''
+    requiredOrderName: '',
   };
   cart: Cart;
   isLoggedIn: boolean;
@@ -114,6 +114,7 @@ export class CartComponent implements OnInit, OnDestroy {
   displayCaptcha: boolean;
   supportedFileTypes = '.pdf,.doc,.docx,.jpeg,.jpg,.png';
   poAttachmentFile: File = null;
+  isPaymentFeatureEnabled: boolean = false;
 
   private subscriptions: Subscription[] = [];
 
@@ -130,11 +131,24 @@ export class CartComponent implements OnInit, OnDestroy {
     private ngZone: NgZone,
     private exceptionService: ExceptionService,
     private attachmentService: AttachmentService,
-    private productInformationService: ProductInformationService) {
+    private productInformationService: ProductInformationService,
+    private integrationService: IntegrationService) {
     this.uniqueId = uniqueId();
   }
 
   ngOnInit() {
+    // Check if payment feature is enabled
+    this.subscriptions.push(
+      this.integrationService.getPaymentMetadata().pipe(
+        catchError((error) => {
+          this.exceptionService.showError(error);
+          // Return default metadata with payment disabled
+          return of({ EnablePaymentIntegration: false });
+        })
+      ).subscribe((metadata) => {
+        this.isPaymentFeatureEnabled = get(metadata, 'EnablePaymentIntegration', false);
+      })
+    );
     this.subscriptions.push(this.userService.isLoggedIn().subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn));
     this.subscriptions.push(this.userService.getCurrentUserLocale(false).subscribe((currentLocale) => this.currentUserLocale = currentLocale));
     this.primaryContact = new Contact();
@@ -182,7 +196,6 @@ export class CartComponent implements OnInit, OnDestroy {
       )
     );
 
-
     this.onBillToChange();
     this.onShipToChange();
     this.isButtonDisabled();
@@ -220,7 +233,7 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   isButtonDisabled() {
-    this.disableSubmit = this.isLoggedIn ? (isNil(this.order.PrimaryContact) || isNil(this.order.ShipToAccount)) : isNil(get(this.primaryContact, 'FirstName')) || isNil(get(this.primaryContact, 'LastName')) || isNil(get(this.primaryContact, 'Email')) || isNil(get(this.order, 'Name'));
+    this.disableSubmit = this.isLoggedIn ? (isNil(this.order.PrimaryContact) || isNil(this.order.ShipToAccount)) : (isNil(get(this.primaryContact, 'FirstName')) || isNil(get(this.primaryContact, 'LastName')) || isNil(get(this.primaryContact, 'Email')));
   }
 
   onPrimaryContactChange($event: Contact) {
@@ -232,7 +245,6 @@ export class CartComponent implements OnInit, OnDestroy {
     );
     this.isButtonDisabled()
   }
-
 
   /**
    * Allow to switch address tabs if billing and shipping address are diffrent.
@@ -257,7 +269,7 @@ export class CartComponent implements OnInit, OnDestroy {
    * @param paymentState - Optional payment state indicating the payment method (PAYLATER, PONUMBER, etc.)
    * @ignore
    */
-  submitOrder(paymentState?: 'PONUMBER' | 'PAYLATER') {
+  submitOrder(paymentState?: 'PONUMBER' | 'PAYLATER' | 'PAYNOW') {
     const orderAmountGroup = find(get(this.cart, 'SummaryGroups'), c => get(c, 'LineType') === 'Grand Total');
     this.orderAmount = defaultTo(get(orderAmountGroup, 'NetPrice', 0).toString(), '0');
 
@@ -271,24 +283,50 @@ export class CartComponent implements OnInit, OnDestroy {
       this.order.PaymentStatus = 'Pending';
     }
 
-    if (this.isLoggedIn) {
+    if (this.isLoggedIn && paymentState !== 'PAYNOW') {
       this.convertCartToOrder(this.order, this.order.PrimaryContact);
     }
-    else {
+    else if (!this.isLoggedIn) {
+      // Only populate this.primaryContact for guest users
       if (this.shippingEqualsBilling) {
         this.primaryContact.OtherCity = this.primaryContact.MailingCity;
         this.primaryContact.OtherStreet = this.primaryContact.MailingStreet;
         this.primaryContact.OtherState = this.primaryContact.MailingState;
-        this.primaryContact.OtherStateCode = this.primaryContact.MailingStateCode;
-        this.primaryContact.OtherPostalCode = this.primaryContact.MailingPostalCode;
-        this.primaryContact.OtherCountryCode = this.primaryContact.MailingCountryCode;
+        this.primaryContact.OtherStateCode =
+          this.primaryContact.MailingStateCode;
+        this.primaryContact.OtherPostalCode =
+          this.primaryContact.MailingPostalCode;
+        this.primaryContact.OtherCountryCode =
+          this.primaryContact.MailingCountryCode;
         this.primaryContact.OtherCountry = this.primaryContact.MailingCountry;
       }
-      this.primaryContact.Name = this.primaryContact.FirstName + ' ' + this.primaryContact.LastName;
+      this.primaryContact.Name =
+        this.primaryContact.FirstName + ' ' + this.primaryContact.LastName;
+
+      // Set the primary contact on the order
+      this.order.PrimaryContact = this.primaryContact;
+    }
+    // For logged-in users with PAYNOW, this.order.PrimaryContact is already set via onPrimaryContactChange
+
+    if (paymentState === 'PAYNOW') {
+      // Use order's primary contact if available, otherwise use this.primaryContact
+      const contactToPass = this.order.PrimaryContact || this.primaryContact;
+      
+      this.router
+        .navigate(['/checkout/secure-checkout'], {
+          state: {
+            order: this.order,
+            cart: this.cart,
+            primaryContact: contactToPass,
+            orderAmount: this.orderAmount,
+          },
+        });
+    }
+    else if (!this.isLoggedIn) {
+      // For guest users without PAYNOW, convert cart to order
       this.convertCartToOrder(this.order, this.primaryContact);
     }
   }
-
 
   /**
    * Generates a unique id for different components
@@ -302,12 +340,16 @@ export class CartComponent implements OnInit, OnDestroy {
 
   onBillToChange() {
     if (get(this.order.BillToAccount, 'Id'))
-      this.billToAccount$ = this.accountService.getAccount(get(this.order.BillToAccount, 'Id'));
+      this.billToAccount$ = this.accountService.getAccount(
+        get(this.order.BillToAccount, 'Id')
+      );
   }
 
   onShipToChange() {
     if (get(this.order.ShipToAccount, 'Id'))
-      this.shipToAccount$ = this.accountService.getAccount(get(this.order.ShipToAccount, 'Id'));
+      this.shipToAccount$ = this.accountService.getAccount(
+        get(this.order.ShipToAccount, 'Id')
+      );
     this.isButtonDisabled();
   }
 
@@ -361,7 +403,7 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   /**
-    * Redirect to Order detail page
+   * Redirect to Order detail page
    */
   redirectOrderPage() {
     this.ngZone.run(() => {
@@ -373,9 +415,12 @@ export class CartComponent implements OnInit, OnDestroy {
     const ngbModalOptions: ModalOptions = {
       backdrop: 'static',
       keyboard: false,
-      class: 'modal-lg'
+      class: 'modal-lg',
     };
-    this.confirmationModal = this.modalService.show(this.confirmationTemplate, ngbModalOptions);
+    this.confirmationModal = this.modalService.show(
+      this.confirmationTemplate,
+      ngbModalOptions
+    );
     if (get(this.orderConfirmation, 'Id')) {
       this.order.PrimaryContact = this.orderConfirmation.PrimaryContact;
       this.emailService.getEmailTemplateByName('DC Order Notification Template').pipe(
@@ -384,7 +429,6 @@ export class CartComponent implements OnInit, OnDestroy {
       ).subscribe();
     }
   }
-
 
   closeModal() {
     this.confirmationModal.hide();
@@ -412,8 +456,7 @@ export class CartComponent implements OnInit, OnDestroy {
 
     if (this.displayCaptcha) {
       this.showCaptcha = true;
-    }
-    else {
+    } else {
       this.submitOrder(paymentState);
     }
   }
@@ -422,14 +465,15 @@ export class CartComponent implements OnInit, OnDestroy {
     const ngbModalOptions: ModalOptions = {
       backdrop: 'static',
       keyboard: false,
-      class: 'modal-md'
+      class: 'modal-md',
     };
     this.POModalRef = this.modalService.show(this.POTemplate, ngbModalOptions);
   }
 
   uploadPOAttachment(fileInput: FileOutput) {
     const fileList = fileInput.files;
-    this.poAttachmentFile = fileList && fileList.length > 0 ? fileList[0] : null;
+    this.poAttachmentFile =
+      fileList && fileList.length > 0 ? fileList[0] : null;
   }
 
   savePONumber() {
