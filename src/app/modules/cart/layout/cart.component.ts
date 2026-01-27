@@ -8,7 +8,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { get, uniqueId, find, defaultTo, isNil, set } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigurationService } from '@congarevenuecloud/core';
-import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate, AttachmentService, ProductInformationService, IntegrationService } from '@congarevenuecloud/ecommerce';
+import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate, AttachmentService, ProductInformationService, IntegrationService, TaxAddress } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, PriceSummaryComponent, FileOutput } from '@congarevenuecloud/elements';
 
 @Component({
@@ -115,6 +115,9 @@ export class CartComponent implements OnInit, OnDestroy {
   supportedFileTypes = '.pdf,.doc,.docx,.jpeg,.jpg,.png';
   poAttachmentFile: File = null;
   isPaymentFeatureEnabled: boolean = false;
+  taxAddress: TaxAddress;
+  taxCalculationEnabled: boolean = false;
+  taxCalculated: boolean = false;
 
   private subscriptions: Subscription[] = [];
 
@@ -155,12 +158,16 @@ export class CartComponent implements OnInit, OnDestroy {
     this.order = new Order();
     this.subscriptions.push(combineLatest(this.cartService.getMyCart(), this.accountService.getCurrentAccount()).subscribe(([cart, account]) => {
       this.cart = cart;
-      // Setting default values
-      this.order.Name = 'New Order'
-      this.order.SoldToAccount = isNil(get(cart, 'Account')) ? account : get(cart, 'Account');
-      this.order.BillToAccount = isNil(get(cart, 'Account')) ? account : get(cart, 'Account');
-      this.order.ShipToAccount = isNil(get(cart, 'Account')) ? account : get(cart, 'Account');
-      this.order.PriceList = get(cart, 'PriceList');
+      
+      // Determine the account to use (prefer cart.Account, fallback to account)
+      const accountToUse = get(cart, 'Account') || account;
+      
+      // Only set default values if they haven't been set yet (preserve user selections)
+      if (!this.order.Name) this.order.Name = 'New Order';
+      if (!this.order.SoldToAccount?.Id && accountToUse) this.order.SoldToAccount = accountToUse;
+      if (!this.order.BillToAccount?.Id && accountToUse) this.order.BillToAccount = accountToUse;
+      if (!this.order.ShipToAccount?.Id && accountToUse) this.order.ShipToAccount = accountToUse;
+      if (!this.order.PriceList?.Id && get(cart, 'PriceList')) this.order.PriceList = get(cart, 'PriceList');
 
     }));
     this.user$ = this.userService.me();
@@ -232,6 +239,22 @@ export class CartComponent implements OnInit, OnDestroy {
     return Array.from(this.paymentLoadingStates.values()).some(loading => loading);
   }
 
+  // Check if tax calculation is blocking checkout
+  isTaxCalculationBlocking(): boolean {
+    return this.taxCalculationEnabled && !this.taxCalculated;
+  }
+
+  // Check if checkout buttons should be disabled
+  isCheckoutDisabled(): boolean {
+    return this.disableSubmit || (this.cart?.LineItems?.length < 1) || this.isAnyPaymentLoading() || this.isTaxCalculationBlocking();
+  }
+
+  // Handle tax status changes from price summary component
+  onTaxStatusChange(status: { calculated: boolean, enabled: boolean, amount: number }): void {
+    this.taxCalculated = status.calculated;
+    this.taxCalculationEnabled = status.enabled;
+  }
+
   isButtonDisabled() {
     this.disableSubmit = this.isLoggedIn ? (isNil(this.order.PrimaryContact) || isNil(this.order.ShipToAccount)) : (isNil(get(this.primaryContact, 'FirstName')) || isNil(get(this.primaryContact, 'LastName')) || isNil(get(this.primaryContact, 'Email')));
   }
@@ -257,11 +280,71 @@ export class CartComponent implements OnInit, OnDestroy {
     else {
       setTimeout(() => this.staticTabs.tabs[1].active = true, 50);
     }
+    
+    // Update tax address when shipping/billing preference changes for guest users
+    if (!this.isLoggedIn) {
+      this.updateGuestTaxAddress();
+    }
+  }
+  
+  // Handle address changes from apt-address component for guest users
+  // Tax is always based on shipping address
+  onAddressChange(type: 'Billing' | 'Shipping' = 'Billing') {
+    if (!this.isLoggedIn) {
+      // Only update tax address if the relevant shipping address changed
+      // If checkbox is checked (shippingEqualsBilling = true), billing address IS the shipping address
+      // If checkbox is NOT checked (shippingEqualsBilling = false), use separate shipping address
+      const shouldUpdate = (type === 'Billing' && this.shippingEqualsBilling) ||
+        (type === 'Shipping' && !this.shippingEqualsBilling);
+
+      if (shouldUpdate) {
+        this.updateGuestTaxAddress();
+      }
+    }
   }
 
   updatePrimaryContact(field: string, $event: string) {
     set(this.primaryContact, field, $event.length > 0 ? $event : null)
     this.isButtonDisabled();
+    
+    // Update taxAddress for guest users when address fields change
+    if (!this.isLoggedIn) {
+      this.updateGuestTaxAddress();
+    }
+  }
+  
+  // Updates tax address from guest user form (primaryContact)
+  // Creates a new object reference to trigger change detection in child component
+  updateGuestTaxAddress() {
+    if (!this.primaryContact) return;
+    
+    // Normalize Contact to TaxAddress format
+    // Always create a new object reference to trigger ngOnChanges in price-summary component
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        if (this.shippingEqualsBilling) {
+          // Use billing address (Mailing fields)
+          this.taxAddress = {
+            Line1: this.primaryContact.MailingStreet || '',
+            Line2: '',
+            City: this.primaryContact.MailingCity || '',
+            Region: this.primaryContact.MailingState || '',
+            Country: this.primaryContact.MailingCountry || '',
+            PostalCode: this.primaryContact.MailingPostalCode?.toString() || ''
+          };
+        } else {
+          // Use shipping address (Other fields)
+          this.taxAddress = {
+            Line1: this.primaryContact.OtherStreet || '',
+            Line2: '',
+            City: this.primaryContact.OtherCity || '',
+            Region: this.primaryContact.OtherState || '',
+            Country: this.primaryContact.OtherCountry || '',
+            PostalCode: this.primaryContact.OtherPostalCode?.toString() || ''
+          };
+        }
+      });
+    }, 0);
   }
 
   /**
@@ -343,6 +426,26 @@ export class CartComponent implements OnInit, OnDestroy {
       this.billToAccount$ = this.accountService.getAccount(
         get(this.order.BillToAccount, 'Id')
       );
+
+    if (this.shippingEqualsBilling && this.billToAccount$ && this.isLoggedIn) {
+      this.billToAccount$.pipe(take(1)).subscribe(account => {
+        // Use BillingPostalCode, fallback to ShippingPostalCode if billing is not available
+        const postalCode = account.BillingPostalCode || account.ShippingPostalCode;
+
+        if (account && postalCode) {
+          this.taxAddress = {
+            Line1: account.BillingStreet || account.ShippingStreet || '',
+            Line2: '',
+            City: account.BillingCity || account.ShippingCity || '',
+            Region: account.BillingState || account.ShippingState || '',
+            Country: account.BillingCountry || account.ShippingCountry || '',
+            PostalCode: postalCode.toString()
+          };
+        } else {
+          this.exceptionService.showError(this.translate.instant('TAX.ACCOUNT_MISSING_POSTAL_CODE'));
+        }
+      })
+    }
   }
 
   onShipToChange() {
@@ -351,6 +454,25 @@ export class CartComponent implements OnInit, OnDestroy {
         get(this.order.ShipToAccount, 'Id')
       );
     this.isButtonDisabled();
+
+    if (!this.shippingEqualsBilling && this.shipToAccount$ && this.isLoggedIn) {
+      this.shipToAccount$.pipe(take(1)).subscribe(account => {
+        const postalCode = account.ShippingPostalCode;
+
+        if (account && postalCode) {
+          this.taxAddress = {
+            Line1: account.ShippingStreet || account.BillingStreet || '',
+            Line2: '',
+            City: account.ShippingCity || account.BillingCity || '',
+            Region: account.ShippingState || account.BillingState || '',
+            Country: account.ShippingCountry || account.BillingCountry || '',
+            PostalCode: postalCode.toString()
+          };
+        } else {
+          this.exceptionService.showError(this.translate.instant('TAX.ACCOUNT_MISSING_POSTAL_CODE'));
+        }
+      })
+    }
   }
 
   convertCartToOrder(order: Order, primaryContact: Contact, cart?: Cart, selectedAccount?: AccountInfo, acceptOrder?: boolean) {

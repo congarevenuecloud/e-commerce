@@ -18,7 +18,8 @@ import {
   CartService,
   Order,
   OrderService,
-  IntegrationService
+  IntegrationService,
+  UserService
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService } from '@congarevenuecloud/elements';
 
@@ -52,6 +53,8 @@ export class SecureCheckoutComponent
   canNavigateAway: boolean = false; // Flag to control navigation
   paymentIntentId: string = null; // Store payment intent ID for retry scenarios
   showRetryButton: boolean = false; // Flag to show retry button for order creation failures
+  isExistingOrderPayment: boolean = false; // Flag to track if paying for existing order
+  isLoggedIn: boolean = false; // Track if user is logged in
 
   // Modal properties
   confirmationModal: BsModalRef;
@@ -69,7 +72,8 @@ export class SecureCheckoutComponent
     private integrationService: IntegrationService,
     private exceptionService: ExceptionService,
     private translate: TranslateService,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private userService: UserService
   ) {}
 
   // Prevent navigation away from page without confirmation
@@ -91,6 +95,13 @@ export class SecureCheckoutComponent
   }
 
   ngOnInit() {
+    // Check if user is logged in
+    this.subscriptions.push(
+      this.userService.isLoggedIn().subscribe(loggedIn => {
+        this.isLoggedIn = loggedIn;
+      })
+    );
+
     // Get data from navigation state BEFORE preventing back button
     const navigation = this.router.getCurrentNavigation();
     const state = get(navigation, 'extras.state') || get(window, 'history.state');
@@ -117,6 +128,11 @@ export class SecureCheckoutComponent
 
     if (get(savedState, 'order')) {
       this.order = get(savedState, 'order');
+      
+      // Check if this is an existing order payment (coming from order details page)
+      if (get(this.order, 'Id')) {
+        this.isExistingOrderPayment = true;
+      }
     }
 
     // Also check for primaryContact passed separately
@@ -564,7 +580,7 @@ export class SecureCheckoutComponent
     );
   }
 
-  // User confirmed cancellation - navigate to checkout
+  // User confirmed cancellation - navigate to checkout or back to order details
   confirmCancel() {
     this.canNavigateAway = true;
     if (get(this, 'cancelConfirmationModal')) {
@@ -572,7 +588,11 @@ export class SecureCheckoutComponent
     }
     // Small delay to ensure modal closes before navigation
     setTimeout(() => {
-      this.router.navigate(['/checkout']);
+      if (this.isExistingOrderPayment && get(this.order, 'Id')) {
+        this.router.navigate(['/orders', get(this.order, 'Id')]);
+      } else {
+        this.router.navigate(['/checkout']);
+      }
     }, 100);
   }
 

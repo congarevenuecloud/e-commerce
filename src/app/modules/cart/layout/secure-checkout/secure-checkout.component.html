@@ -19,13 +19,71 @@
           <h5 class="mb-0 mt-3">{{ "DETAILS.ORDER_SUMMARY" | translate }}</h5>
         </div>
         <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="font-weight-bold"
-              >{{ "CUSTOM_LABELS.TOTAL_AMOUNT" | translate }}:</span
-            >
-            <span class="h4 mb-0 text-primary"
-              >${{ getFormattedAmount() }}</span
-            >
+          <div class="row">
+            <!-- Contact Information -->
+            <div class="col-md-6 mb-3 mb-md-0">
+              <h6 class="font-weight-bold text-muted mb-3">
+                <i class="fa fa-user mr-2"></i>{{ "COMMON.CONTACT_INFORMATION" | translate }}
+              </h6>
+              <div *ngIf="order?.PrimaryContact" class="ml-3">
+                <p class="mb-1">
+                  <strong>{{ order.PrimaryContact.FirstName }} {{ order.PrimaryContact.LastName }}</strong>
+                </p>
+                <p class="mb-1 text-muted" *ngIf="order.PrimaryContact.Email">
+                  <i class="fa fa-envelope mr-2"></i>{{ order.PrimaryContact.Email }}
+                </p>
+                <p class="mb-0 text-muted" *ngIf="order.PrimaryContact.Phone">
+                  <i class="fa fa-phone mr-2"></i>{{ order.PrimaryContact.Phone }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="col-md-6">
+              <h6 class="font-weight-bold text-muted mb-3">
+                <i class="fa fa-map-marker-alt mr-2"></i>{{ "CHECKOUT.SHIPPING_ADDRESS" | translate }}
+              </h6>
+              <!-- Logged-in user: Show ShipToAccount address -->
+              <div *ngIf="isLoggedIn && order?.ShipToAccount" class="ml-3">
+                <div class="text-muted">
+                  <p class="mb-0" *ngIf="order.ShipToAccount.ShippingStreet">
+                    {{ order.ShipToAccount.ShippingStreet }}
+                  </p>
+                  <p class="mb-0" *ngIf="order.ShipToAccount.ShippingCity || order.ShipToAccount.ShippingState || order.ShipToAccount.ShippingPostalCode">
+                    {{ order.ShipToAccount.ShippingCity }}<span *ngIf="order.ShipToAccount.ShippingCity && order.ShipToAccount.ShippingState">, </span>{{ order.ShipToAccount.ShippingState }} {{ order.ShipToAccount.ShippingPostalCode }}
+                  </p>
+                  <p class="mb-0" *ngIf="order.ShipToAccount.ShippingCountry">
+                    {{ order.ShipToAccount.ShippingCountry }}
+                  </p>
+                </div>
+              </div>
+              <!-- Guest user: Show PrimaryContact.Other* address -->
+              <div *ngIf="!isLoggedIn && order?.PrimaryContact" class="ml-3">
+                <div class="text-muted">
+                  <p class="mb-0" *ngIf="order.PrimaryContact.OtherStreet">
+                    {{ order.PrimaryContact.OtherStreet }}
+                  </p>
+                  <p class="mb-0" *ngIf="order.PrimaryContact.OtherCity || order.PrimaryContact.OtherState || order.PrimaryContact.OtherPostalCode">
+                    {{ order.PrimaryContact.OtherCity }}<span *ngIf="order.PrimaryContact.OtherCity && order.PrimaryContact.OtherState">, </span>{{ order.PrimaryContact.OtherState }} {{ order.PrimaryContact.OtherPostalCode }}
+                  </p>
+                  <p class="mb-0" *ngIf="order.PrimaryContact.OtherCountry">
+                    {{ order.PrimaryContact.OtherCountry }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Amount -->
+          <div class="border-top mt-4 pt-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="font-weight-bold h5 mb-0"
+                >{{ "CUSTOM_LABELS.TOTAL_AMOUNT" | translate }}:</span
+              >
+              <span class="h4 mb-0 text-primary font-weight-bold"
+                >${{ getFormattedAmount() }}</span
+              >
+            </div>
           </div>
         </div>
       </div>

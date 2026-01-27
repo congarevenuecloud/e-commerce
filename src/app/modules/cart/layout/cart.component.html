@@ -17,11 +17,11 @@
         
         <ng-container *ngIf="isPaymentFeatureEnabled; else placeOrderOnly">
           <button class="btn btn-outline-primary mr-3" [ladda]="getPaymentLoadingState('PONUMBER')" data-style="zoom-in"
-            [disabled]="(disableSubmit || (cart?.LineItems?.length < 1)) || isAnyPaymentLoading()" (click)="openPOModal()">
+            [disabled]="isCheckoutDisabled()" (click)="openPOModal()">
             {{ 'PAYMENT.PO_NUMBER' | translate }}
           </button>
           <button class="btn btn-outline-primary btn-raised mr-2" *ngIf="isLoggedIn" [ladda]="getPaymentLoadingState('PAYLATER')"
-            data-style="zoom-in" [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
+            data-style="zoom-in" [disabled]="isCheckoutDisabled()"
             (click)="orderPlacement('PAYLATER')">
             <span>{{ 'PAYMENT.PAY_LATER' | translate }}</span>
           </button>
@@ -30,7 +30,7 @@
             <ng-content select=".cancel-button"></ng-content>
             
             <button class="btn btn-primary btn-raised" [ladda]="getPaymentLoadingState('PLACEORDER')" data-style="zoom-in"
-              [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
+              [disabled]="isCheckoutDisabled()"
               (click)="orderPlacement('PAYNOW')">
               <span>{{ 'CHECKOUT.PAY_NOW' | translate }}</span>
             </button>
@@ -42,7 +42,7 @@
             <ng-content select=".cancel-button"></ng-content>
             
             <button class="btn btn-primary btn-raised" [ladda]="getPaymentLoadingState('PLACEORDER')" data-style="zoom-in"
-              [disabled]="(disableSubmit || (cart?.LineItems?.length < 1) || isAnyPaymentLoading())"
+              [disabled]="isCheckoutDisabled()"
               (click)="orderPlacement()">
               <span>{{ 'COMMON.PLACE_ORDER' | translate }}</span>
             </button>
@@ -52,8 +52,11 @@
     </div>
     <div class="row py-2">
       <div class="col-md-4 order-md-2 mb-4">
-        <apt-price-summary [record]="cart" [form]="form" [page]="pricingSummaryType" [loading]="isAnyPaymentLoading()"
-          [showCaptcha]="false" (onSubmitOrder)="submitOrder()" (onShowCaptcha)="loadCaptcha()" #priceSummary>
+        <apt-price-summary [record]="cart" [page]="pricingSummaryType" [loading]="isAnyPaymentLoading()"
+          [showCaptcha]="false" [enableTaxCalculation]="true" 
+          [taxAddress]="taxAddress"
+          (onSubmitOrder)="submitOrder()" (onShowCaptcha)="loadCaptcha()" 
+          (taxStatusChange)="onTaxStatusChange($event)" #priceSummary>
         </apt-price-summary>
         <cart-summary [cart]="cart"></cart-summary>
       </div>
@@ -96,7 +99,8 @@
                       </apt-input-field>
                     </div>
                   </div>
-                  <apt-address [(ngModel)]="primaryContact" type="Billing" name="billingAddress" [form]="form">
+                  <apt-address [(ngModel)]="primaryContact" type="Billing" name="billingAddress" [form]="form"
+                    (addressChange)="onAddressChange('Billing')">
                   </apt-address>
                 </div>
                 <ng-template #showBillingAddressTemplate>
@@ -119,7 +123,8 @@
               </tab>
               <tab heading="{{'CART.SHIPPING_ADDRESS' | translate}}" [disabled]="shippingEqualsBilling" id="shipping">
                 <div *ngIf="!isLoggedIn else showShippingAddressTemplate">
-                  <apt-address [(ngModel)]="primaryContact" type="Shipping" name="shippingAddress" [form]="form">
+                  <apt-address [(ngModel)]="primaryContact" type="Shipping" name="shippingAddress" [form]="form"
+                    (addressChange)="onAddressChange('Shipping')">
                   </apt-address>
                 </div>
                 <ng-template #showShippingAddressTemplate>
