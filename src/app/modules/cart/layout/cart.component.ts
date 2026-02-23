@@ -427,6 +427,12 @@ export class CartComponent implements OnInit, OnDestroy {
         get(this.order.BillToAccount, 'Id')
       );
 
+    // Sync shipping account with billing account when they should be the same
+    if (this.shippingEqualsBilling && this.isLoggedIn && this.order.BillToAccount) {
+      this.order.ShipToAccount = this.order.BillToAccount;
+      this.shipToAccount$ = this.billToAccount$;
+    }
+
     if (this.shippingEqualsBilling && this.billToAccount$ && this.isLoggedIn) {
       this.billToAccount$.pipe(take(1)).subscribe(account => {
         // Use BillingPostalCode, fallback to ShippingPostalCode if billing is not available

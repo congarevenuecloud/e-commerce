@@ -178,6 +178,8 @@ export class CartListComponent implements OnInit {
       this.isCloneCart = true;
       this.cart = sourceCart;
       this.cart.Name = `Clone of ${sourceCart.Name}`
+    } else {
+      this.isCloneCart = false;
     }
     this.message = null;
     this.modalRef = this.modalService.show(template);
