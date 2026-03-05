@@ -52,10 +52,10 @@
                 [translateParams]="{Sellername: quoteConfirmation?.CreatedBy?.Name}"></small>
             <small class="text-center" *ngIf="quoteConfirmation?.RFPResponseDueDate"
                 [translate]="'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRMATION_MSG_WITH_RFP'"
-                [translateParams]="{RFP_value: quoteConfirmation.RFPResponseDueDate | date: 'yyyy-MM-dd'}"></small>
+                [translateParams]="{RFP_value: quoteConfirmation.RFPResponseDueDate | dateFormat : 'ShortDatePattern' | async}"></small>
             <small class="text-center" *ngIf="cart?.Proposald?.Id"
                 [translate]="'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRMATION_Update_MSG'"
-                [translateParams]="{Sellername: quoteConfirmation?.CreatedBy?.Name, RFP_value: quoteConfirmation.RFPResponseDueDate | date: 'yyyy-MM-dd'}"></small>
+                [translateParams]="{Sellername: quoteConfirmation?.CreatedBy?.Name, RFP_value: quoteConfirmation.RFPResponseDueDate | dateFormat : 'ShortDatePattern' | async}"></small>
             <h5 class="text-center my-3">{{ 'QUOTE_CONFIRMATION_MODAL.QUOTE_CONFIRMATION_NO' | translate }}
                 {{quoteConfirmation.Name}}</h5>
             <button class="btn btn-outline-primary w-35 mx-auto" (click)="confirmationModal.hide()"

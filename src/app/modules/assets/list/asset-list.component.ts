@@ -6,7 +6,7 @@ import {
   AssetLineItemExtended,
   AssetLineItem,
   AccountService, Account,
-  Cart, FieldFilter, GroupByAggregateResponse, AggregateFields, AssetActionLabels,StorefrontService, LineItemProductService
+  Cart, FieldFilter, GroupByAggregateResponse, AggregateFields, AssetActionLabels,StorefrontService, LineItemProductService, DateFormatPipe
 } from '@congarevenuecloud/ecommerce';
 import { Observable, of, Subscription, take, map, combineLatest } from 'rxjs';
 import { isNil, set, get, filter, omit, concat, mapValues, groupBy, sumBy, first, last, isEmpty } from 'lodash';
@@ -17,15 +17,13 @@ import {
   FilterOptions
 } from '@congarevenuecloud/elements';
 import { ToastrService } from 'ngx-toastr';
-import { DatePipe } from '@angular/common';
 import { ClassType } from 'class-transformer/ClassTransformer';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-asset-list',
   templateUrl: './asset-list.component.html',
-  styleUrls: ['./asset-list.component.scss'],
-  providers: [DatePipe]
+  styleUrls: ['./asset-list.component.scss']
 })
 export class AssetListComponent implements OnInit, OnDestroy {
   /**
@@ -191,8 +189,9 @@ export class AssetListComponent implements OnInit, OnDestroy {
     protected cartService: CartService,
     protected toastr: ToastrService,
     protected accountService: AccountService,
-    private storefrontService:StorefrontService,
-    private route: ActivatedRoute
+    private storefrontService: StorefrontService,
+    private route: ActivatedRoute,
+    private dateFormatPipe: DateFormatPipe
   ) { }
 
   /**
@@ -265,8 +264,14 @@ export class AssetListComponent implements OnInit, OnDestroy {
               columns: [
                 { prop: 'Name' },
                 { prop: 'SellingFrequency' },
-                { prop: 'StartDate' },
-                { prop: 'EndDate' },
+                {
+                  prop: 'StartDate',
+                  value: (record: AssetLineItemExtended) => this.getDateFormat(record, 'StartDate')
+                },
+                {
+                  prop: 'EndDate',
+                  value: (record: AssetLineItemExtended) => this.getDateFormat(record, 'EndDate')
+                },
                 { prop: 'NetPrice' },
                 { prop: 'Quantity' },
                 { prop: 'AssetStatus' },
@@ -287,7 +292,11 @@ export class AssetListComponent implements OnInit, OnDestroy {
       );
   }
 
-
+  getDateFormat(record: AssetLineItemExtended, field: string, dateTimeFormat: string = 'ShortDatePattern'): Observable<string> {
+    const dateValue = get(record, field);
+    if (!dateValue) return of('');
+    return this.dateFormatPipe.transform(dateValue, dateTimeFormat);
+  }
 
   /**
    * Event handler for when the advanced filter changes.

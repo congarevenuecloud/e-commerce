@@ -71,11 +71,11 @@ export class FavoriteListComponent implements OnInit {
                 },
                 {
                   prop: 'CreatedDate',
-                  value: (record: Favorite) => this.getDateFormat(record)
+                  value: (record: Favorite) => this.getDateFormat(record, 'CreatedDate')
                 },
                 {
                   prop: 'ModifiedDate',
-                  value: (record: Favorite) => this.getDateFormat(record)
+                  value: (record: Favorite) => this.getDateFormat(record, 'ModifiedDate')
                 }
               ],
               actions: [
@@ -135,8 +135,10 @@ export class FavoriteListComponent implements OnInit {
     return favorite.IsActive;
   }
 
-  getDateFormat(record: Favorite) {
-    return this.dateFormatPipe.transform(get(record, 'CreatedDate'));
+  getDateFormat(record: Favorite, field: string, dateTimeFormat: string = 'ShortDatePattern'): Observable<string> {
+    const dateValue = get(record, field);
+    if (!dateValue) return of('');
+    return this.dateFormatPipe.transform(dateValue, dateTimeFormat);
   }
 
   private addFavoriteToCart(favorite: Favorite) {

@@ -93,10 +93,11 @@ export class OrderListComponent implements OnInit, OnDestroy {
                 },
                 {
                   prop: 'CreatedDate',
-                  value: (record: Order) => this.getDateFormat(record)
+                  value: (record: Order) => this.getDateFormat(record, 'CreatedDate')
                 },
                 {
-                  prop: 'ActivatedDate'
+                  prop: 'ActivatedDate',
+                  value: (record: Order) => this.getDateFormat(record, 'ActivatedDate')
                 }
               ],
               fields: [
@@ -167,8 +168,10 @@ export class OrderListComponent implements OnInit, OnDestroy {
       ).subscribe();
   }
 
-  getDateFormat(record: Order) {
-    return this.dateFormatPipe.transform(get(record, 'CreatedDate'));
+  getDateFormat(record: Order, field: string, dateTimeFormat: string = 'ShortDatePattern'): Observable<string> {
+    const dateValue = get(record, field);
+    if (!dateValue) return of('');
+    return this.dateFormatPipe.transform(dateValue, dateTimeFormat);
   }
 
   updateOrderValue(order: Order): Observable<Order> {
