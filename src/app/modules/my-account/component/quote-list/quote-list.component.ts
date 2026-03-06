@@ -100,7 +100,8 @@ export class QuoteListComponent implements OnInit {
                   prop: 'ApprovalStage'
                 },
                 {
-                  prop: 'RFPResponseDueDate'
+                  prop: 'RFPResponseDueDate',
+                  value: (record: Quote) => this.getDateFormat(record, 'RFPResponseDueDate')
                 },
                 {
                   prop: 'PriceList',
@@ -121,7 +122,7 @@ export class QuoteListComponent implements OnInit {
                 {
                   prop: 'ModifiedDate',
                   label: 'CUSTOM_LABELS.LAST_MODIFIED_DATE',
-                  value: (record: Quote) => this.getDateFormat(record)
+                  value: (record: Quote) => this.getDateFormat(record, 'ModifiedDate')
                 }
               ],
               filters: this.filterList$.value.concat(this.getFilters()),
@@ -166,8 +167,10 @@ export class QuoteListComponent implements OnInit {
     return momentdate;
   }
 
-  getDateFormat(record: Quote) {
-    return this.dateFormatPipe.transform(get(record, 'CreatedDate'));
+  getDateFormat(record: Quote, field: string, dateTimeFormat: string = 'ShortDatePattern'): Observable<string> {
+    const dateValue = get(record, field);
+    if (!dateValue) return of('');
+    return this.dateFormatPipe.transform(dateValue, dateTimeFormat);
   }
 
   getFilters(): Array<FieldFilter> {

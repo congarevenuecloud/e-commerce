@@ -96,7 +96,14 @@
                 </div>
                 <div class="d-flex align-items-center justify-content-start mt-2">
                   <label class="mb-0 mr-1">{{ "COMMON.CREATED_DATE" | translate }}:</label>
-                  <span *ngIf="favorite?.CreatedDate">{{favorite?.CreatedDate | dateFormat | async}}</span>
+                  <apt-output-field 
+                    *ngIf="favorite?.CreatedDate"
+                    [record]="favorite"
+                    field="CreatedDate"
+                    [valueOnly]="true"
+                    [editable]="false"
+                    [valueClass]="'p-0'">
+                  </apt-output-field>
                 </div>
                 <div class="d-flex align-items-center justify-content-start mt-2">
                   <label class="mb-0 mr-1">{{ "MY_ACCOUNT.ORDER_DETAIL.DESCRIPTION" | translate }}:</label>

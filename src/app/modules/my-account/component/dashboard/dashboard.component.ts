@@ -90,7 +90,7 @@ export class DashboardComponent implements OnInit {
               {
                 prop: 'CreatedDate',
                 label: 'CUSTOM_LABELS.CREATED_DATE',
-                value: (record) => this.getDateFormat(record)
+                value: (record) => this.getDateFormat(record, 'CreatedDate')
               }
             ],
             filters: this.getQuoteFilters(),
@@ -115,7 +115,7 @@ export class DashboardComponent implements OnInit {
               {
                 prop: 'CreatedDate',
                 label: 'CUSTOM_LABELS.CREATED_DATE',
-                value: (record) => this.getDateFormat(record)
+                value: (record) => this.getDateFormat(record, 'CreatedDate')
               }
             ],
             filters: this.getOrderFilters(),
@@ -243,8 +243,10 @@ export class DashboardComponent implements OnInit {
     }] as Array<FieldFilter>;
   }
 
-  getDateFormat(record: Order | Quote ) {
-    return this.dateFormatPipe.transform(get(record, 'CreatedDate'));
+  getDateFormat(record: Order | Quote, field: string , dateTimeFormat: string = 'ShortDatePattern'): Observable<string> {
+    const dateValue = get(record, field);
+    if (!dateValue) return of('');
+    return this.dateFormatPipe.transform(dateValue, dateTimeFormat);
   }
 
   ngOnDestroy() {

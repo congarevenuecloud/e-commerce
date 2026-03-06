@@ -62,7 +62,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     showTypeFilter: true,
     pageSize: 10,
     enablePagination: true,
-    dateFormat: DateFormat.Medium
+    dateFormat: 'ShortDateTimePattern'
   };
 
   requestChangesConfig: AddCommentsConfig;

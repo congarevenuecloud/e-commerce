@@ -38,7 +38,7 @@
                 </div>
                 <div class="px-3 pt-1 pb-3">
                     <div>
-                        <h2 class="m-0 font-weight-bold text-center dashboard-status">{{totalOrderAmount$ | async | convertCurrency | async }}</h2>
+                        <h2 class="m-0 font-weight-bold text-center dashboard-status">{{totalOrderAmount$ | async | localCurrency | async }}</h2>
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@
                     </h6>
                 </div>
                 <div class="px-3 pt-1 pb-3">
-                    <h2 class="m-0 font-weight-bold text-center dashboard-status">{{totalQuoteAmount$ | async | convertCurrency | async }}</h2>
+                    <h2 class="m-0 font-weight-bold text-center dashboard-status">{{totalQuoteAmount$ | async | localCurrency | async }}</h2>
                 </div>
             </div>
         </div>
