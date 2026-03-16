@@ -19,6 +19,15 @@
  */
 
 /**
+ * Buffer polyfill for Chrome 146+ compatibility
+ * Required by class-transformer and other Node.js dependencies in browser
+ */
+import { Buffer } from 'buffer';
+const globalScope = globalThis as any;
+if (!globalScope.Buffer) {
+    globalScope.Buffer = Buffer;
+}
+/**
  * IE11 requires the following for NgClass support on SVG elements
  */
 // import 'classlist.js';  // Run `npm install --save classlist.js`.
