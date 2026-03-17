@@ -1,6 +1,6 @@
 {
   "name": "conga.ui.ecom.rc",
-  "version": "202602.2.2",
+  "version": "202602.2.5",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -22,9 +22,9 @@
     "@angular/platform-browser-dynamic": "^16.2.12",
     "@angular/router": "^16.2.12",
     "angular-auth-oidc-client": "15.0.0",
-    "@congarevenuecloud/core": "202602.2.2",
-    "@congarevenuecloud/ecommerce": "202602.2.2",
-    "@congarevenuecloud/elements": "202602.2.2",
+    "@congarevenuecloud/core": "202602.2.5",
+    "@congarevenuecloud/ecommerce": "202602.2.5",
+    "@congarevenuecloud/elements": "202602.2.5",
     "@chmoyle-conga/graphql-cart": "^1.0.36",
     "@fortawesome/fontawesome-free": "^5.12.0",
     "@ng-select/ng-select": "^11.2.0",
@@ -32,6 +32,7 @@
     "angular2-ladda": "^5.0.0",
     "bootstrap": "^4.4.1",
     "bootstrap-material-design": "^4.1.2",
+    "buffer": "^6.0.3",
     "chart.js": "^2.9.4",
     "class-transformer": "^0.2.3",
     "classlist.js": "^1.1.20150312",
