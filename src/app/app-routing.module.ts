@@ -4,6 +4,7 @@ import { AuthorizationGuard } from './auth/auth.guard';
 import { MainComponent } from './main.component';
 import { environment } from '../environments/environment';
 import { AuthenticationGuard } from './services/authentication.guard';
+import { DsrRestrictedGuard } from './guards/dsr-restricted.guard';
 
 @NgModule({
   imports: [
@@ -19,23 +20,30 @@ import { AuthenticationGuard } from './services/authentication.guard';
             pathMatch: 'full'
           },
           {
+            path: 'dsr',
+            loadChildren: () => import('./modules/dsr/dsr.module').then(m => m.DsrModule),
+            data: { title: 'DSR' }
+          },
+          {
             path: 'orders',
-            loadChildren: () => import('./modules/order/order.module').then(m => m.OrderModule)
+            loadChildren: () => import('./modules/order/order.module').then(m => m.OrderModule),
+            canActivate: [DsrRestrictedGuard]
           },
           {
             path: 'home',
             loadChildren: () => import('./modules/home/home.module').then(m => m.HomeModule),
+            canActivate: [DsrRestrictedGuard]
           },
           {
             path: 'assets',
             loadChildren: () => import('./modules/assets/assets.module').then(m => m.AssetsModule),
-            canActivate: [AuthenticationGuard],
+            canActivate: [AuthenticationGuard, DsrRestrictedGuard],
           },
           {
             path: 'my-account',
             loadChildren: () => import('./modules/my-account/my-account.module').then(m => m.MyAccountModule),
             data: { title: 'My Account' },
-            canActivate: [AuthenticationGuard]
+            canActivate: [AuthenticationGuard, DsrRestrictedGuard]
           },
           {
             path: 'products',
@@ -58,12 +66,14 @@ import { AuthenticationGuard } from './services/authentication.guard';
           {
             path: 'checkout',
             loadChildren: () => import('./modules/cart/cart.module').then(m => m.CartModule),
-            data: { title: 'Checkout' }
+            data: { title: 'Checkout' },
+            canActivate: [DsrRestrictedGuard]
           },
           {
             path: 'favorites',
             loadChildren: () => import('./modules/favorite/favorite.module').then(m => m.FavoriteModule),
-            data: { title: 'Favorites' }
+            data: { title: 'Favorites' },
+            canActivate: [DsrRestrictedGuard]
           },
           {
             path:'collaborative',

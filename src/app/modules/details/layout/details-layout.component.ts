@@ -27,6 +27,8 @@ export class DetailsLayoutComponent implements AfterContentInit, OnDestroy, OnCh
   @Input() context: AObject;
   @Input() route: string;
   @Input() hideLink: boolean = false;
+  @Input() hideHome: boolean = false;
+  @Input() readOnly: boolean = false;
 
   private activeTabIndex = 0;
   private cachedHeaderHeight: number | null = null; // Cache header height

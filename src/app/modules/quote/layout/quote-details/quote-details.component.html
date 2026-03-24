@@ -1,7 +1,7 @@
 <apt-breadcrumb *ngIf="isAnonymous && !isLoggedIn" class="border-bottom" [sobject]="quote" [route]="'proposals'"
   [readOnly]="true"></apt-breadcrumb>
 
-<app-detail *ngIf="quote; else loading" [context]="quote" [route]="'proposals'" [hideLink]="isAnonymous && !isLoggedIn">
+<app-detail *ngIf="quote; else loading" [context]="quote" [route]="'proposals'" [hideLink]="isAnonymous && !isLoggedIn" [readOnly]="isDsrMode">
 
   <apt-alert [record]="quote" message="ERROR.UPDATE_QUOTE_FAILED_ON_DETAILS_PAGE" [showOnlyMessage]="false">
   </apt-alert>
@@ -24,19 +24,20 @@
           {{quote?.ApprovalStage}} - {{ 'COLLABORATION.IN_PROGRESS' | translate }}
         </span>
       </div>
-      <!-- Desktop Button Layout -->
+      <!-- ==================== DESKTOP BUTTON LAYOUT ==================== -->
+      <!-- Desktop buttons show only primary actions. Secondary actions go in kebab menu. -->
       <div class="align-items-center d-lg-flex d-md-flex d-sm-none d-none" *ngIf="!showPresentTemplate">
-        <!-- Logged In User Buttons -->
+        
+        <!-- ============= LOGGED-IN USER ACTIONS ============= -->
         <ng-container *ngIf="isLoggedIn">
-          <!-- Draft Stage: Show Generate Button (visible when no collaboration OR FullEdit access) -->
+          <!-- Draft Stage: Only show Generate button (no collaboration active) -->
           <apt-generate-document
-            *ngIf="quote.ApprovalStage === 'Draft' && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')"
+            *ngIf="quote.ApprovalStage === 'Draft' && !collaborationRequest"
             [record]="quote" class="ml-auto" (onStatusUpdate)="onGenerateQuote()">
           </apt-generate-document>
 
-          <!-- Generated Stage: Show Present as Primary and Generate as Secondary button (visible when no collaboration OR FullEdit access) -->
-          <ng-container
-            *ngIf="quote.ApprovalStage === 'Generated' && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')">
+          <!-- Generated Stage: Show both Generate and Present buttons (no collaboration active) -->
+          <ng-container *ngIf="quote.ApprovalStage === 'Generated' && !collaborationRequest">
             <apt-generate-document [record]="quote" class="ml-auto mr-3" (onStatusUpdate)="onGenerateQuote()">
             </apt-generate-document>
             <button type="button" class="btn btn-primary btn-raised px-3" (click)="showPresentTemplateFun()">
@@ -44,17 +45,25 @@
             </button>
           </ng-container>
 
+          <!-- Presented Stage: Show Accept/Reject when: -->
+          <!-- 1. No collaboration active, OR -->
+          <!-- 2. In DSR mode with collaboration (user is actively collaborating) -->
+          <ng-container *ngIf="quote.ApprovalStage === 'Presented' && canShowCollaborationActions && (!collaborationRequest || (isDsrMode))">
+            <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary mr-3 ml-auto" data-style="zoom-in"
+              (click)="rejectQuote(quote?.Id)">
+              {{'COMMON.REJECT' | translate}}
+            </button>
+            <button type="button" *ngIf="quote?.Items?.length > 0" class="btn btn-primary btn-raised mr-3"
+              [ladda]="acceptLoader" data-style="zoom-in" (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+              {{'COMMON.ACCEPT_QUOTE' | translate}}
+            </button>
+          </ng-container>
         </ng-container>
 
-        <!-- Guest user without collaboration: Show Request Changes button -->
-        <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !isLoggedIn && !collaborationRequest">
-          <button type="button" class="btn btn-outline-primary btn-raised ml-auto" (click)="openRequestChangesModal()">
-            {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-          </button>
-        </ng-container>
-
-        <!-- Presented Stage: Show Accept/Reject for logged-in users or guests with collaboration -->
-        <ng-container *ngIf="quote.ApprovalStage === 'Presented' && canShowCollaborationActions && (isLoggedIn || collaborationRequest)">
+        <!-- ============= GUEST USER ACTIONS ============= -->
+        <!-- Guest users in DSR mode with collaboration: Show Accept/Reject as primary actions -->
+        <!-- (Request Changes goes in kebab menu) -->
+        <ng-container *ngIf="!isLoggedIn && quote.ApprovalStage === 'Presented' && (isDsrMode) && canShowCollaborationActions">
           <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary mr-3 ml-auto" data-style="zoom-in"
             (click)="rejectQuote(quote?.Id)">
             {{'COMMON.REJECT' | translate}}
@@ -65,9 +74,22 @@
           </button>
         </ng-container>
 
-        <!-- Desktop Kebab Menu for Secondary Actions -->
+        <!-- Guest users NOT in DSR mode: Only Request Changes button -->
+        <!-- (No accept/reject - they need to use collaboration link) -->
+        <ng-container *ngIf="!isLoggedIn && quote.ApprovalStage === 'Presented' && !(isDsrMode)">
+          <button type="button" class="btn btn-outline-primary btn-raised ml-auto" (click)="openRequestChangesModal()">
+            {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+          </button>
+        </ng-container>
+
+        <!-- ============= KEBAB MENU FOR SECONDARY ACTIONS ============= -->
+        <!-- Show kebab menu when: -->
+        <!-- 1. Logged-in user with no collaboration OR in DSR mode, OR -->
+        <!-- 2. Guest user IN DSR mode (not shown for guest in normal mode - they have primary buttons) -->
         <div class="dropdown ml-3 d-lg-block d-md-block d-sm-none d-none"
-          *ngIf="quote?.ApprovalStage === 'Presented' && canShowCollaborationActions && (isLoggedIn || collaborationRequest)">
+          *ngIf="quote?.ApprovalStage === 'Presented' && 
+                 ((isLoggedIn && canShowCollaborationActions && (!collaborationRequest || (isDsrMode))) ||
+                  (!isLoggedIn && (isDsrMode)))">
           <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="desktopDropdownMenuLink"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           </a>
@@ -77,9 +99,9 @@
         </div>
       </div>
       <div class="d-sm-block d-block ml-auto d-md-none d-lg-none pt-2"
-      *ngIf="(['Draft','Generated','Presented','Approved'].includes(quote?.ApprovalStage))
-       && (isLoggedIn || quote?.ApprovalStage === 'Presented')
-       && (quote?.ApprovalStage !== 'Presented' || canShowCollaborationActions)">
+        *ngIf="(isLoggedIn && (['Draft','Generated','Approved'].includes(quote?.ApprovalStage) && !collaborationRequest)) ||
+               (isLoggedIn && quote?.ApprovalStage === 'Presented' && canShowCollaborationActions && (!collaborationRequest || (isDsrMode))) ||
+               (!isLoggedIn && quote?.ApprovalStage === 'Presented')"> 
         <div class="dropdown pr-4">
           <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -89,10 +111,11 @@
           </div>
         </div>
       </div>
+      
       <div *ngIf="quote?.ApprovalStage === 'Accepted' && order$ | async as order">
         <span class="d-flex align-items-baseline flex-wrap">
           <apt-output-field [record]="order" field="Name" [label]="'MY_ACCOUNT.ORDER_DETAIL.ORDER_ID' | translate"
-            layout="inline" [editable]="false" [showQuickView]="true"></apt-output-field>
+            layout="inline" [editable]="false" [showQuickView]="!(isDsrMode)"></apt-output-field>
           <span class="badge badge-light ml-1 py-0">
             <apt-output-field [record]="order" [field]="'Status'" [valueOnly]="true" [valueClass]="'p-0'"
               [editable]="false">
@@ -100,13 +123,22 @@
         </span>
       </div>
     </div>
-    <!-- Collaboration In Progress Banner for non-record owners (show for logged-in users viewing any collaboration) -->
+    <!-- ==================== COLLABORATION IN PROGRESS BANNER ==================== -->
+    <!-- Show warning when: Presented stage, collaboration active, NOT in DSR mode -->
+    <!-- This tells users they can't act on quote directly (logged-in) or limited actions (guest) -->
     <div class="alert alert-warning d-flex align-items-center my-2 py-2" role="alert"
-      *ngIf="collaborationRequest && !isRecordOwner && isLoggedIn && quote?.ApprovalStage === 'Presented'">
+      *ngIf="collaborationRequest && quote?.ApprovalStage === 'Presented' && !(isDsrMode)">
       <i class="fa fa-exclamation-triangle mr-3"></i>
-      <div class="mb-0">{{ 'COLLABORATION.IN_PROGRESS_MESSAGE' | translate }}</div>
+      <div class="mb-0">
+        <ng-container *ngIf="isRecordOwner; else genericMessage">
+          {{ 'COLLABORATION.USE_COLLABORATION_LINK' | translate }}
+        </ng-container>
+        <ng-template #genericMessage>
+          {{ 'COLLABORATION.IN_PROGRESS_MESSAGE' | translate }}
+        </ng-template>
+      </div>
     </div>
-    <app-progress class="status-bar" *ngIf="isLoggedIn && quoteStatusLabelMap[quote.ApprovalStage]"
+    <app-progress class="status-bar" *ngIf="isLoggedIn && quoteStatusLabelMap[quote.ApprovalStage] && !(isDsrMode)"
       [steps]="quoteStatusStepsLabels" [currentStep]="quoteStatusLabelMap[quote.ApprovalStage]">
     </app-progress>
   </div>
@@ -208,7 +240,7 @@
             <div class="card-header border-bottom py-2">
               <h5>
                 {{'DETAILS.LINE_ITEMS' | translate}}
-                <!-- Show Edit/Add button -->
+                <!-- Show Edit/Add button when: Logged-in, quote in editable stages, and user has permission -->
                 <button class="btn text-primary px-2 ml-1 py-0"
                   *ngIf="isLoggedIn && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Presented') && canManageLineItems"
                   [ladda]="editLoader" data-style="zoom-in" data-spinner-color="black" (click)="editQuoteItems(quote)">
@@ -309,7 +341,7 @@
                             </apt-output-field>
                           </td>
                           <td><button
-                              *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied' && (!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner))"
+                              *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied' && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')"
                               class="btn btn-link p-0 m-0" (click)="deleteAttachment(attachment)"
                               [ladda]="attachment?.DocumentMetadata?._metadata?.deleting" data-style="zoom-in"
                               data-spinner-color="black">
@@ -328,9 +360,10 @@
                 </ng-template>
               </div>
               <span class="d-lg-block d-md-block d-sm-none d-none border-left"
-                *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied' && (!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner))"></span>
+                *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied' && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')"></span>
+              <!-- Show file upload section when: Logged-in, not Denied, and (no collaboration OR FullEdit access) -->
               <div class="col-12 col-md-5 pt-lg-0 pt-md-0 pt-sm-3 pt-3"
-                *ngIf="isLoggedIn && (!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner))">
+                *ngIf="isLoggedIn && quote?.ApprovalStage !== 'Denied' && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')">
                 <ng-container *ngTemplateOutlet="addAttachments"></ng-container>
               </div>
             </div>
@@ -393,41 +426,53 @@
   </ng-template>
 </app-detail>
 
+<!-- ==================== DESKTOP KEBAB MENU BUTTON TEMPLATES ==================== -->
+
 <ng-template #desktopKebabButtons>
-  <!-- Guest user without collaboration - show only Request Changes -->
-  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !isLoggedIn && !showPresentTemplate && !collaborationRequest">
+  <!-- ============= GUEST USER KEBAB ACTIONS ============= -->
+  <!-- Guest users: Only Request Changes in kebab menu -->
+  <!-- (Accept/Reject are shown as primary buttons in DSR mode, or user can't act without DSR link) -->
+  <ng-container *ngIf="!isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate">
     <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
       {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
     </button>
   </ng-container>
 
-  <!-- Logged-in users or collaboration scenarios - show Request Changes plus Generate/Present for authorized users -->
-  <ng-container *ngIf="quote.ApprovalStage === 'Presented' && !showPresentTemplate && canShowCollaborationActions && (isLoggedIn || collaborationRequest)">
+  <!-- ============= LOGGED-IN USER KEBAB ACTIONS ============= -->
+  <!-- Logged-in without collaboration: Show all secondary actions (Request Changes, Generate, Present) -->
+  <ng-container *ngIf="isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && !collaborationRequest">
     <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
       {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
     </button>
-    <!-- Generate and Present buttons visible when no collaboration, or for FullEdit record owners when collaboration exists -->
-    <ng-container *ngIf="!collaborationRequest || (collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner)">
-      <apt-generate-document [record]="quote" [buttonClasses]="'dropdown-item'" (onStatusUpdate)="onGenerateQuote()">
-      </apt-generate-document>
-      <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
-        {{'DETAILS.PRESENT_QUOTE' | translate}}
-      </button>
-    </ng-container>
+    <apt-generate-document [record]="quote" [buttonClasses]="'dropdown-item'" (onStatusUpdate)="onGenerateQuote()">
+    </apt-generate-document>
+    <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
+      {{'DETAILS.PRESENT_QUOTE' | translate}}
+    </button>
+  </ng-container>
+  
+  <!-- Logged-in in DSR mode: Only Request Changes in kebab (Accept/Reject are primary buttons) -->
+  <ng-container *ngIf="isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && (isDsrMode) && canShowCollaborationActions">
+    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+    </button>
   </ng-container>
 </ng-template>
 
+<!-- ==================== MOBILE KEBAB MENU BUTTON TEMPLATES ==================== -->
+<!-- Mobile view: ALL actions go in kebab menu (nothing shown as primary buttons) -->
+
 <ng-template #mobileActionButtons>
-  <!-- Draft Stage: Show Generate Button (visible when no collaboration OR FullEdit access) -->
-  <ng-container
-    *ngIf="quote.ApprovalStage === 'Draft' && isLoggedIn && !showPresentTemplate && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')">
+  <!-- ============= LOGGED-IN USER MOBILE ACTIONS ============= -->
+  
+  <!-- Draft Stage: Only Generate button (no collaboration active) -->
+  <ng-container *ngIf="isLoggedIn && quote.ApprovalStage === 'Draft' && !showPresentTemplate && !collaborationRequest">
     <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
     </apt-generate-document>
   </ng-container>
 
-  <!-- Generated Stage: Show Generate as Secondary and Present as Primary button (visible when no collaboration OR FullEdit access) -->
-  <ng-container
-    *ngIf="quote.ApprovalStage === 'Generated' && isLoggedIn && !showPresentTemplate && (!collaborationRequest || collaborationRequest?.AccessType === 'FullEdit')">
+  <!-- Generated Stage: Show Generate + Present (no collaboration active) -->
+  <ng-container *ngIf="isLoggedIn && quote.ApprovalStage === 'Generated' && !showPresentTemplate && !collaborationRequest">
     <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
     </apt-generate-document>
     <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
@@ -435,17 +480,8 @@
     </button>
   </ng-container>
 
-  <!-- Presented Stage: Guest user on non-collaboration quote - show only Request Changes -->
-  <ng-container
-    *ngIf="quote.ApprovalStage === 'Presented' && !isLoggedIn && !showPresentTemplate && !collaborationRequest">
-    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
-      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-    </button>
-  </ng-container>
-
-  <!-- Presented Stage: Logged-in users on non-collaboration quote - show all buttons -->
-  <ng-container
-    *ngIf="quote.ApprovalStage === 'Presented' && isLoggedIn && !showPresentTemplate && !collaborationRequest">
+  <!-- Presented Stage: All actions - no collaboration active -->
+  <ng-container *ngIf="isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && !collaborationRequest">
     <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
     </apt-generate-document>
     <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
@@ -463,17 +499,9 @@
     </button>
   </ng-container>
 
-  <!-- Presented Stage: Collaboration scenarios - use canShowCollaborationActions logic -->
-  <ng-container
-    *ngIf="quote.ApprovalStage === 'Presented' && !showPresentTemplate && collaborationRequest && canShowCollaborationActions">
-    <!-- Generate and Present buttons visible for FullEdit record owners (logged-in only) -->
-    <ng-container *ngIf="isLoggedIn && collaborationRequest?.AccessType === 'FullEdit' && isRecordOwner">
-      <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
-      </apt-generate-document>
-      <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
-        {{'DETAILS.PRESENT_QUOTE' | translate}}
-      </button>
-    </ng-container>
+  <!-- Presented Stage: All actions when in DSR mode with collaboration -->
+  <ng-container *ngIf="isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && (isDsrMode) && canShowCollaborationActions">
+    <!-- Show Request Changes, Accept, and Reject -->
     <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
       {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
     </button>
@@ -483,6 +511,29 @@
     <button type="button" [ladda]="acceptLoader" class="dropdown-item" *ngIf="quote?.Items?.length > 0"
       (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
       {{'COMMON.ACCEPT_QUOTE' | translate}}
+    </button>
+  </ng-container>
+
+  <!-- ============= GUEST USER MOBILE ACTIONS ============= -->
+  
+  <!-- Guest in DSR mode with collaboration: Show all actions (Request Changes, Accept, Reject) -->
+  <ng-container *ngIf="!isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && (isDsrMode) && canShowCollaborationActions">
+    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
+    </button>
+    <button type="button" [ladda]="rejectLoader" class="dropdown-item" (click)="rejectQuote(quote?.Id)">
+      {{'COMMON.REJECT' | translate}}
+    </button>
+    <button type="button" [ladda]="acceptLoader" class="dropdown-item" *ngIf="quote?.Items?.length > 0"
+      (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+      {{'COMMON.ACCEPT_QUOTE' | translate}}
+    </button>
+  </ng-container>
+
+  <!-- Guest NOT in DSR mode: Only Request Changes (can't accept/reject without collaboration link) -->
+  <ng-container *ngIf="!isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && !(isDsrMode)">
+    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
+      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
     </button>
   </ng-container>
 

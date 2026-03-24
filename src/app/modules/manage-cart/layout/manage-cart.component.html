@@ -1,9 +1,12 @@
 <ng-container *ngIf="view$ | async as view; else loadingTemplate">
-  <apt-breadcrumb class="border-bottom" [sobject]="view?.cart" [route]="'carts'" *ngIf="readOnly; else cartBreadcrumb">
+  <apt-breadcrumb class="border-bottom" [sobject]="view?.cart" [route]="'carts'" 
+    [readOnly]="isDsrMode || readOnly" 
+    *ngIf="readOnly; else cartBreadcrumb">
   </apt-breadcrumb>
 
   <ng-template #cartBreadcrumb>
-    <apt-breadcrumb class="border-bottom" [label]="'COMMON.MANAGE_CART' | translate"> </apt-breadcrumb>
+    <apt-breadcrumb class="border-bottom" [label]="'COMMON.MANAGE_CART' | translate" 
+      [readOnly]="isDsrMode"> </apt-breadcrumb>
     <apt-constraint-rule-alert></apt-constraint-rule-alert>
   </ng-template>
 

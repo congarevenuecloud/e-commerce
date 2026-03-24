@@ -3,11 +3,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { plainToClass } from 'class-transformer';
 import { Observable, combineLatest, of, Subscription, BehaviorSubject } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+import { switchMap, take, map } from 'rxjs/operators';
 import { get, filter, isNil, isEqual, set, isNull, forEach, lowerCase, pick } from 'lodash';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { Cart, CartItem, CartService, ConstraintRuleService, ItemGroup, LineItemService, QuoteService, Quote, Order, OrderService, ItemRequest } from '@congarevenuecloud/ecommerce';
 import { BatchActionService, RevalidateCartService, ExceptionService, ButtonAction, BatchSelectionService } from '@congarevenuecloud/elements';
+import { DsrService } from '../../../services/dsr.service';
 
 @Component({
   selector: 'app-manage-cart',
@@ -34,6 +35,7 @@ export class ManageCartComponent implements OnInit {
   cart: Cart;
   disabled: boolean;
   isCartFinalized: boolean = false;
+  isDsrMode: boolean = false;
   subscriptions: Array<Subscription> = new Array();
 
   searchText: string;
@@ -58,9 +60,22 @@ export class ManageCartComponent implements OnInit {
     private ngZone: NgZone,
     private modalService: BsModalService,
     private exceptionService: ExceptionService,
-    public batchSelectionService: BatchSelectionService) { }
+    public batchSelectionService: BatchSelectionService,
+    private dsrService: DsrService) { }
 
   ngOnInit() {
+    // Check if DSR mode is active to disable breadcrumb navigation and hide actions
+    this.subscriptions.push(this.dsrService.getDsrState().pipe(
+      map(state => state.isDsrMode)
+    ).subscribe(isDsrMode => {
+      this.isDsrMode = isDsrMode;
+      if (isDsrMode) {
+        this.batchActionService.hideActions([this.batchActionService._saveFavorite]);
+      } else {
+        this.batchActionService.showActions([this.batchActionService._saveFavorite]);
+      }
+    }));
+
     this.subscriptions.push(combineLatest([
       this.cartService.getMyCart(),
       this.crService.getRecommendationsForCart(),

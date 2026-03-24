@@ -21,6 +21,7 @@ import {
     ItemRequest
 } from '@congarevenuecloud/ecommerce';
 import { ProductConfigurationComponent, ProductConfigurationSummaryComponent, ProductConfigurationService, RevalidateCartService } from '@congarevenuecloud/elements';
+import { DsrService } from '../../../services/dsr.service';
 @Component({
     selector: 'app-product-detail',
     templateUrl: './product-detail.component.html',
@@ -37,6 +38,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
     viewState$: BehaviorSubject<ProductDetailsState> = new BehaviorSubject<ProductDetailsState>(null);
     recommendedProducts$: Observable<Array<ItemRequest>>;
+    isDsrMode: boolean = false;
 
     attachments$: Observable<Array<ProductInformation>>;
     modalRef: BsModalRef;
@@ -86,7 +88,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         private crService: ConstraintRuleService,
         private revalidateCartService: RevalidateCartService,
         private modalService: BsModalService,
-        private configurationService: ConfigurationService) {
+        private configurationService: ConfigurationService,
+        private dsrService: DsrService) {
     }
 
     @HostListener('window:resize', ['$event'])
@@ -95,6 +98,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.subscriptions.push(
+            this.dsrService.getDsrState().pipe(
+                rmap((state) => state.isDsrMode)
+            ).subscribe(isDsrMode => {
+                this.isDsrMode = isDsrMode;
+            })
+        );
+
         // Initialize screen size
         this.checkScreenSize();
         this.subscriptions.push(this.route.params.pipe(

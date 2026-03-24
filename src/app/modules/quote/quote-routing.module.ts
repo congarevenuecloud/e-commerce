@@ -18,7 +18,8 @@ const routes: Routes = [
   {
     path: ':id',
     component: QuoteDetailsComponent,
-    canActivate: [CollaborationAuthGuard]
+    canActivate: [CollaborationAuthGuard],
+    data: { allowDsr: true }
   },
   {
     path: '',
