@@ -57,21 +57,6 @@
     </div>
   </div>
 </div>
-<!--
-  Not part of Nov 15 deliverable
--->
-<!-- <div class="card mt-3" *ngIf="cart">
-  <div class="card-header">
-    Request a Quote
-  </div>
-  <div class="card-body">
-    <small class="mb-3 d-block">
-      Request a quote for your configuration and someone will be in touch to discuss next steps.
-    </small>
-    <button class="btn btn-block btn-outline-primary" [ladda]="state.requestQuoteLoading" data-style="zoom-in" (click)="createQuote()"
-      data-spinner-color="black" [disabled]="!cart?.LineItems || cart?.LineItems?.length === 0">Request a Quote</button>
-  </div>
-</div> -->
 
 <ng-template #discardChangesTemplate>
   <div class="modal-header">

@@ -1,6 +1,5 @@
 <ng-container *ngIf="view$ | async as view; else loadingTemplate">
   <apt-breadcrumb class="border-bottom" [sobject]="view?.cart" [route]="'carts'" 
-    [readOnly]="isDsrMode || readOnly" 
     *ngIf="readOnly; else cartBreadcrumb">
   </apt-breadcrumb>
 
