@@ -1,7 +1,8 @@
 <div class="border-bottom bg-white d-flex justify-content-between">
-  <apt-breadcrumb [sobject]="category" [label]="(!category) ? ('HEADER.PRODUCT_CATALOG' | translate) : category?.Label">
+  <apt-breadcrumb [sobject]="category" [label]="(!category) ? ('HEADER.PRODUCT_CATALOG' | translate) : category?.Label"
+    [hideHome]="isDsrMode">
   </apt-breadcrumb>
-  <div class="px-3 d-flex align-items-center">
+  <div class="px-3 d-flex align-items-center" *ngIf="!isDsrMode">
     <app-quick-add [layout]="'modal'" [fields]="fields" [productFieldType]="'lookup'"
       [businessObjectFields]="businessObjectFields" [btnClass]="'btn-custom-secondary border-0'"></app-quick-add>
   </div>
@@ -18,7 +19,7 @@
     <div class="col-12 col-lg-3 pl-lg-3 pr-lg-2">
       <div>
         <ng-container *ngIf="!isFavoriteCatalog">
-          <apt-product-type-filter class="mb-2" (onFilterAdd)="onFilterAdd($event, 'product')"
+          <apt-product-type-filter *ngIf="!isDsrMode" class="mb-2" (onFilterAdd)="onFilterAdd($event, 'product')"
             (onFilterRemove)="onFilterRemove($event)">
           </apt-product-type-filter>
 
@@ -33,7 +34,7 @@
               (userSelection)="getFacetFilterSelection($event)"></apt-facet-filter>
           </div>
         </ng-container>
-        <apt-favorite-filter [showScopeOptions]="isFavoriteCatalog"
+        <apt-favorite-filter *ngIf="!isDsrMode" [showScopeOptions]="isFavoriteCatalog"
           (onFavoriteScope)="onFilterAdd($event, 'favorite')"></apt-favorite-filter>
         <div *ngIf="isFavoriteCatalog" class="card mb-2">
           <div class="card-body">
@@ -233,7 +234,7 @@
               *ngTemplateOutlet="paginationTemplate; context: { totalItems: data?.TotalCount, type: 'product', maxPageSize:5  }"></ng-container>
           </div>
 
-          <div class="col-12 d-lg-flex justify-content-start mb-3 align-items-baseline">
+          <div class="col-12 d-lg-flex justify-content-start mb-3 align-items-baseline" *ngIf="!isDsrMode">
             <apt-select-all class="mt-n3" [items]="data.Products"></apt-select-all>
             <label class="pl-2 mt-n3 pb-0 mb-0 align-items-center d-flex" *ngIf="selectedCount > 0">&#124;
               <span class="pl-1" [translate]="'PRODUCT_LIST.SELECT_ALL_MSG'"
@@ -256,7 +257,7 @@
             <ng-container
               *ngTemplateOutlet="paginationTemplate; context: { totalItems: data?.TotalCount, type: 'product', maxPageSize:1  }"></ng-container>
           </span>
-          <div class="select-all d-block d-sm-block d-lg-none d-md-block mb-4 pl-3 position-relative">
+          <div class="select-all d-block d-sm-block d-lg-none d-md-block mb-4 pl-3 position-relative" *ngIf="!isDsrMode">
             <div class="row">
               <apt-select-all class="justify-content-end" [items]="data.Products"></apt-select-all>
               <label class="pl-2 mt-1 pb-0 mb-0 align-items-center d-flex " *ngIf="selectedCount > 0">&#124;
@@ -268,17 +269,17 @@
           </div>
         </div>
 
-        <div class="row" *ngIf="view == 'grid' && data?.Products">
+        <div class="row" *ngIf="view == 'grid' && data?.Products" [ngClass]="{'dsr-mode': isDsrMode}">
           <div class="col-12 col-sm-6 col-md-4 col-xl-3 mb-3" *ngFor="let product of data?.Products">
-            <apt-product-card [product]="product"></apt-product-card>
+            <apt-product-card [product]="product" [showCheckbox]="!isDsrMode"></apt-product-card>
           </div>
         </div>
 
-        <div class="row" *ngIf="view == 'list' && data?.Products">
+        <div class="row" *ngIf="view == 'list' && data?.Products" [ngClass]="{'dsr-mode': isDsrMode}">
           <div class="col-12">
             <ul class="list-unstyled list-group">
               <li *ngFor="let product of data?.Products let i = index; let last = last" [class.mb-3]="last">
-                <apt-product-card [product]="product" type="media"></apt-product-card>
+                <apt-product-card [product]="product" type="media" [showCheckbox]="!isDsrMode"></apt-product-card>
               </li>
             </ul>
           </div>

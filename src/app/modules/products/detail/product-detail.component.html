@@ -1,4 +1,5 @@
 <app-detail [title]="viewState?.product?.Name" [subtitle]="viewState?.product?.ProductCode"
+    [hideHome]="isDsrMode"
     [context]="viewState?.product" *ngIf="viewState$ | async as viewState; else loading">
     <div class="constraintAlerts">
         <apt-alert [record]="activeCart" [autoRun]="false" [showPriceError]="priceProgress"></apt-alert>

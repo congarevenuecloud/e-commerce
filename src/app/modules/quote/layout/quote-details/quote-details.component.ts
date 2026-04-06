@@ -7,13 +7,14 @@ import { get, set, first, map as _map, isEmpty, join, split, trim, isNil } from 
 import { Observable, of, BehaviorSubject, Subscription, combineLatest, forkJoin } from 'rxjs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import { FilterOperator } from '@congarevenuecloud/core';
+import { FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import {
   UserService, QuoteService, Quote, Order, OrderService, AttachmentService,
   AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService, EmailRequestPayload,
   CartService, Cart, DateFormat, FieldFilter, ContactService, CollaborationRequestService, CollaborationRequest, CollaborationAccessType, CollaborationAuthenticationType
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, ToasterPosition, FileOutput, AddCommentsConfig, ViewCommentsConfig } from '@congarevenuecloud/elements';
+import { DsrService } from '../../../../services/dsr.service';
 
 @Component({
   selector: 'app-quote-details',
@@ -113,6 +114,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   isPrivate: boolean = false;
   maxFileSizeLimit = 29360128;
   cartRecord: Cart = new Cart();
+  isDsrMode: boolean = false;
   // Flag used to toggle the content visibility when the list of fields exceeds two rows of the summary with show more or show less icon
   isExpanded: boolean = false;
   quoteStatusLabelMap: Record<string, string> = {};
@@ -137,10 +139,20 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     private renderer: Renderer2,
     private translateService: TranslateService,
     private collaborationService: CollaborationRequestService,
-    private contactService: ContactService
+    private contactService: ContactService,
+    private dsrService: DsrService
   ) { }
 
   ngOnInit() {
+    // Set DSR mode boolean once
+    this.isDsrMode = this.dsrService.isDsrMode();
+    
+    // Clear DSR editing flag when landing on quote details page
+    // This handles cases where user discarded or finalized changes and returned here
+    if (this.isDsrMode && this.dsrService.hasEditedLineItems()) {
+      this.dsrService.clearEditingLineItems();
+    }
+    
     this.initializeTranslationsComments();
     this.getQuote();
     this.quoteSubscription.push(this.userService.isLoggedIn().pipe(switchMap((value: boolean) => {
@@ -398,10 +410,22 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   private navigateToCartBasedOnAccessType(): void {
     const accessType = get(this.collaborationRequest, 'AccessType');
+    
+    // DSR Mode: Set pricelist and editing flag for FullEdit and RestrictedEdit access types
+    if (this.dsrService.isDsrMode() &&
+      (accessType === CollaborationAccessType.FullEdit || accessType === CollaborationAccessType.RestrictedEdit)) {
+      const priceListId = get(this.quote, 'PriceList.Id');
+      if (priceListId) {
+        localStorage.setItem(PlatformConstants.PRICELIST_ID, priceListId);
+      }
+      // Mark that user is editing line items in DSR mode
+      this.dsrService.setEditingLineItems();
+    }
+
+    // Use existing collaboration logic for navigation
     if (accessType === CollaborationAccessType.RestrictedEdit) {
       this.ngZone.run(() => this.router.navigate(['/collaborative/cart']));
     } else {
-      // For FullEdit, AcceptReject or other access types, navigate to normal cart
       this.ngZone.run(() => this.router.navigate(['/carts', 'active']));
     }
   }
@@ -618,17 +642,24 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     const accessType = get(this.collaborationRequest, 'AccessType');
     const authType = get(this.collaborationRequest, 'AuthenticationType');
     const hasLineItems = this.quoteLineItems$?.value && this.quoteLineItems$.value.length > 0;
+    const isDsrMode = this.dsrService.isDsrMode();
 
+    // Line items management: Collaboration quotes must be in DSR mode to edit
     // Edit existing items: Record owner can edit unless access is AcceptReject
     const canEditExistingItems = this.isRecordOwner && accessType !== CollaborationAccessType.AcceptReject;
-    // Add new items: Only record owner with full authenticated login access.
+    // Add new items: Only record owner with full authenticated login access
     const canAddNewItems = this.isRecordOwner && authType === CollaborationAuthenticationType.AuthenticatedWithLogin && accessType === CollaborationAccessType.FullEdit;
-    this.canManageLineItems = hasLineItems ? canEditExistingItems : canAddNewItems;
+    // Only allow management when in DSR mode
+    this.canManageLineItems = isDsrMode && (hasLineItems ? canEditExistingItems : canAddNewItems);
 
-    // Quote fields: editable by logged-in record owners, but not for anonymous users who logged in or restricted access types
+    // Quote fields editability logic:
+    // Collaboration quotes MUST be accessed via DSR mode to be editable
+    // If accessed directly (not in DSR mode), collaboration quotes are always read-only
     const isAnonymousWithLoggedInUser = authType === CollaborationAuthenticationType.Anonymous && this.isLoggedIn;
     const isRestrictedAccess = accessType === CollaborationAccessType.RestrictedEdit || accessType === CollaborationAccessType.AcceptReject;
-    this.canEditQuoteFields = this.isLoggedIn && this.isRecordOwner && !isAnonymousWithLoggedInUser && !isRestrictedAccess;
+    
+    // Collaboration quotes: Only editable when accessed in DSR mode with proper permissions
+    this.canEditQuoteFields = isDsrMode && this.isLoggedIn && this.isRecordOwner && !isAnonymousWithLoggedInUser && !isRestrictedAccess;
 
     // For Anonymous auth: Hide all actions once they log in
     if (authType === CollaborationAuthenticationType.Anonymous && this.isLoggedIn) {

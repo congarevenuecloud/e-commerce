@@ -1,28 +1,46 @@
 <div class="navbar navbar-light bg-light border-bottom py-0">
   <div class="d-flex align-items-center">
-    <!-- Hide hamburger menu in collaborative mode -->
-    <button *ngIf="!(isReadOnlyCollaborationMode$ | async)" class="navbar-toggler px-2 border-0" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    <!-- Hide hamburger menu in collaborative mode and DSR mode -->
+    <button *ngIf="isNormalMode$ | async" class="navbar-toggler px-2 border-0" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       (click)="menuModal.show()">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <ng-container *ngIf="storefront$ | async as storefront; else errorPageHeader">
-      <!-- Disable logo navigation in collaborative mode -->
+      <!-- Disable logo navigation in collaborative mode and DSR mode -->
       <button class="navbar-brand btn btn-link d-none d-md-inline-block p-0 mr-2 d-lg-block d-sm-none"
-        [routerLink]="(isReadOnlyCollaborationMode$ | async) ? null : ['/']" 
-        [disabled]="(isReadOnlyCollaborationMode$ | async)"
-        [class.cursor-default]="(isReadOnlyCollaborationMode$ | async)"
+        [ngClass]="{'pl-2': (isRestrictedMode$ | async)}"
+        [routerLink]="(isRestrictedMode$ | async) ? null : ['/']" 
+        [disabled]="isRestrictedMode$ | async"
+        [class.cursor-default]="isRestrictedMode$ | async"
         *ngIf="storeLogo$ | async as storeLogo; else defaultStoreLogo">
         <img class="pl-2" [src]="storeLogo | image" />
       </button>
-      <span class="sf-label mb-0 d-lg-block d-md-block d-sm-none d-none">{{storefront?.Name}}</span>
-      <span tooltip="{{storefront?.Name}}" class="sf-label m-0 d-lg-none d-md-none d-sm-block d-block">
-        {{storefront?.Name | truncate:5}}
+      <span class="sf-label mb-0 d-lg-block d-md-block d-sm-none d-none">
+        <ng-container *ngIf="isDsrMode$ | async; else normalStorefront">
+          {{'HEADER.DIGITAL_SALES_ROOM' | translate}}
+        </ng-container>
+        <ng-template #normalStorefront>{{storefront?.Name}}</ng-template>
+      </span>
+      <span class="sf-label m-0 d-lg-none d-md-none d-sm-block d-block"
+        [tooltip]="(isDsrMode$ | async) ? ('HEADER.DIGITAL_SALES_ROOM' | translate) : storefront?.Name">
+        <ng-container *ngIf="isDsrMode$ | async; else normalStorefrontShort">
+          {{'HEADER.DSR' | translate | truncate:5}}
+        </ng-container>
+        <ng-template #normalStorefrontShort>
+          {{storefront?.Name | truncate:5}}
+        </ng-template>
       </span>
     </ng-container>
 
     <ng-template #defaultStoreLogo>
-      <img class="pl-2" src="./assets/images/logo.png" height="24" />
+      <button class="btn btn-link d-none d-md-inline-block p-0 d-lg-block d-sm-none"
+        [ngClass]="{'pl-2': (isRestrictedMode$ | async)}"
+        [routerLink]="(isRestrictedMode$ | async) ? null : ['/']" 
+        [disabled]="isRestrictedMode$ | async"
+        [class.cursor-default]="isRestrictedMode$ | async">
+        <img class="pl-2" src="./assets/images/logo.png" height="24" />
+      </button>
     </ng-template>
 
     <ng-template #errorPageHeader>
@@ -37,12 +55,13 @@
   </div>
 
   <div class="actions d-flex align-items-center m-0">
-    <!-- Hide search, cart, and constraint icon in collaborative mode -->
-    <apt-product-search *ngIf="!(isReadOnlyCollaborationMode$ | async) && (storefront$ | async)" [typeAheadLimit]="7"></apt-product-search>
-    <apt-mini-cart *ngIf="!(isReadOnlyCollaborationMode$ | async)"></apt-mini-cart>
-    <apt-cr-constraint-icon *ngIf="!(isReadOnlyCollaborationMode$ | async)" class="d-block position-relative"></apt-cr-constraint-icon>
+    <!-- Show search in normal mode OR when in DSR mode editing line items -->
+    <apt-product-search *ngIf="(showProductSearch$ | async) && (storefront$ | async)" [typeAheadLimit]="7"></apt-product-search>
+    <apt-mini-cart *ngIf="(isNormalMode$ | async) || (showMiniCart$ | async)"></apt-mini-cart>
+    <apt-cr-constraint-icon *ngIf="isNormalMode$ | async" class="d-block position-relative"></apt-cr-constraint-icon>
     
-    <ng-container *ngIf="user$ | async as user">
+    <!-- Show My Account section, but with limited options in DSR mode -->
+    <ng-container *ngIf="(user$ | async) as user">
       <div class="d-flex user-action flex-column text-primary align-items-flex-start exclude-border pl-2">
         <strong>
           <font size="1" *ngIf="user?.Alias !== 'guest'">{{ 'COMMON.WELCOME_MESSAGE' | translate: {userName:
@@ -69,15 +88,32 @@
                 </div>
               </div>
               
-              <!-- Hide account selection and menu items in collaborative mode -->
-              <ng-container *ngIf="!(isReadOnlyCollaborationMode$ | async)">
-                <div class="text-nowrap px-3 d-flex" *ngIf="cartView$ | async as cartView">
-                  <div class="cursor-pointer" (click)="loadAccountDetails()"><b>{{ 'COMMON.ACCOUNT' | translate }}:</b>
-                    <span class="account-section text-primary pl-1"><u>{{cart?.Account?.Name}}</u></span>
-                  </div>
+              <!-- Show account name in DSR mode and collaborative mode -->
+              <div class="text-nowrap px-3 d-flex" *ngIf="(cartView$ | async) as cartView">
+                <!-- Clickable account in normal mode -->
+                <div *ngIf="(isNormalMode$ | async); else nonClickableAccount" 
+                     class="cursor-pointer" (click)="loadAccountDetails()">
+                  <b>{{ 'COMMON.ACCOUNT' | translate }}:</b>
+                  <span class="account-section text-primary pl-1 text-decoration-underline">
+                    {{cart?.Account?.Name}}
+                  </span>
                 </div>
+                <!-- Non-clickable account in DSR/collaborative mode -->
+                <ng-template #nonClickableAccount>
+                  <div>
+                    <b>{{ 'COMMON.ACCOUNT' | translate }}:</b>
+                    <span class="account-section text-primary pl-1">
+                      {{cart?.Account?.Name}}
+                    </span>
+                  </div>
+                </ng-template>
+              </div>
+              
+              <!-- Hide menu items in collaborative mode and DSR mode -->
+              <ng-container *ngIf="isNormalMode$ | async">
                 <div dropdown-item class="nav flex-column nav-pills pl-3" id="v-pills-tab" role="tablist"
                   aria-orientation="vertical">
+                  <!-- Hide My Orders in DSR mode -->
                   <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/orders']"
                     [routerLinkActive]="'active'">
                     <i class="fas fa-list-ul pr-1"></i>
@@ -88,17 +124,18 @@
                     <i class="fas fa-pencil-alt pr-1"></i>
                     {{'COMMON.MY_QUOTES' | translate}}
                   </a>
+                  <!-- Hide My Carts in DSR mode -->
                   <a class="pt-3" href="javascript:void(0)" [routerLink]="['/my-account/carts']"
                     [routerLinkActive]="'active'">
                     <i class="fas fa-shopping-cart pr-1"></i>
                     {{'COMMON.MY_CARTS' | translate}}
                   </a>
-                  <a class="pt-3" href="javascript:void(0)" *ngIf="showFavorites$ | async"
+                  <a class="pt-3" href="javascript:void(0)" *ngIf="(showFavorites$ | async)"
                     [routerLink]="['/my-account/favorites']" [routerLinkActive]="'active'">
                     <i class="fas fa-star pr-1"></i>
                     {{'COMMON.FAVORITES' | translate}}
                   </a>
-                  <a class="pt-3" href="javascript:void(0)" [routerLink]="['/assets']" routerLinkActive="active" class="pt-3">
+                  <a class="pt-3" href="javascript:void(0)" [routerLink]="['/assets']" routerLinkActive="active">
                     <i class = "fa fa-shopping-bag pr-2"></i>
                     {{'COMMON.INSTALLED_PRODUCTS' | translate}}
                    </a>
@@ -131,8 +168,8 @@
           </div>
         </div>
         
-        <!-- Hide account info dropdown in collaborative mode -->
-        <div class="dropdown" *ngIf="!(isReadOnlyCollaborationMode$ | async)">
+        <!-- Hide account info dropdown in DSR mode -->
+        <div class="dropdown" *ngIf="isNormalMode$ | async">
           <div class="dropdown-menu account-info p-3" [ngClass]="showAccountInfo ? 'show' : ''">
             <a *ngIf="!loading" class="position-absolute back-icon" href="javascript:void(0)"
               (click)="navigateToAccountHome()"><i class="fa fa-chevron-left mr-1"></i>{{ 'HEADER.BACK' | translate |
@@ -164,16 +201,19 @@
     <div class="modal-content bg-white py-1" *ngIf="user$ | async as user">
       <div class="modal-header d-block p-0">
         <div class="list-group list-group-flush">
+          <!-- Hide Home in DSR mode and read-only collaboration mode -->
           <a href="javascript:void(0)" [routerLink]="['/']" (click)="menuModal.hide()"
-            class="list-group-item list-group-item-action border-0">
+            class="list-group-item list-group-item-action border-0" *ngIf="isNormalMode$ | async">
             <i class="fas fa-home mr-4"></i>{{'HEADER.HOME' | translate}}
           </a>
-          <a href="javascript:void(0)" [routerLink]="['/my-account']" *ngIf="user?.Alias !== 'guest'"
+          <!-- Hide My Account in DSR mode and read-only collaboration mode -->
+          <a href="javascript:void(0)" [routerLink]="['/my-account']" *ngIf="user?.Alias !== 'guest' && (isNormalMode$ | async)"
             (click)="menuModal.hide()" class="list-group-item list-group-item-action border-0">
             <i class="fas fa-cog mr-4"></i>{{'HEADER.MY_ACCOUNT' | translate}}
           </a>
+          <!-- Hide Product Catalog in DSR mode and read-only collaboration mode -->
           <a href="javascript:void(0)" [routerLink]="['/products']" (click)="menuModal.hide()"
-            class="list-group-item list-group-item-action border-0">
+            class="list-group-item list-group-item-action border-0" *ngIf="isNormalMode$ | async">
             <i class="fas fa-th mr-4"></i>{{'HEADER.PRODUCT_CATALOG' | translate}}
           </a>
           <a href="javascript:void(0)" *ngIf="user?.Alias === 'guest'" (click)="login()"
