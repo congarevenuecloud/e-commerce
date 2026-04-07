@@ -80,16 +80,18 @@ export class HeaderComponent implements OnInit {
           // Extract quoteId from URL
           const quoteId = url.match(/\/proposals\/([^\/\?]+)/)?.[1];
           if (quoteId) {
-            return this.collaborationService.getMyCollaborationRequest('Proposal', quoteId).pipe(
+            return this.collaborationService.getCollaborationRequest('Proposal', quoteId).pipe(
               take(1),
               switchMap((request: CollaborationRequest) => {
                 return this.userService.isLoggedIn().pipe(
                   map((isLoggedIn: boolean) => {
                     // Hide header only for anonymous collaboration when user is not logged in
                     return request?.AuthenticationType === CollaborationAuthenticationType.Anonymous && !isLoggedIn;
-                  })
+                  }),
+                  catchError(() => of(false))
                 );
-              })
+              }),
+              catchError(() => of(false))
             );
           }
         }

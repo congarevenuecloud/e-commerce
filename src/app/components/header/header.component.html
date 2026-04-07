@@ -92,9 +92,9 @@
               <div class="text-nowrap px-3 d-flex" *ngIf="(cartView$ | async) as cartView">
                 <!-- Clickable account in normal mode -->
                 <div *ngIf="(isNormalMode$ | async); else nonClickableAccount" 
-                     class="cursor-pointer" (click)="loadAccountDetails()">
+                     class="cursor-pointer account-section" (click)="loadAccountDetails()">
                   <b>{{ 'COMMON.ACCOUNT' | translate }}:</b>
-                  <span class="account-section text-primary pl-1 text-decoration-underline">
+                  <span class="text-primary pl-1 text-decoration-underline">
                     {{cart?.Account?.Name}}
                   </span>
                 </div>
