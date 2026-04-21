@@ -18,13 +18,15 @@ import {
   IconModule,
   CaptchaModule,
   FileUploaderModule,
-  PaymentIntegrationModule
+  PaymentIntegrationModule,
+  WizardModule
 } from '@congarevenuecloud/elements';
 
 import { ComponentModule } from '../../components/component.module';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { TranslateModule } from '@ngx-translate/core';
 import { CongaModule } from '@congarevenuecloud/core';
 import { PricingModule } from '@congarevenuecloud/ecommerce';
@@ -55,7 +57,9 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     PriceSummaryModule,
     InputFieldModule,
     PricingModule,
-    FileUploaderModule
+    FileUploaderModule,
+    WizardModule,
+    PaginationModule.forRoot()
   ],
   declarations: [CartComponent, SecureCheckoutComponent, SummaryComponent],
   exports : [SummaryComponent]

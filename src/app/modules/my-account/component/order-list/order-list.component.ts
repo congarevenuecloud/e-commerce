@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { of, Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
-import { switchMap, take, map as rmap, catchError } from 'rxjs/operators';
+import { switchMap, take, map, catchError } from 'rxjs/operators';
 import { get, groupBy, omit, sumBy, mapValues } from 'lodash';
 import { Operator, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
-import { OrderService, Order, AccountService, FieldFilter, OrderResult, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
+import { OrderService, Order, AccountService, FieldFilter, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
 import { TableOptions, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
 @Component({
   selector: 'app-order-list',
@@ -122,19 +122,36 @@ export class OrderListComponent implements OnInit, OnDestroy {
               }
             }
           }
-          this.fetchOrderTotals();
-          this.getChartData();
           return of(tableOptions);
         }));
+    this.getChartData();
   }
 
   getChartData() {
     const queryFields = ['Status'];
     const groupByFields = ['Status'];
-    return this.orderService.getOrderAggregatesByStatus(null, this.aggregateFields, queryFields, groupByFields, this.filterList$.value).pipe(take(1)).subscribe((data) => {
-      this.orderAmountByStatus$ = of(omit(mapValues(groupBy(data, 'Status'), (s) => sumBy(s, 'sum(OrderAmount)')), 'null'));
-      this.ordersByStatus$ = of(omit(mapValues(groupBy(data, 'Status'), s => sumBy(s, 'count(Status)')), 'null'))
-    });
+    return this.orderService.getOrderAggregatesByStatus(null, this.aggregateFields, queryFields, groupByFields, this.filterList$.value)
+      .pipe(
+        take(1),
+        catchError(error => {
+          this.totalRecords$ = of(0);
+          this.totalAmount$ = of(0);
+          this.orderAmountByStatus$ = of({});
+          this.ordersByStatus$ = of({});
+          this.exceptionService.showError(error, 'ERROR.INVALID_REQUEST_ERROR_TOASTR_TITLE');
+          return of([]);
+        })
+      )
+      .subscribe((data : any[]) => {
+        const groupedByStatus = groupBy(data, 'Status');
+        const totalRecords = get(data,'total_records') ?? sumBy(data, 'count(Status)');
+        const totalAmount = sumBy(data, 'sum(OrderAmount)');
+
+        this.totalRecords$ = of(totalRecords || 0);
+        this.totalAmount$ = of(totalAmount || 0);
+        this.orderAmountByStatus$ = of(omit(mapValues(groupedByStatus, (s) => sumBy(s, 'sum(OrderAmount)')), 'null'));
+        this.ordersByStatus$ = of(omit(mapValues(groupedByStatus, s => sumBy(s, 'count(Status)')), 'null'));
+      });
   }
 
   handleFilterListChange(event: any) {
@@ -151,23 +168,6 @@ export class OrderListComponent implements OnInit, OnDestroy {
       }] as Array<FieldFilter>;
   }
 
-  fetchOrderTotals() {
-    this.orderService.getMyOrders(null, null, this.filterList$.value.concat(this.getFilters()), null, null, null, null, null, false)
-      .pipe(
-        rmap((orderResult: OrderResult) => {
-          this.totalRecords$ = orderResult ? of(get(orderResult, 'TotalCount')) : of(0);
-          this.totalAmount$ = of(sumBy(get(orderResult, 'Orders'), order => get(order, 'OrderAmount.DisplayValue')));
-        }),
-        take(1),
-        catchError(error => {
-          this.totalRecords$ = of(0);
-          this.totalAmount$ = of(0);
-          this.exceptionService.showError(error, 'ERROR.INVALID_REQUEST_ERROR_TOASTR_TITLE');
-          return of(error);
-        })
-      ).subscribe();
-  }
-
   getDateFormat(record: Order, field: string, dateTimeFormat: string = 'ShortDatePattern'): Observable<string> {
     const dateValue = get(record, field);
     if (!dateValue) return of('');
@@ -181,7 +181,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
       fetchSoldToAccount: false
     }).pipe(
       take(1),
-      rmap((updatedOrder: Order) => {
+      map((updatedOrder: Order) => {
         return updatedOrder;
       })
     );

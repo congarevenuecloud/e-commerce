@@ -92,7 +92,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   };
   fields: string[];
   object: any;
-  businessObjectFields: string[];
+  quoteFields: string[];
+  orderFields: string[];
   selectedCount: number = 0;
   /**
    * Array of product families associated with the list of assets.
@@ -218,7 +219,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
         })
       );
       this.fields = ['AdjustmentType', 'AdjustmentAmount', 'StartDate', 'EndDate'];
-      this.businessObjectFields = ['Description', 'BillToAccount', 'Amount', 'ModifiedDate', 'AutoActivateOrder', 'ABOType', 'DiscountPercent', 'configurationSyncDate', 'SourceChannel', 'PONumber']
+      this.quoteFields = ['Description', 'BillToAccount', 'configurationSyncDate', 'SourceChannel'];
+      this.orderFields = ['Description', 'BillToAccount', 'configurationSyncDate', 'SourceChannel', 'PONumber', 'AutoActivateOrder'];
       this.object = new Quote();
       this.subscriptions.push(
         this.batchSelectionService.getSelectedProducts().subscribe((data) => {

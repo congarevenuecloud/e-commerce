@@ -5,7 +5,6 @@ import { BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
 import { Observable, of, combineLatest, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { get, lowerCase } from 'lodash';
-import { TabsetComponent } from 'ngx-bootstrap/tabs';
 import {
   AccountService, ContactService, UserService, Quote, QuoteService, PriceListService, Cart,
   Account, Contact, PriceList, StorefrontService
@@ -18,7 +17,6 @@ import { LookupOptions } from '@congarevenuecloud/elements';
   styleUrls: ['./request-quote-form.component.scss']
 })
 export class RequestQuoteFormComponent implements OnInit, OnDestroy {
-  @ViewChild('staticTabs') staticTabs: TabsetComponent;
   @ViewChild('form', { static: false }) form: NgForm;
   @Input() cart: Cart;
   @Output() onQuoteUpdate = new EventEmitter<Quote>();
@@ -85,10 +83,9 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
           this.quote = get(this.cart, 'Proposald');
           this.quote.ProposalName = quote.Name;
         };
-        this.quote.Requestor = account?.Owner || user;
         this.quote.SourceChannel = get(storefront, 'ChannelType');
         this.quoteChange();
-        this.getPriceList
+        this.getPriceList();
       });
 
     this.subscriptions.push(
@@ -167,20 +164,6 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
     else {
       this.quote.PrimaryContact = null;
       this.onQuoteUpdate.emit(this.quote);
-    }
-  }
-
-  /**
-   * Allow to switch address tabs if billing and shipping address are diffrent.
-   *
-   * @param evt Event that identifies if Shipping and billing addresses are same.
-   *
-   */
-  selectTab(evt) {
-    if (evt)
-      this.staticTabs.tabs[0].active = true;
-    else {
-      setTimeout(() => this.staticTabs.tabs[1].active = true, 50);
     }
   }
 

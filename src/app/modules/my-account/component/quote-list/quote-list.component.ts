@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, BehaviorSubject, of, combineLatest } from 'rxjs';
-import { map as rmap, switchMap, take, catchError, map } from 'rxjs/operators';
+import { switchMap, take, catchError, map } from 'rxjs/operators';
 import moment from 'moment';
-import { get, sumBy, map as _map, mapValues, groupBy, omit } from 'lodash';
-import { Operator, ApiService, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
-import { Quote, QuoteService, LocalCurrencyPipe, AccountService, FieldFilter, QuoteResult, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
+import { get, sumBy, mapValues, groupBy, omit } from 'lodash';
+import { Operator, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
+import { Quote, QuoteService, LocalCurrencyPipe, AccountService, FieldFilter, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
 import { TableOptions, CustomFilterView, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
 
 @Component({
@@ -71,13 +71,13 @@ export class QuoteListComponent implements OnInit {
       }
     }
   ];
-  businessObjectFields: string[];
+  quoteFields: string[];
 
-  constructor(private quoteService: QuoteService, private currencyPipe: LocalCurrencyPipe, private dateFormatPipe: DateFormatPipe, private accountService: AccountService, private apiService: ApiService, private exceptionService: ExceptionService) { }
+  constructor(private quoteService: QuoteService, private currencyPipe: LocalCurrencyPipe, private dateFormatPipe: DateFormatPipe, private accountService: AccountService, private exceptionService: ExceptionService) { }
 
   ngOnInit() {
     this.loadView();
-    this.businessObjectFields = ['Description', 'BillToAccount', 'ShipToAccount', 'SourceChannel'];
+    this.quoteFields = ['Description', 'BillToAccount', 'ShipToAccount', 'SourceChannel'];
   }
 
   loadView() {
@@ -136,7 +136,6 @@ export class QuoteListComponent implements OnInit {
               }
             }
           }
-          this.fetchQuoteTotals();
           return of(tableOptions);
         })
       );
@@ -146,10 +145,28 @@ export class QuoteListComponent implements OnInit {
   getChartData() {
     const queryFields = ['ApprovalStage', 'RFPResponseDueDate'];
     const groupByFields = ['ApprovalStage', 'RFPResponseDueDate'];
-    return this.quoteService.getQuoteAggregatesByApprovalStage(null, this.aggregateFields, queryFields, groupByFields, this.filterList$.value).pipe(take(1)).subscribe((data) => {
-      this.amountsByStatus$ = of(omit(mapValues(groupBy(data, 'ApprovalStage'), (s) => sumBy(s, 'sum(Amount)')), 'null'));
-      this.quotesByStatus$ = of(omit(mapValues(groupBy(data, 'ApprovalStage'), (s) => sumBy(s, 'count(ApprovalStage)')), 'null'));
-    });
+    return this.quoteService.getQuoteAggregatesByApprovalStage(null, this.aggregateFields, queryFields, groupByFields, this.filterList$.value)
+      .pipe(
+        take(1),
+        catchError(error => {
+          this.totalRecords$ = of(0);
+          this.totalAmount$ = of(0);
+          this.amountsByStatus$ = of({});
+          this.quotesByStatus$ = of({});
+          this.exceptionService.showError(error, 'ERROR.INVALID_REQUEST_ERROR_TOASTR_TITLE');
+          return of([]);
+        })
+      )
+      .subscribe((data: any[]) => {
+        const groupedByStatus = groupBy(data, 'ApprovalStage');
+        const totalRecords = get(data,'total_records') ?? sumBy(data, 'count(ApprovalStage)');
+        const totalAmount = sumBy(data, 'sum(Amount)');
+
+        this.totalRecords$ = of(totalRecords || 0);
+        this.totalAmount$ = of(totalAmount || 0);
+        this.amountsByStatus$ = of(omit(mapValues(groupedByStatus, (s) => sumBy(s, 'sum(Amount)')), 'null'));
+        this.quotesByStatus$ = of(omit(mapValues(groupedByStatus, (s) => sumBy(s, 'count(ApprovalStage)')), 'null'));
+      });
   }
 
   handleFilterListChange(event: any) {
@@ -179,23 +196,6 @@ export class QuoteListComponent implements OnInit {
       value: localStorage.getItem(PlatformConstants.ACCOUNT),
       filterOperator: FilterOperator.EQUAL
     }] as Array<FieldFilter>;
-  }
-
-  fetchQuoteTotals() {
-    this.quoteService.getMyQuotes(null, this.filterList$.value.concat(this.getFilters()), null, null, null, null, null, false)
-      .pipe(
-        rmap((quoteResult: QuoteResult) => {
-          this.totalRecords$ = quoteResult ? of(get(quoteResult, 'TotalCount')) : of(0);
-          this.totalAmount$ = of(sumBy(get(quoteResult, 'Quotes'), (quote) => get(quote, 'Amount.Value')));
-        }),
-        take(1),
-        catchError(error => {
-          this.totalRecords$ = of(0);
-          this.totalAmount$ = of(0);
-          this.exceptionService.showError(error, 'ERROR.INVALID_REQUEST_ERROR_TOASTR_TITLE');
-          return of(error);
-        })
-      ).subscribe();
   }
 
   updateQuoteValue(quote: Quote): Observable<Quote> {

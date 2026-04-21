@@ -27,6 +27,7 @@ const globalScope = globalThis as any;
 if (!globalScope.Buffer) {
     globalScope.Buffer = Buffer;
 }
+
 /**
  * IE11 requires the following for NgClass support on SVG elements
  */

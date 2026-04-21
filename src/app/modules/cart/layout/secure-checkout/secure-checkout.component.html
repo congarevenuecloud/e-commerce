@@ -1,104 +1,89 @@
 <div class="container-fluid py-4">
   <div class="row justify-content-center">
-    <div class="col-lg-8 col-md-10 col-12">
+    <div class="col-12 col-xl-10">
       <!-- Header -->
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">{{ "CHECKOUT.SECURE_PAYMENT" | translate }}</h2>
-        <button
-          type="button"
-          class="btn btn-outline-secondary"
-          (click)="cancel()"
-        >
-          <i class="fa fa-arrow-left mr-2"></i>{{ "HEADER.BACK" | translate }}
-        </button>
+      <div class="mb-4">
+        <h2 class="mb-0">{{ 'COMMON.SECURE_CHECKOUT' | translate }}</h2>
       </div>
 
-      <!-- Payment Summary Card -->
-      <div class="card mb-4">
-        <div class="card-header bg-light">
-          <h5 class="mb-0 mt-3">{{ "DETAILS.ORDER_SUMMARY" | translate }}</h5>
+      <!-- Two-column layout -->
+      <div class="row">
+        <!-- Left Column: Payment Form -->
+        <div class="col-lg-7 col-md-12 mb-4">
+          <!-- Payment Element -->
+          <apt-payment-integration #paymentElement [cart]="cart" [config]="{
+              amount: paymentAmount,
+              currency: currency,
+              showTerms: true
+            }" (onPaymentSuccess)="handlePaymentSuccess($event)"
+            (onConfirmCancel)="handleConfirmCancel()"></apt-payment-integration>
         </div>
-        <div class="card-body">
-          <div class="row">
-            <!-- Contact Information -->
-            <div class="col-md-6 mb-3 mb-md-0">
-              <h6 class="font-weight-bold text-muted mb-3">
-                <i class="fa fa-user mr-2"></i>{{ "COMMON.CONTACT_INFORMATION" | translate }}
-              </h6>
-              <div *ngIf="order?.PrimaryContact" class="ml-3">
-                <p class="mb-1">
-                  <strong>{{ order.PrimaryContact.FirstName }} {{ order.PrimaryContact.LastName }}</strong>
-                </p>
-                <p class="mb-1 text-muted" *ngIf="order.PrimaryContact.Email">
-                  <i class="fa fa-envelope mr-2"></i>{{ order.PrimaryContact.Email }}
-                </p>
-                <p class="mb-0 text-muted" *ngIf="order.PrimaryContact.Phone">
-                  <i class="fa fa-phone mr-2"></i>{{ order.PrimaryContact.Phone }}
-                </p>
-              </div>
-            </div>
 
-            <!-- Shipping Address -->
-            <div class="col-md-6">
-              <h6 class="font-weight-bold text-muted mb-3">
-                <i class="fa fa-map-marker-alt mr-2"></i>{{ "CHECKOUT.SHIPPING_ADDRESS" | translate }}
-              </h6>
-              <!-- Logged-in user: Show ShipToAccount address -->
-              <div *ngIf="isLoggedIn && order?.ShipToAccount" class="ml-3">
-                <div class="text-muted">
-                  <p class="mb-0" *ngIf="order.ShipToAccount.ShippingStreet">
-                    {{ order.ShipToAccount.ShippingStreet }}
-                  </p>
-                  <p class="mb-0" *ngIf="order.ShipToAccount.ShippingCity || order.ShipToAccount.ShippingState || order.ShipToAccount.ShippingPostalCode">
-                    {{ order.ShipToAccount.ShippingCity }}<span *ngIf="order.ShipToAccount.ShippingCity && order.ShipToAccount.ShippingState">, </span>{{ order.ShipToAccount.ShippingState }} {{ order.ShipToAccount.ShippingPostalCode }}
-                  </p>
-                  <p class="mb-0" *ngIf="order.ShipToAccount.ShippingCountry">
-                    {{ order.ShipToAccount.ShippingCountry }}
-                  </p>
+        <!-- Right Column: Shipping Address & Contact Information -->
+        <div class="col-lg-5 col-md-12">
+          <!-- Shipping Address Card -->
+          <div class="card mb-3">
+            <div class="card-header border-bottom py-2">
+              <h5 class="card-title m-0">{{ 'CHECKOUT.SHIPPING_ADDRESS' | translate }}</h5>
+            </div>
+            <div class="card-body text-muted">
+              <!-- For logged-in users -->
+              <ng-container *ngIf="isLoggedIn">
+                <div *ngIf="order?.BillToAccount">
+                  <p class="mb-2 font-weight-bold text-dark">{{ order.BillToAccount.Name }}</p>
+                  <address class="mb-0">
+                    <span *ngIf="order.BillToAccount.BillingStreet">{{ order.BillToAccount.BillingStreet }}<br></span>
+                    <span *ngIf="order.BillToAccount.BillingCity || order.BillToAccount.BillingState || order.BillToAccount.BillingPostalCode">
+                      {{ order.BillToAccount.BillingCity }}<ng-container *ngIf="order.BillToAccount.BillingCity && (order.BillToAccount.BillingState || order.BillToAccount.BillingPostalCode)">, </ng-container>
+                      {{ order.BillToAccount.BillingState }} {{ order.BillToAccount.BillingPostalCode }}<br>
+                    </span>
+                    <span *ngIf="order.BillToAccount.BillingCountry">{{ order.BillToAccount.BillingCountry }}</span>
+                  </address>
                 </div>
-              </div>
-              <!-- Guest user: Show PrimaryContact.Other* address -->
-              <div *ngIf="!isLoggedIn && order?.PrimaryContact" class="ml-3">
-                <div class="text-muted">
-                  <p class="mb-0" *ngIf="order.PrimaryContact.OtherStreet">
-                    {{ order.PrimaryContact.OtherStreet }}
-                  </p>
-                  <p class="mb-0" *ngIf="order.PrimaryContact.OtherCity || order.PrimaryContact.OtherState || order.PrimaryContact.OtherPostalCode">
-                    {{ order.PrimaryContact.OtherCity }}<span *ngIf="order.PrimaryContact.OtherCity && order.PrimaryContact.OtherState">, </span>{{ order.PrimaryContact.OtherState }} {{ order.PrimaryContact.OtherPostalCode }}
-                  </p>
-                  <p class="mb-0" *ngIf="order.PrimaryContact.OtherCountry">
-                    {{ order.PrimaryContact.OtherCountry }}
-                  </p>
-                </div>
-              </div>
+              </ng-container>
+              <!-- For guest users -->
+              <ng-container *ngIf="!isLoggedIn && primaryContact">
+                <apt-address [value]="primaryContact" [type]="primaryContact?.OtherStreet ? 'Shipping' : 'Billing'" [readonly]="true"
+                  [showLabel]="false"></apt-address>
+              </ng-container>
             </div>
           </div>
 
-          <!-- Total Amount -->
-          <div class="border-top mt-4 pt-3">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="font-weight-bold h5 mb-0"
-                >{{ "CUSTOM_LABELS.TOTAL_AMOUNT" | translate }}:</span
-              >
-              <span class="h4 mb-0 text-primary font-weight-bold"
-                >{{ getFormattedAmount() | async }}</span
-              >
+          <!-- Contact Information Card -->
+          <div class="card">
+            <div class="card-header border-bottom py-2">
+              <h5 class="card-title m-0">{{ 'CART.CONTACT_INFORMATION' | translate }}</h5>
+            </div>
+            <div class="card-body">
+
+              <!-- For logged-in users: Show Primary Contact -->
+              <ng-container *ngIf="isLoggedIn">
+                <div *ngIf="order?.PrimaryContact">
+                  <div class="mb-2">
+                    <small class="text-muted">{{ 'COMMON.NAME' | translate }}</small>
+                    <div>{{ order.PrimaryContact?.Name }}</div>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted">{{ 'COMMON.EMAIL_ADDRESS' | translate }}</small>
+                    <div>{{ order.PrimaryContact?.Email }}</div>
+                  </div>
+                </div>
+              </ng-container>
+              <!-- For guest users: Show Primary Contact Details -->
+              <ng-container *ngIf="!isLoggedIn && primaryContact">
+                <div class="mb-2">
+                  <small class="text-muted">{{ 'COMMON.NAME' | translate }}</small>
+                  <div>{{ primaryContact.FirstName }} {{ primaryContact.LastName }}</div>
+                </div>
+                <div class="mb-2">
+                  <small class="text-muted">{{ 'COMMON.EMAIL_ADDRESS' | translate }}</small>
+                  <div>{{ primaryContact.Email }}</div>
+                </div>
+              </ng-container>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Payment Element - Handles payment only, parent handles order creation -->
-      <apt-payment-integration
-        #paymentElement
-        [cart]="cart"
-        [config]="{
-          amount: paymentAmount,
-          currency: currency
-        }"
-        (onPaymentSuccess)="handlePaymentSuccess($event)"
-        (onConfirmCancel)="handleConfirmCancel()"
-      ></apt-payment-integration>
     </div>
   </div>
 </div>
@@ -106,12 +91,7 @@
 <!-- Success Modal Template -->
 <ng-template #confirmationTemplate>
   <div class="modal-header align-items-center d-flex flex-row-reverse p-0 pb-2 mt-3 border-bottom border-secondary">
-    <button
-      type="button"
-      class="close close-button pull-right pr-3"
-      aria-label="Close"
-      (click)="handleCloseSuccess()"
-    >
+    <button type="button" class="close close-button pull-right pr-3" aria-label="Close" (click)="handleCloseSuccess()">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
@@ -127,15 +107,12 @@
     <div class="text-center" *ngIf="orderConfirmation?.PrimaryContact?.Email; else noEmail">
       <small>{{
         "CART.SUCCESSFUL_ORDER_CREATION_MESSAGE"
-          | translate: { emailAddress: orderConfirmation?.PrimaryContact?.Email }
-      }}</small>
+        | translate: { emailAddress: orderConfirmation?.PrimaryContact?.Email }
+        }}</small>
     </div>
 
-    <h5
-      class="text-center my-3"
-      [translate]="'DETAILS.GENERATED_ORDER_NUMBER'"
-      [translateParams]="{ orderName: orderConfirmation?.Name }"
-    ></h5>
+    <h5 class="text-center my-3" [translate]="'DETAILS.GENERATED_ORDER_NUMBER'"
+      [translateParams]="{ orderName: orderConfirmation?.Name }"></h5>
     <div class="d-flex justify-content-center">
       <button class="btn btn-primary" (click)="handleViewOrder(orderConfirmation)">
         {{ "DETAILS.VIEW_YOUR_ORDER" | translate }}
@@ -147,5 +124,5 @@
 <ng-template #noEmail>
   <small class="text-center">{{
     "CART.SUCCESSFUL_ORDER_CREATION_MESSAGE_WITHOUT_EMAIL" | translate
-  }}</small>
+    }}</small>
 </ng-template>
