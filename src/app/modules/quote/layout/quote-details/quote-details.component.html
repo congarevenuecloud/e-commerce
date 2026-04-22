@@ -98,6 +98,11 @@
           </div>
         </div>
       </div>
+      <!-- ==================== MOBILE KEBAB MENU ==================== -->
+      <!-- Mobile view shows ALL actions in kebab menu. Show menu when: -->
+      <!-- 1. Logged-in: Draft/Generated/Approved with no collaboration, OR -->
+      <!-- 2. Logged-in: Presented with no collaboration OR in DSR mode, OR -->
+      <!-- 3. Guest: Presented (any state) -->
       <div class="d-sm-block d-block ml-auto d-md-none d-lg-none pt-2"
         *ngIf="(isLoggedIn && (['Draft','Generated','Approved'].includes(quote?.ApprovalStage) && !collaborationRequest)) ||
                (isLoggedIn && quote?.ApprovalStage === 'Presented' && canShowCollaborationActions && (!collaborationRequest || (isDsrMode))) ||
@@ -206,7 +211,15 @@
                 </div>
 
                 <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="PriceList" [displayValue]="'PriceList'" [editable]="false"
+                    [showQuickView]="true"></apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="Requestor" [displayValue]="'Requestor'" [editable]="false"
+                    [showQuickView]="true"></apt-output-field>
+                </div>
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  <apt-output-field [record]="quote" field="Owner" [displayValue]="'Owner'" [editable]="false"
                     [showQuickView]="true"></apt-output-field>
                 </div>
                 <div class="flex-shrink-1 col-md-4 mb-2">

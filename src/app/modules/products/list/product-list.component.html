@@ -4,7 +4,7 @@
   </apt-breadcrumb>
   <div class="px-3 d-flex align-items-center" *ngIf="!isDsrMode">
     <app-quick-add [layout]="'modal'" [fields]="fields" [productFieldType]="'lookup'"
-      [businessObjectFields]="businessObjectFields" [btnClass]="'btn-custom-secondary border-0'"></app-quick-add>
+      [quoteFields]="quoteFields" [orderFields]="orderFields" [presetFields]="{ SourceChannel: 'E-Commerce' }" [btnClass]="'btn-custom-secondary border-0'"></app-quick-add>
   </div>
 </div>
 

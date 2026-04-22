@@ -46,6 +46,7 @@ export class HeaderComponent implements OnInit {
   isReadOnlyCollaborationMode$: Observable<boolean>;
   isDsrMode$: Observable<boolean>;
   showMiniCart$: Observable<boolean>;
+  hideMiniCartForRoute$: Observable<boolean>;
   showProductSearch$: Observable<boolean>; // true when in normal mode OR DSR editing mode
   
   isRestrictedMode$: Observable<boolean>; // true when in DSR or readonly collaboration mode
@@ -67,6 +68,19 @@ export class HeaderComponent implements OnInit {
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       map(() => this.router.url),
       startWith(this.router.url)
+    );
+
+    this.hideMiniCartForRoute$ = currentUrl$.pipe(
+      map(url => {
+        // Always hide on checkout
+        if (url.includes('/checkout')) {
+          return true;
+        }
+        
+        return false;
+      }),
+      distinctUntilChanged(),
+      shareReplay({ bufferSize: 1, refCount: true })
     );
 
     this.isReadOnlyCollaborationMode$ = currentUrl$.pipe(
@@ -111,6 +125,11 @@ export class HeaderComponent implements OnInit {
       currentUrl$
     ]).pipe(
       map(([isDsrMode, url]) => {
+        // Hide mini-cart on the full checkout flow
+        if (url.includes('/checkout') || url.includes('#/checkout')) {
+          return false;
+        }
+        
         if (!isDsrMode) {
           return true; // Always show in normal mode
         }
