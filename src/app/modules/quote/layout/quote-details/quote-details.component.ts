@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, TemplateRef, NgZone, ChangeDetectorRef, O
 import { ActivatedRoute, Router } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
 import { TranslateService, } from '@ngx-translate/core';
-import { filter, map, take, switchMap } from 'rxjs/operators';
+import { filter, map, take, switchMap, catchError } from 'rxjs/operators';
 import { get, set, first, map as _map, isEmpty, join, split, trim, isNil } from 'lodash';
 import { Observable, of, BehaviorSubject, Subscription, combineLatest, forkJoin } from 'rxjs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
@@ -11,7 +11,7 @@ import { FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
 import {
   UserService, QuoteService, Quote, Order, OrderService, AttachmentService,
   AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService, EmailRequestPayload,
-  CartService, Cart, DateFormat, FieldFilter, ContactService, CollaborationRequestService, CollaborationRequest, CollaborationAccessType, CollaborationAuthenticationType
+  CartService, Cart, DateFormat, FieldFilter, ContactService, CollaborationRequestService, CollaborationRequest, CollaborationAccessType, CollaborationAuthenticationType, CollaborationStatus, StorefrontService
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, ToasterPosition, FileOutput, AddCommentsConfig, ViewCommentsConfig } from '@congarevenuecloud/elements';
 import { DsrService } from '../../../../services/dsr.service';
@@ -140,7 +140,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     private translateService: TranslateService,
     private collaborationService: CollaborationRequestService,
     private contactService: ContactService,
-    private dsrService: DsrService
+    private dsrService: DsrService,
+    private storefrontService: StorefrontService
   ) { }
 
   ngOnInit() {
@@ -261,23 +262,63 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   acceptQuote(quoteId: string, primaryContactId: string) {
     this.acceptLoader = true;
-    this.quoteService.acceptQuote(quoteId).pipe(take(1)).subscribe(
-      res => {
+    this.quoteService.acceptQuote(quoteId).pipe(
+      take(1),
+      switchMap(res => this.updateCollaborationRequestIfNeeded(res, CollaborationStatus.Accepted)),
+      switchMap(res => {
         if (res) {
           this.acceptLoader = false;
-          this.sendEmailWithTemplate(this.acceptQuoteEmailTemplateName);
-          const ngbModalOptions: ModalOptions = {
-            backdrop: 'static',
-            keyboard: false
-          };
-          this.ngZone.run(() => {
-            this.intimationModal = this.modalService.show(this.intimationTemplate, ngbModalOptions);
-          });
+          // Feature flag check for email notifications
+          return this.shouldSendEmailFromUI();
         }
+        this.acceptLoader = false;
+        return of(null); // Return null to indicate failure
+      })
+    ).subscribe(
+      enableEmailsFromDCUI => {
+        if (enableEmailsFromDCUI === null) {
+          // Quote acceptance failed, don't show modal or send email
+          return;
+        }
+        if (enableEmailsFromDCUI) {
+          this.sendEmailWithTemplate(this.acceptQuoteEmailTemplateName);
+        }
+        const ngbModalOptions: ModalOptions = {
+          backdrop: 'static',
+          keyboard: false
+        };
+        this.ngZone.run(() => {
+          this.intimationModal = this.modalService.show(this.intimationTemplate, ngbModalOptions);
+        });
       },
       err => {
         this.acceptLoader = false;
       }
+    );
+  }
+
+  private updateCollaborationRequestIfNeeded(originalValue: boolean, status: CollaborationStatus): Observable<boolean> {
+    if (originalValue && this.isDsrMode && this.collaborationRequest) {
+      const payload = {
+        Id: this.collaborationRequest.Id,
+        Name: this.collaborationRequest.Name,
+        Status: status
+      };
+      return this.collaborationService.updateCollaborationRequest(this.collaborationRequest.Id, payload).pipe(
+        take(1),
+        map(() => originalValue),
+        catchError(() => of(originalValue))
+      );
+    }
+    return of(originalValue);
+  }
+
+  // TO DO : Remove this method once email sending logic is moved to backend
+  private shouldSendEmailFromUI(): Observable<boolean> {
+    return this.storefrontService.getConfigSettings().pipe(
+      take(1),
+      catchError(() => of({ enableEmailsFromDCUI: true })),
+      map(configSettings => get(configSettings, 'enableEmailsFromDCUI', true))
     );
   }
 
@@ -360,11 +401,20 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
 
   rejectQuote(quoteId: string) {
     this.rejectLoader = true;
-    this.quoteService.rejectQuote(quoteId).pipe(take(1)).subscribe(
+    this.quoteService.rejectQuote(quoteId).pipe(
+      take(1),
+      switchMap(() => this.updateCollaborationRequestIfNeeded(true, CollaborationStatus.Cancelled)),
+      switchMap(() => {
+        this.getQuote();
+        // Feature flag check for email notifications
+        return this.shouldSendEmailFromUI();
+      })
+    ).subscribe(
       {
-        next: () => {
-          this.getQuote();
-          this.sendEmailWithTemplate(this.rejectQuoteEmailTemplateName);
+        next: (enableEmailsFromDCUI) => {
+          if (enableEmailsFromDCUI) {
+            this.sendEmailWithTemplate(this.rejectQuoteEmailTemplateName);
+          }
         },
         complete: () => {
           this.rejectLoader = false;
@@ -454,12 +504,26 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     } else {
       obsv$ = of(null);
     }
-    combineLatest([this.emailService.getEmailTemplateByName('DC Quote generate-document Template'), obsv$]).pipe(
-      switchMap(result => {
-        return first(result) ? this.emailService.sendEmailNotificationWithTemplate(get(first(result), 'Id'), this.quote, get(this.quote.PrimaryContact, 'Id')) : of(null)
-      }), take(1)).subscribe(() => {
-        this.getQuote();
-      });
+    
+    // Feature flag check for email notifications
+    this.shouldSendEmailFromUI().pipe(
+      take(1)
+    ).subscribe(enableEmailsFromDCUI => {
+      
+      if (enableEmailsFromDCUI) {
+        combineLatest([this.emailService.getEmailTemplateByName('DC Quote generate-document Template'), obsv$]).pipe(
+          switchMap(result => {
+            return first(result) ? this.emailService.sendEmailNotificationWithTemplate(get(first(result), 'Id'), this.quote, get(this.quote.PrimaryContact, 'Id')) : of(null)
+          }), take(1)).subscribe(() => {
+            this.getQuote();
+          });
+      } else {
+        obsv$.pipe(take(1)).subscribe(() => {
+          this.getQuote();
+        });
+      }
+    });
+    
     this.quoteGenerated = true;
   }
 
