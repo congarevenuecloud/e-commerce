@@ -95,25 +95,40 @@
                     </div>
                     <ng-template #showBillingAddressTemplate>
                       <div>
-                        <apt-input-field name="billTo" [labelClass]="'font-weight-normal'" [entity]="order"
-                          [field]="'BillToAccount'" [(ngModel)]="order.BillToAccount"
-                          (ngModelChange)="onBillToChange()">
+                        <!-- Primary Contact Field - Now Above Bill To -->
+                        <apt-input-field name="primaryContact" [labelClass]="'font-weight-normal'" [entity]="order"
+                          (ngModelChange)="onPrimaryContactChange($event)" [field]="'PrimaryContact'"
+                          [(ngModel)]="order.PrimaryContact" [lookupOptions]="lookupOptions" [required]="true"
+                          [errorMsg]="errMessages.requiredPrimaryContact">
                         </apt-input-field>
-                        <div *ngIf="billToAccount$ | async as billAccount">
-                          <apt-address [value]="billAccount" [type]="'Billing'" [readonly]="true"></apt-address>
-                        </div>
-                        <div class="pt-3">
-                          <apt-input-field name="primaryContact" [labelClass]="'font-weight-normal'" [entity]="order"
-                            (ngModelChange)="onPrimaryContactChange($event)" [field]="'PrimaryContact'"
-                            [(ngModel)]="order.PrimaryContact" [lookupOptions]="lookupOptions" [required]="true"
-                            [errorMsg]="errMessages.requiredPrimaryContact">
-                          </apt-input-field>
+
+                        <!-- Ship To and Bill To side by side -->
+                        <div class="row pt-3">
+                          <div class="col-md-6">
+                            <apt-input-field name="shipTo" [labelClass]="'font-weight-normal'" [entity]="order"
+                              [field]="'ShipToAccount'" [(ngModel)]="order.ShipToAccount"
+                              (ngModelChange)="onShipToChange()" [required]="true"
+                              [errorMsg]="errMessages.requiredShipToAcc">
+                            </apt-input-field>
+                            <div *ngIf="shipToAccount$ | async as shipAccount">
+                              <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"></apt-address>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <apt-input-field name="billTo" [labelClass]="'font-weight-normal'" [entity]="order"
+                              [field]="'BillToAccount'" [(ngModel)]="order.BillToAccount"
+                              (ngModelChange)="onBillToChange()">
+                            </apt-input-field>
+                            <div *ngIf="billToAccount$ | async as billAccount">
+                              <apt-address [value]="billAccount" [type]="'Billing'" [readonly]="true"></apt-address>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </ng-template>
 
-                    <!-- Shipping equals billing checkbox -->
-                    <div class="custom-control custom-checkbox my-4">
+                    <!-- Shipping equals billing checkbox (only for guest users) -->
+                    <div *ngIf="!isLoggedIn" class="custom-control custom-checkbox my-4">
                       <input type="checkbox" class="custom-control-input" id="same-address"
                         (ngModelChange)="selectTab($event)" [(ngModel)]="shippingEqualsBilling"
                         name="shippingEqualsBilling">
@@ -121,26 +136,12 @@
                         translate}}</label>
                     </div>
 
-                    <!-- Shipping Address Section (only shown when checkbox is unchecked) -->
-                    <div *ngIf="!shippingEqualsBilling">
+                    <!-- Shipping Address Section (only for guest users when checkbox is unchecked) -->
+                    <div *ngIf="!isLoggedIn && !shippingEqualsBilling">
                       <h6 class="mb-3 font-weight-bold">{{'CART.SHIPPING_ADDRESS' | translate}}</h6>
-                      <div *ngIf="!isLoggedIn else showShippingAddressTemplate">
-                        <apt-address [(ngModel)]="primaryContact" type="Shipping" name="shippingAddress" [form]="form"
-                          (addressChange)="onAddressChange('Shipping')">
-                        </apt-address>
-                      </div>
-                      <ng-template #showShippingAddressTemplate>
-                        <div>
-                          <apt-input-field name="shipTo" [labelClass]="'font-weight-normal'" [entity]="order"
-                            [field]="'ShipToAccount'" [(ngModel)]="order.ShipToAccount"
-                            (ngModelChange)="onShipToChange()" [required]="true"
-                            [errorMsg]="errMessages.requiredShipToAcc">
-                          </apt-input-field>
-                          <div *ngIf="shipToAccount$ | async as shipAccount">
-                            <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"></apt-address>
-                          </div>
-                        </div>
-                      </ng-template>
+                      <apt-address [(ngModel)]="primaryContact" type="Shipping" name="shippingAddress" [form]="form"
+                        (addressChange)="onAddressChange('Shipping')">
+                      </apt-address>
                     </div>
                   </div>
                 </form>
@@ -312,22 +313,11 @@
               <div class="card-body text-muted">
                 <!-- For logged-in users -->
                 <ng-container *ngIf="isLoggedIn">
-                  <!-- Show ship-to account if shipping is different from billing -->
-                  <ng-container *ngIf="!shippingEqualsBilling">
-                    <div *ngIf="shipToAccount$ | async as shipAccount">
-                      <p class="mb-2 font-weight-bold text-dark">{{ shipAccount.Name }}</p>
-                      <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"
-                        [showLabel]="false"></apt-address>
-                    </div>
-                  </ng-container>
-                  <!-- Show bill-to account shipping address if shipping equals billing -->
-                  <ng-container *ngIf="shippingEqualsBilling">
-                    <div *ngIf="billToAccount$ | async as billAccount">
-                      <p class="mb-2 font-weight-bold text-dark">{{ billAccount.Name }}</p>
-                      <apt-address [value]="billAccount" [type]="'Shipping'" [readonly]="true"
-                        [showLabel]="false"></apt-address>
-                    </div>
-                  </ng-container>
+                  <div *ngIf="shipToAccount$ | async as shipAccount">
+                    <p class="mb-2 font-weight-bold text-dark">{{ shipAccount.Name }}</p>
+                    <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"
+                      [showLabel]="false"></apt-address>
+                  </div>
                 </ng-container>
                 <!-- For guest users -->
                 <ng-container *ngIf="!isLoggedIn && primaryContact">
@@ -516,16 +506,9 @@
                     <div *ngIf="billToAccount$ | async as billAccount" class="text-muted mb-3">
                       <apt-address [value]="billAccount" [type]="'Billing'" [readonly]="true"></apt-address>
                     </div>
-                    <ng-container *ngIf="!shippingEqualsBilling">
-                      <div *ngIf="shipToAccount$ | async as shipAccount" class="text-muted">
-                        <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"></apt-address>
-                      </div>
-                    </ng-container>
-                    <ng-container *ngIf="shippingEqualsBilling">
-                      <div *ngIf="billToAccount$ | async as billAccount" class="text-muted">
-                        <apt-address [value]="billAccount" [type]="'Shipping'" [readonly]="true"></apt-address>
-                      </div>
-                    </ng-container>
+                    <div *ngIf="shipToAccount$ | async as shipAccount" class="text-muted">
+                      <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"></apt-address>
+                    </div>
                   </ng-container>
                   <ng-container *ngIf="!isLoggedIn && primaryContact">
                     <div class="mb-3">
