@@ -313,7 +313,6 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     return of(originalValue);
   }
 
-  // TO DO : Remove this method once email sending logic is moved to backend
   private shouldSendEmailFromUI(): Observable<boolean> {
     return this.storefrontService.getConfigSettings().pipe(
       take(1),
