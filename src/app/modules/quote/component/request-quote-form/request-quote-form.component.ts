@@ -55,6 +55,7 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
 
   contact: string;
   isGuest: boolean = false;
+  private lastProcessedContactId: string = null;
 
   constructor(public quoteService: QuoteService,
     private accountService: AccountService,
@@ -73,12 +74,16 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
       .pipe(take(1)).subscribe(([account, user, quote, storefront]) => {
         this.isGuest = lowerCase(user.Alias) === 'guest';
         this.primaryContact = new Contact();
-        this.quote.ShipToAccount = account;
-        this.quote.ProposalName = 'New Quote'
-        this.quote.BillToAccount = account;
+        this.billToAccount$ = of(null);
+        this.shipToAccount$ = of(null);
+        this.quote.ProposalName = 'New Quote';
         this.quote.Account = get(this.cart, 'Account');
         this.quote.PrimaryContact = this.isGuest ? this.primaryContact : get(user, 'Contact');
         this.contact = this.cart.Proposald ? get(quote[0], 'PrimaryContact.Id') : get(user, 'Contact.Id');
+        if (this.isGuest) {
+          this.quote.BillToAccount = account;
+          this.quote.ShipToAccount = account;
+        }
         if (get(this.cart, 'Proposald.Id')) {
           this.quote = get(this.cart, 'Proposald');
           this.quote.ProposalName = quote.Name;
@@ -123,6 +128,10 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
   }
 
   shipToChange() {
+    if (!get(this.quote.ShipToAccount, 'Id')) {
+      this.shipToAccount$ = of(null);
+      return;
+    }
     this.shipToAccount$ = this.accountService.getAccount(get(this.quote.ShipToAccount, 'Id'));
     this.shipToAccount$.pipe(take(1)).subscribe((newShippingAccount) => {
       this.quote.ShipToAccount = newShippingAccount;
@@ -131,6 +140,10 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
   }
 
   billToChange() {
+    if (!get(this.quote.BillToAccount, 'Id')) {
+      this.billToAccount$ = of(null);
+      return;
+    }
     this.billToAccount$ = this.accountService.getAccount(get(this.quote.BillToAccount, 'Id'));
     this.billToAccount$.pipe(take(1)).subscribe((newBillingAccount) => {
       this.quote.BillToAccount = newBillingAccount;
@@ -148,23 +161,44 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
   }
   /**
     * Event handler for when the primary contact input changes.
+    * Populates Ship To and Bill To accounts based on the contact's associated account.
     * @param event The event that was fired.
     */
   primaryContactChange() {
-    if (get(this.contact, 'Id')) {
-      this.contactService.fetch(get(this.contact, 'Id'))
-        .pipe(take(1))
-        .subscribe((newPrimaryContact: Contact) => {
-          this.quote.PrimaryContact = newPrimaryContact;
-          this.onQuoteUpdate.emit(this.quote);
-        });
-    } else if (get(this.quote.PrimaryContact, 'Id')) {
-      this.onQuoteUpdate.emit(this.quote);
-    }
-    else {
+    const contactId = get(this.quote.PrimaryContact, 'Id');
+    if (!contactId) {
+      // Primary Contact cleared - reset Ship To and Bill To
+      this.lastProcessedContactId = null;
       this.quote.PrimaryContact = null;
+      this.quote.ShipToAccount = null;
+      this.quote.BillToAccount = null;
+      this.shipToAccount$ = of(null);
+      this.billToAccount$ = of(null);
       this.onQuoteUpdate.emit(this.quote);
+      return;
     }
+    if (contactId === this.lastProcessedContactId) {
+      return;
+    }
+    this.lastProcessedContactId = contactId;
+    this.contactService.getContactById(contactId)
+      .pipe(take(1))
+      .subscribe((newPrimaryContact: Contact) => {
+        this.quote.PrimaryContact = newPrimaryContact;
+        const contactAccount: Account = get(newPrimaryContact, 'Account');
+        if (contactAccount && contactAccount.Id) {
+          this.quote.ShipToAccount = contactAccount;
+          this.quote.BillToAccount = contactAccount;
+          this.shipToChange();
+          this.billToChange();
+        } else {
+          this.quote.ShipToAccount = null;
+          this.quote.BillToAccount = null;
+          this.shipToAccount$ = of(null);
+          this.billToAccount$ = of(null);
+        }
+        this.onQuoteUpdate.emit(this.quote);
+      });
   }
 
 }

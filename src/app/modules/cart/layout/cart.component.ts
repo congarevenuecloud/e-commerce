@@ -8,7 +8,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { get, uniqueId, find, defaultTo, isNil, set, isEmpty } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigurationService } from '@congarevenuecloud/core';
-import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate, AttachmentService, IntegrationService, TaxAddress, LocalCurrencyPipe } from '@congarevenuecloud/ecommerce';
+import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate, AttachmentService, IntegrationService, TaxAddress, LocalCurrencyPipe, StorefrontService } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, FileOutput, PaymentIntegrationComponent, PaymentResult, WizardStep } from '@congarevenuecloud/elements';
 
 @Component({
@@ -211,6 +211,8 @@ export class CartComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
   private beforeUnloadHandler: (event: BeforeUnloadEvent) => void;
+  private lastProcessedContactId: string = null;
+  private lastAccountWithShownError: string = null;
 
   constructor(private cartService: CartService,
     public configurationService: ConfigurationService,
@@ -227,7 +229,8 @@ export class CartComponent implements OnInit, OnDestroy {
     private exceptionService: ExceptionService,
     private attachmentService: AttachmentService,
     private integrationService: IntegrationService,
-    private localCurrencyPipe: LocalCurrencyPipe) {
+    private localCurrencyPipe: LocalCurrencyPipe,
+    private storefrontService: StorefrontService) {
     this.uniqueId = uniqueId();
   }
 
@@ -323,8 +326,10 @@ export class CartComponent implements OnInit, OnDestroy {
       // Only set default values if they haven't been set yet (preserve user selections)
       if (!this.order.Name) this.order.Name = 'New Order';
       if (!this.order.SoldToAccount?.Id && accountToUse) this.order.SoldToAccount = accountToUse;
-      if (!this.order.BillToAccount?.Id && accountToUse) this.order.BillToAccount = accountToUse;
-      if (!this.order.ShipToAccount?.Id && accountToUse) this.order.ShipToAccount = accountToUse;
+      if (!this.isLoggedIn) {
+        if (!this.order.BillToAccount?.Id && accountToUse) this.order.BillToAccount = accountToUse;
+        if (!this.order.ShipToAccount?.Id && accountToUse) this.order.ShipToAccount = accountToUse;
+      }
       if (!this.order.PriceList?.Id && get(cart, 'PriceList')) this.order.PriceList = get(cart, 'PriceList');
 
     }));
@@ -439,13 +444,72 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   onPrimaryContactChange($event: Contact) {
-    isNil($event) ? set(this.order, 'PrimaryContact', $event) : this.subscriptions.push(
-      this.contactService.fetch(get($event, 'Id')).subscribe(c => {
+    if (isNil($event)) {
+      set(this.order, 'PrimaryContact', null);
+      this.lastProcessedContactId = null;
+      this.lastAccountWithShownError = null; // Clear error tracking
+      
+      // Clear Bill To and Ship To accounts when primary contact is cleared
+      if (this.isLoggedIn) {
+        this.order.BillToAccount = null;
+        this.order.ShipToAccount = null;
+        this.billToAccount$ = of(null);
+        this.shipToAccount$ = of(null);
+        
+        // Clear tax address and reset tax calculation state
+        this.taxAddress = null;
+        this.taxCalculated = false;
+        this.cdr.detectChanges();
+      }
+      
+      this.isButtonDisabled();
+      return;
+    }
+
+    const contactId = get($event, 'Id');
+
+    // Return early if this contact was already processed (e.g. same contact re-emitted on step revisit)
+    if (contactId === this.lastProcessedContactId) {
+      return;
+    }
+
+    if (this.isLoggedIn) {
+      // If the lookup component already hydrated the Account relation, skip the fetch entirely
+      const existingAccount: Account = get($event, 'Account');
+      if (existingAccount && get(existingAccount, 'Id')) {
+        set(this.order, 'PrimaryContact', $event);
+        this.order.BillToAccount = existingAccount;
+        this.order.ShipToAccount = existingAccount;
+        this.onBillToChange();
+        this.onShipToChange();
+        this.lastProcessedContactId = contactId;
+        this.isButtonDisabled();
+        this.cdr.detectChanges();
+        return;
+      }
+    }
+
+    // Account not yet loaded — fetch the full contact to get the Account relation
+    this.subscriptions.push(
+      this.contactService.getContactById(contactId).subscribe(c => {
         set(this.order, 'PrimaryContact', c);
         this.order.PrimaryContact.Id = get(c, 'Id');
+
+        if (this.isLoggedIn) {
+          const contactAccount: Account = get(c, 'Account');
+          if (contactAccount && get(contactAccount, 'Id')) {
+            this.order.BillToAccount = contactAccount;
+            this.order.ShipToAccount = contactAccount;
+          }
+          this.onBillToChange();
+          this.onShipToChange();
+        }
+
+        this.lastProcessedContactId = contactId;
+        this.isButtonDisabled();
+        this.cdr.detectChanges();
       })
     );
-    this.isButtonDisabled()
   }
 
   /**
@@ -595,35 +659,57 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   onBillToChange() {
-    if (get(this.order.BillToAccount, 'Id'))
-      this.billToAccount$ = this.accountService.getAccount(
-        get(this.order.BillToAccount, 'Id')
-      ).pipe(shareReplay(1));
-
-    // Sync shipping account with billing account when they should be the same
-    if (this.shippingEqualsBilling && this.isLoggedIn && this.order.BillToAccount) {
-      this.order.ShipToAccount = this.order.BillToAccount;
-      this.shipToAccount$ = this.billToAccount$;
+    if (!get(this.order.BillToAccount, 'Id')) {
+      this.billToAccount$ = of(null);
+      return;
     }
 
-    if (this.shippingEqualsBilling && this.billToAccount$ && this.isLoggedIn) {
+    this.billToAccount$ = this.accountService.getAccount(
+      get(this.order.BillToAccount, 'Id')
+    ).pipe(shareReplay(1));
+
+    // For logged-in users: Never use billing address for tax (shipping address is used in onShipToChange)
+    // For guest users: Only use billing address if shippingEqualsBilling checkbox is checked
+    if (this.billToAccount$ && !this.isLoggedIn && this.shippingEqualsBilling) {
       this.billToAccount$.pipe(take(1)).subscribe(account => {
-        // Use BillingPostalCode, fallback to ShippingPostalCode if billing is not available
-        const postalCode = account.BillingPostalCode || account.ShippingPostalCode;
+        this.order.BillToAccount = account;
+        const postalCode = account.BillingPostalCode;
 
         if (account && postalCode) {
           this.taxAddress = {
-            Line1: account.BillingStreet || account.ShippingStreet || '',
+            Line1: account.BillingStreet || '',
             Line2: '',
-            City: account.BillingCity || account.ShippingCity || '',
-            Region: account.BillingState || account.ShippingState || '',
-            Country: account.BillingCountry || account.ShippingCountry || '',
+            City: account.BillingCity || '',
+            Region: account.BillingState || '',
+            Country: account.BillingCountry || '',
             PostalCode: postalCode.toString()
           };
         } else {
+          // Clear tax address to disable Calculate Tax button
+          this.taxAddress = null;
+          this.cdr.detectChanges();
           this.exceptionService.showError(this.translate.instant('TAX.ACCOUNT_MISSING_POSTAL_CODE'));
         }
       })
+    } else if (this.billToAccount$) {
+      // For logged-in users: Fetch and store account, validate postal code but don't set taxAddress
+      this.billToAccount$.pipe(take(1)).subscribe(account => {
+        this.order.BillToAccount = account;
+        
+        // Show error if billing postal code is missing (even though not used for tax)
+        // Only show error once per account to prevent duplicates from same selection
+        if (this.isLoggedIn && account && !account.BillingPostalCode) {
+          const isSameAccountAsLast = (this.lastAccountWithShownError === account.Id);
+          
+          if (!isSameAccountAsLast) {
+            this.lastAccountWithShownError = account.Id;
+            this.exceptionService.showError(this.translate.instant('TAX.ACCOUNT_MISSING_POSTAL_CODE'));
+          }
+        } else if (account?.BillingPostalCode) {
+          // Clear error tracking when any account with valid postal code is selected
+          this.lastAccountWithShownError = null;
+        }
+      });
     }
   }
 
@@ -634,21 +720,43 @@ export class CartComponent implements OnInit, OnDestroy {
       ).pipe(shareReplay(1));
     this.isButtonDisabled();
 
-    if (!this.shippingEqualsBilling && this.shipToAccount$ && this.isLoggedIn) {
+    // For logged-in users: Always use shipping address for tax calculation (ignore shippingEqualsBilling flag)
+    // For guest users: Only use shipping address if shippingEqualsBilling checkbox is unchecked
+    if (this.shipToAccount$ && this.isLoggedIn) {
       this.shipToAccount$.pipe(take(1)).subscribe(account => {
-        const postalCode = account.ShippingPostalCode;
+        this.order.ShipToAccount = account;
 
-        if (account && postalCode) {
-          this.taxAddress = {
-            Line1: account.ShippingStreet || account.BillingStreet || '',
-            Line2: '',
-            City: account.ShippingCity || account.BillingCity || '',
-            Region: account.ShippingState || account.BillingState || '',
-            Country: account.ShippingCountry || account.BillingCountry || '',
-            PostalCode: postalCode.toString()
-          };
+        if (account) {
+          const postalCode = account.ShippingPostalCode;
+          
+          if (postalCode) {
+            this.taxAddress = {
+              Line1: account.ShippingStreet || '',
+              Line2: '',
+              City: account.ShippingCity || '',
+              Region: account.ShippingState || '',
+              Country: account.ShippingCountry || '',
+              PostalCode: postalCode.toString()
+            };
+            // Clear error tracking when any account with valid postal code is selected
+            this.lastAccountWithShownError = null;
+          } else {
+            // Account exists but missing postal code - show error
+            this.taxAddress = null;
+            this.cdr.detectChanges();
+            
+            // Only show error once per account to prevent duplicates from same selection
+            const isSameAccountAsLast = (this.lastAccountWithShownError === account.Id);
+            
+            if (!isSameAccountAsLast) {
+              this.lastAccountWithShownError = account.Id;
+              this.exceptionService.showError(this.translate.instant('TAX.ACCOUNT_MISSING_POSTAL_CODE'));
+            }
+          }
         } else {
-          this.exceptionService.showError(this.translate.instant('TAX.ACCOUNT_MISSING_POSTAL_CODE'));
+          // Clear tax address to disable Calculate Tax button when account is null
+          this.taxAddress = null;
+          this.cdr.detectChanges();
         }
       })
     }
@@ -722,6 +830,9 @@ export class CartComponent implements OnInit, OnDestroy {
    * Redirect to Order detail page
    */
   redirectOrderPage() {
+    if (!this.orderConfirmation?.Id) {
+      return;
+    }
     this.ngZone.run(() => {
       this.router.navigate(['/orders', this.orderConfirmation.Id]);
     });
@@ -889,11 +1000,31 @@ export class CartComponent implements OnInit, OnDestroy {
     this.updateStepClickability(event.currentIndex);
   }
 
-  /**
-   * Send order confirmation email notification
-   */
+  private shouldSendEmailFromUI(): Observable<boolean> {
+    return this.storefrontService.getConfigSettings().pipe(
+      take(1),
+      catchError(() => of({ enableEmailsFromDCUI: true })),
+      map(configSettings => get(configSettings, 'enableEmailsFromDCUI', true))
+    );
+  }
+
   private sendOrderConfirmationEmail(): void {
     if (!get(this.orderConfirmation, 'Id')) return;
+
+    // Feature flag check for email notifications
+    this.shouldSendEmailFromUI().pipe(
+      take(1)
+    ).subscribe(enableEmailsFromDCUI => {
+      
+      if (!enableEmailsFromDCUI) {
+        return;
+      }
+
+      this.sendOrderEmail();
+    });
+  }
+
+  private sendOrderEmail(): void {
 
     // Get email address from primary contact or order
     const emailAddress = get(this.primaryContact, 'Email') || get(this.order, 'PrimaryContact.Email') || get(this.orderConfirmation, 'PrimaryContact.Email');

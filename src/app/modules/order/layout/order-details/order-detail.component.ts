@@ -1,12 +1,12 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy, ChangeDetectorRef, AfterViewChecked, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest, of } from 'rxjs';
-import { filter, map, switchMap, mergeMap, take } from 'rxjs/operators';
+import { filter, map, switchMap, mergeMap, take, catchError } from 'rxjs/operators';
 import { get, set, indexOf, sum, cloneDeep, first, isNil, map as _map, join, split, trim } from 'lodash';
 import {
   Order, OrderLineItem, OrderService, UserService,
   ItemGroup, LineItemService, EmailService, AccountService,
-  Cart, AttachmentService, ProductInformationService, AttachmentDetails
+  Cart, AttachmentService, ProductInformationService, AttachmentDetails, StorefrontService
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, FileOutput } from '@congarevenuecloud/elements';
 @Component({
@@ -94,7 +94,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
     private attachmentService: AttachmentService,
-    private productInformationService: ProductInformationService
+    private productInformationService: ProductInformationService,
+    private storefrontService: StorefrontService
   ) { }
 
   ngOnInit() {
@@ -206,22 +207,40 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     return orderLineItems.filter(orderItem => !orderItem.IsPrimaryLine && orderItem.PrimaryLineNumber === lineItem.PrimaryLineNumber);
   }
 
+  private shouldSendEmailFromUI(): Observable<boolean> {
+    return this.storefrontService.getConfigSettings().pipe(
+      take(1),
+      catchError(() => of({ enableEmailsFromDCUI: true })),
+      map(configSettings => get(configSettings, 'enableEmailsFromDCUI', true))
+    );
+  }
+
   confirmOrder(orderId: string, primaryContactId: string) {
     this.isLoading = true;
-    this.subscriptions.push(combineLatest([this.orderService.acceptOrder(orderId), this.emailService.getEmailTemplateByName('DC Order Confirmation Template')]).pipe(
-      switchMap(([orderAcceptanceResult, templateInfo]) => {
-        this.isLoading = false;
-        if (orderAcceptanceResult) {
-          this.exceptionService.showSuccess('ACTION_BAR.ORDER_CONFIRMATION_TOASTR_MESSAGE', 'ACTION_BAR.ORDER_CONFIRMATION_TOASTR_TITLE');
-        }
-        else {
-          this.exceptionService.showError('ACTION_BAR.ORDER_CONFIRMATION_FAILURE');
-        }
-        return templateInfo ? this.emailService.sendEmailNotificationWithTemplate(get(templateInfo, 'Id'), this.order, primaryContactId) : of(null);
+    this.subscriptions.push(
+      combineLatest([
+        this.orderService.acceptOrder(orderId), 
+        this.emailService.getEmailTemplateByName('DC Order Confirmation Template'),
+        this.shouldSendEmailFromUI()
+      ]).pipe(
+        switchMap(([orderAcceptanceResult, templateInfo, enableEmailsFromDCUI]) => {
+          this.isLoading = false;
+          if (orderAcceptanceResult) {
+            this.exceptionService.showSuccess('ACTION_BAR.ORDER_CONFIRMATION_TOASTR_MESSAGE', 'ACTION_BAR.ORDER_CONFIRMATION_TOASTR_TITLE');
+          }
+          else {
+            this.exceptionService.showError('ACTION_BAR.ORDER_CONFIRMATION_FAILURE');
+          }
+          // Feature flag check for email notifications  
+          return (enableEmailsFromDCUI && templateInfo) 
+            ? this.emailService.sendEmailNotificationWithTemplate(get(templateInfo, 'Id'), this.order, primaryContactId) 
+            : of(null);
+        }),
+        take(1)
+      ).subscribe(() => {
+        this.getOrder();
       })
-    ).subscribe(() => {
-      this.getOrder();
-    }))
+    );
   }
 
   onGenerateOrder() {
@@ -234,10 +253,23 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       obsv$ = of(null);
     }
 
-    combineLatest([this.emailService.getEmailTemplateByName('DC Order generate-document Template'), obsv$]).pipe(
-      switchMap(result => {
-        return first(result) ? this.emailService.sendEmailNotificationWithTemplate(get(first(result), 'Id'), this.order, get(this.order.PrimaryContact, 'Id')) : of(null)
-      }), take(1)).subscribe(() => { this.getOrder(); });
+    // Execute order update first, then check config for optional email
+    obsv$.pipe(
+      switchMap(() => this.shouldSendEmailFromUI()),
+      switchMap(enableEmailsFromDCUI => {
+        return enableEmailsFromDCUI
+          ? this.emailService.getEmailTemplateByName('DC Order generate-document Template')
+          : of(null);
+      }),
+      switchMap(template => {
+        return template
+          ? this.emailService.sendEmailNotificationWithTemplate(get(template, 'Id'), this.order, get(this.order.PrimaryContact, 'Id'))
+          : of(null);
+      }),
+      take(1)
+    ).subscribe(() => { 
+      this.getOrder(); 
+    });
   }
 
 

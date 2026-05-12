@@ -29,15 +29,15 @@
             <div class="card-body text-muted">
               <!-- For logged-in users -->
               <ng-container *ngIf="isLoggedIn">
-                <div *ngIf="order?.BillToAccount">
-                  <p class="mb-2 font-weight-bold text-dark">{{ order.BillToAccount.Name }}</p>
+                <div *ngIf="order?.ShipToAccount">
+                  <p class="mb-2 font-weight-bold text-dark">{{ order.ShipToAccount.Name }}</p>
                   <address class="mb-0">
-                    <span *ngIf="order.BillToAccount.BillingStreet">{{ order.BillToAccount.BillingStreet }}<br></span>
-                    <span *ngIf="order.BillToAccount.BillingCity || order.BillToAccount.BillingState || order.BillToAccount.BillingPostalCode">
-                      {{ order.BillToAccount.BillingCity }}<ng-container *ngIf="order.BillToAccount.BillingCity && (order.BillToAccount.BillingState || order.BillToAccount.BillingPostalCode)">, </ng-container>
-                      {{ order.BillToAccount.BillingState }} {{ order.BillToAccount.BillingPostalCode }}<br>
+                    <span *ngIf="order.ShipToAccount.ShippingStreet">{{ order.ShipToAccount.ShippingStreet }}<br></span>
+                    <span *ngIf="order.ShipToAccount.ShippingCity || order.ShipToAccount.ShippingState || order.ShipToAccount.ShippingPostalCode">
+                      {{ order.ShipToAccount.ShippingCity }}<ng-container *ngIf="order.ShipToAccount.ShippingCity && (order.ShipToAccount.ShippingState || order.ShipToAccount.ShippingPostalCode)">, </ng-container>
+                      {{ order.ShipToAccount.ShippingState }} {{ order.ShipToAccount.ShippingPostalCode }}<br>
                     </span>
-                    <span *ngIf="order.BillToAccount.BillingCountry">{{ order.BillToAccount.BillingCountry }}</span>
+                    <span *ngIf="order.ShipToAccount.ShippingCountry">{{ order.ShipToAccount.ShippingCountry }}</span>
                   </address>
                 </div>
               </ng-container>

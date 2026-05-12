@@ -24,10 +24,10 @@
           </apt-product-type-filter>
 
           <apt-category-filter [category]="category" title="{{'PRODUCT_LIST.RELATED_CATEGORIES' | translate}}"
-            limit="10" relationship="peers" class="mb-2 mt-0" (onChange)="onCategory($event)"></apt-category-filter>
+            limit="10" relationship="peers" [includeDescendants]="false" class="mb-2 mt-0" (onChange)="onCategory($event)"></apt-category-filter>
 
           <apt-category-filter [category]="category" title="{{'COMMON.SUB_CATEGORIES' | translate}}" limit="10"
-            relationship="children" selection="multi" class="mb-2" (onChange)="onSubcategoryFilter($event)">
+            relationship="children" selection="multi" [includeDescendants]="false" class="mb-2" (onChange)="onSubcategoryFilter($event)">
           </apt-category-filter>
           <div *ngIf="data$ | async as data">
             <apt-facet-filter class="mb-2" [facet]="data?.Facets" [record]="product"
