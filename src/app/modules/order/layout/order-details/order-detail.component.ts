@@ -6,7 +6,8 @@ import { get, set, indexOf, sum, cloneDeep, first, isNil, map as _map, join, spl
 import {
   Order, OrderLineItem, OrderService, UserService,
   ItemGroup, LineItemService, EmailService, AccountService,
-  Cart, AttachmentService, ProductInformationService, AttachmentDetails, StorefrontService
+  Cart, AttachmentService, ProductInformationService, AttachmentDetails, StorefrontService,
+  IntegrationService
 } from '@congarevenuecloud/ecommerce';
 import { ExceptionService, LookupOptions, FileOutput } from '@congarevenuecloud/elements';
 @Component({
@@ -83,6 +84,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   cartRecord: Cart = new Cart();
   // Flag used to toggle the content visibility when the list of fields exceeds two rows of the summary with show more or show less icon.
   isExpanded: boolean = false;
+  // Flag to check if payment integration is enabled
+  isPaymentEnabled: boolean = false;
 
   constructor(private activatedRoute: ActivatedRoute,
     private orderService: OrderService,
@@ -95,7 +98,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     private ngZone: NgZone,
     private attachmentService: AttachmentService,
     private productInformationService: ProductInformationService,
-    private storefrontService: StorefrontService
+    private storefrontService: StorefrontService,
+    private integrationService: IntegrationService
   ) { }
 
   ngOnInit() {
@@ -115,7 +119,14 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     }), take(1)
     ).subscribe(data => {
       this.supportedFileTypes = join(_map(split(data, ','), (item) => trim(item)), ', ');
-    }))
+    }));
+    // Check if payment integration is enabled
+    this.subscriptions.push(this.integrationService.isPaymentIntegrationEnabled().pipe(
+      catchError(() => of(false)),
+      take(1)
+    ).subscribe(isPaymentEnabled => {
+      this.isPaymentEnabled = isPaymentEnabled;
+    }));
   }
 
   getOrder() {

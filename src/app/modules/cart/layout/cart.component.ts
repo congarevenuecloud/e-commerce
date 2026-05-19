@@ -260,16 +260,16 @@ export class CartComponent implements OnInit, OnDestroy {
       }
     };
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
-    // Check if payment feature is enabled
+    // Check if payment feature is enabled via Custom Settings API
     this.subscriptions.push(
-      this.integrationService.getPaymentMetadata().pipe(
+      this.integrationService.isPaymentIntegrationEnabled().pipe(
         catchError((error) => {
           this.exceptionService.showError(error);
-          // Return default metadata with payment disabled
-          return of({ EnablePaymentIntegration: false });
+          // Return false if API fails
+          return of(false);
         })
-      ).subscribe((metadata) => {
-        this.isPaymentFeatureEnabled = get(metadata, 'EnablePaymentIntegration', false);
+      ).subscribe((isPaymentEnabled) => {
+        this.isPaymentFeatureEnabled = isPaymentEnabled;
 
         // Remove payment step if payment feature is not enabled
         if (!this.isPaymentFeatureEnabled) {
@@ -284,15 +284,15 @@ export class CartComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Check if tax calculation is enabled via integration metadata
+    // Check if tax calculation is enabled via Custom Settings API
     this.subscriptions.push(
-      this.integrationService.getTaxMetadata().pipe(
+      this.integrationService.isTaxIntegrationEnabled().pipe(
         catchError((error) => {
-          // Return default metadata with tax disabled if API fails
-          return of({ EnableTaxIntegration: false });
+          // Return false if API fails
+          return of(false);
         })
-      ).subscribe((metadata) => {
-        this.enableTaxCalculations = get(metadata, 'EnableTaxIntegration', false);
+      ).subscribe((isTaxEnabled) => {
+        this.enableTaxCalculations = isTaxEnabled;
       })
     );
     this.subscriptions.push(this.userService.isLoggedIn().subscribe(isLoggedIn => this.isLoggedIn = isLoggedIn));

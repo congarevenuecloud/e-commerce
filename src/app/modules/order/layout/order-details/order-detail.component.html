@@ -83,7 +83,7 @@
                   (onChange)="refreshOrder($event.Description, order, 'Description')"></apt-output-field>
               </div>
 
-              <div class="flex-shrink-1 col-md-4 mb-2" *ngIf="order?.PaymentStatus">
+              <div class="flex-shrink-1 col-md-4 mb-2" *ngIf="isPaymentEnabled && order?.PaymentStatus">
                 <div class="d-flex align-items-end">
                   <apt-output-field [record]="order" field="PaymentStatus" [editable]="false"></apt-output-field>
                   <button *ngIf="isLoggedIn && order?.PaymentStatus === 'Pending'" 
@@ -94,7 +94,7 @@
                 </div>
               </div>
 
-              <div class="flex-shrink-1 col-md-4 mb-2">
+              <div class="flex-shrink-1 col-md-4 mb-2" *ngIf="isPaymentEnabled">
                 <apt-output-field [record]="order" field="PONumber" [editable]="false"></apt-output-field>
               </div>
               <div class="flex-shrink-1 col-md-4 mb-2">
