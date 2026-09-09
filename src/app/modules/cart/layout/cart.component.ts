@@ -2,15 +2,15 @@ import { Component, OnInit, ViewChild, ElementRef, TemplateRef, OnDestroy, NgZon
 
 import { Router } from '@angular/router';
 import { Observable, Subscription, combineLatest, of } from 'rxjs';
-import { switchMap, take, catchError, map, shareReplay } from 'rxjs/operators';
+import { switchMap, take, catchError, map, shareReplay, tap, filter } from 'rxjs/operators';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
-import { get, uniqueId, find, defaultTo, isNil, set, isEmpty } from 'lodash';
+import { get, uniqueId, find, defaultTo, isNil, set, isEmpty, clone, omit } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigurationService } from '@congarevenuecloud/core';
+import { ConfigurationService, FilterOperator } from '@congarevenuecloud/core';
 import { User, Account, Cart, CartService, Order, OrderService, Contact, ContactService, UserService, AccountService, EmailService, PaymentTransaction, AccountInfo, EmailTemplate, AttachmentService, IntegrationService, TaxAddress, LocalCurrencyPipe, StorefrontService, TaxBreakup } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, FileOutput, PaymentIntegrationComponent, PaymentResult, WizardStep } from '@congarevenuecloud/elements';
+import { ExceptionService, FileOutput, PaymentIntegrationComponent, PaymentResult, WizardStep, LookupOptions } from '@congarevenuecloud/elements';
 
 @Component({
     selector: 'app-cart',
@@ -132,6 +132,13 @@ export class CartComponent implements OnInit, OnDestroy {
   };
   cart: Cart;
   isLoggedIn: boolean;
+  // External (Contact) users have a fixed contact/account, so Primary Contact / Ship To / Bill To are read-only.
+  isExternalUser: boolean = false;
+  // Internal-user Primary Contact lookup, scoped to contacts with an account.
+  primaryContactLookupOptions: LookupOptions = {
+    primaryTextField: 'Name',
+    filters: [{ field: 'Account.Id', value: null, filterOperator: FilterOperator.EQUAL }]
+  };
   shipToAccount$: Observable<Account>;
   billToAccount$: Observable<Account>;
   pricingSummaryType: 'checkout' | 'paymentForOrder' | '' = 'checkout';
@@ -226,7 +233,6 @@ export class CartComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private beforeUnloadHandler: (event: BeforeUnloadEvent) => void;
   private lastProcessedContactId: string = null;
-  private lastAccountWithShownError: string = null;
 
   constructor(private cartService: CartService,
     public configurationService: ConfigurationService,
@@ -315,13 +321,37 @@ export class CartComponent implements OnInit, OnDestroy {
     // Initialize entities with empty objects
     this.primaryContact = new Contact();
     this.order = new Order();
+
+    // External (Contact) users have a single contact; default the Primary Contact to it, resolved via
+    // the user-contact mapping. Ship To / Bill To are already the external user's account (handled in
+    // the cart/account subscription below).
+    this.subscriptions.push(
+      this.userService.isExternalUser().pipe(
+        tap(isExternal => this.isExternalUser = isExternal),
+        filter(isExternal => isExternal),
+        switchMap(() => this.userService.getUserContactMapping()),
+        // Only proceed when the mapping resolves to a Contact record with an id.
+        filter(mapping => get(mapping, 'ContactObjectName') === 'Contact' && !isNil(get(mapping, 'ContactObjectId'))),
+        map(mapping => get(mapping, 'ContactObjectId')),
+        switchMap(contactId => this.contactService.getContactById(contactId))
+      ).subscribe((contact: Contact) => {
+        this.order.PrimaryContact = contact;
+        // Reassign order so the read-only output-field re-renders (it ignores in-place mutation).
+        this.order = clone(this.order);
+        this.isButtonDisabled();
+        this.cdr.detectChanges();
+      })
+    );
+
     this.subscriptions.push(combineLatest(this.cartService.getMyCart(), this.accountService.getCurrentAccount()).subscribe(([cart, account]) => {
       // Skip cart updates after order conversion has started to avoid fetching a new empty cart
       if (this.isOrderConversionStarted) {
         return;
       }
       this.cart = cart;
-      this.cdr.detectChanges(); // Immediately render the checkout view on initial load
+      // Scope the internal-user Primary Contact lookup to the app-level (current) account.
+      this.primaryContactLookupOptions.filters = [{ field: 'Account.Id', value: get(account, 'Id'), filterOperator: FilterOperator.EQUAL }];
+      this.cdr.markForCheck();
 
       // Check if the cart itself currently has tax in SummaryGroups.
       const cartHasTax = !!find(get(cart, 'SummaryGroups', []), (group: any) =>
@@ -355,6 +385,11 @@ export class CartComponent implements OnInit, OnDestroy {
       if (!this.isLoggedIn) {
         if (!this.order.BillToAccount?.Id && accountToUse) this.order.BillToAccount = accountToUse;
         if (!this.order.ShipToAccount?.Id && accountToUse) this.order.ShipToAccount = accountToUse;
+      } else {
+        if (account) {
+          if (!this.order.ShipToAccount?.Id) this.order.ShipToAccount = account;
+          if (!this.order.BillToAccount?.Id) this.order.BillToAccount = account;
+        }
       }
       if (!this.order.PriceList?.Id && get(cart, 'PriceList')) this.order.PriceList = get(cart, 'PriceList');
 
@@ -469,28 +504,22 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   isButtonDisabled() {
-    this.disableSubmit = this.isLoggedIn ? (isNil(this.order.PrimaryContact) || isNil(this.order.ShipToAccount)) : (isNil(get(this.primaryContact, 'FirstName')) || isNil(get(this.primaryContact, 'LastName')) || isNil(get(this.primaryContact, 'Email')));
+    this.disableSubmit = this.isLoggedIn ? (isNil(this.order.PrimaryContact) || isNil(this.order.ShipToAccount) || !get(this.order.Location, 'Id')) : (isNil(get(this.primaryContact, 'FirstName')) || isNil(get(this.primaryContact, 'LastName')) || isNil(get(this.primaryContact, 'Email')));
   }
 
   onPrimaryContactChange($event: Contact) {
     if (isNil($event)) {
       set(this.order, 'PrimaryContact', null);
       this.lastProcessedContactId = null;
-      this.lastAccountWithShownError = null; // Clear error tracking
-      
-      // Clear Bill To and Ship To accounts when primary contact is cleared
+
+      // Ship To / Bill To stay as the app-level account (they don't depend on the contact);
+      // just reset the tax calculation state so the user must recalculate.
       if (this.isLoggedIn) {
-        this.order.BillToAccount = null;
-        this.order.ShipToAccount = null;
-        this.billToAccount$ = of(null);
-        this.shipToAccount$ = of(null);
-        
-        // Clear tax address and reset tax calculation state
         this.taxAddress = null;
         this.taxCalculated = false;
         this.cdr.detectChanges();
       }
-      
+
       this.isButtonDisabled();
       return;
     }
@@ -502,43 +531,20 @@ export class CartComponent implements OnInit, OnDestroy {
       return;
     }
 
+    set(this.order, 'PrimaryContact', $event);
+    this.lastProcessedContactId = contactId;
+
+    // Contacts are filtered to the app-level account, so Ship To / Bill To are already that account
+    // (set at init). Just hydrate their full records + refresh tax from the shipping address.
     if (this.isLoggedIn) {
-      // If the lookup component already hydrated the Account relation, skip the fetch entirely
-      const existingAccount: Account = get($event, 'Account');
-      if (existingAccount && get(existingAccount, 'Id')) {
-        set(this.order, 'PrimaryContact', $event);
-        this.order.BillToAccount = existingAccount;
-        this.order.ShipToAccount = existingAccount;
-        this.onBillToChange();
-        this.onShipToChange();
-        this.lastProcessedContactId = contactId;
-        this.isButtonDisabled();
-        this.cdr.detectChanges();
-        return;
-      }
+      this.onBillToChange();
+      this.onShipToChange();
     }
 
-    // Account not yet loaded — fetch the full contact to get the Account relation
-    this.subscriptions.push(
-      this.contactService.getContactById(contactId).subscribe(c => {
-        set(this.order, 'PrimaryContact', c);
-        this.order.PrimaryContact.Id = get(c, 'Id');
-
-        if (this.isLoggedIn) {
-          const contactAccount: Account = get(c, 'Account');
-          if (contactAccount && get(contactAccount, 'Id')) {
-            this.order.BillToAccount = contactAccount;
-            this.order.ShipToAccount = contactAccount;
-          }
-          this.onBillToChange();
-          this.onShipToChange();
-        }
-
-        this.lastProcessedContactId = contactId;
-        this.isButtonDisabled();
-        this.cdr.detectChanges();
-      })
-    );
+    // Reassign order so the read-only Primary Contact output-field re-renders.
+    this.order = clone(this.order);
+    this.isButtonDisabled();
+    this.cdr.detectChanges();
   }
 
   /**
@@ -721,23 +727,12 @@ export class CartComponent implements OnInit, OnDestroy {
         }
       })
     } else if (this.billToAccount$) {
-      // For logged-in users: Fetch and store account, validate postal code but don't set taxAddress
+      // For logged-in users: hydrate the account for display only; tax is derived from the shipping location.
       this.billToAccount$.pipe(take(1)).subscribe(account => {
         this.order.BillToAccount = account;
-        
-        // Show error if billing postal code is missing (even though not used for tax)
-        // Only show error once per account to prevent duplicates from same selection
-        if (this.isLoggedIn && account && !account.BillingPostalCode) {
-          const isSameAccountAsLast = (this.lastAccountWithShownError === account.Id);
-          
-          if (!isSameAccountAsLast) {
-            this.lastAccountWithShownError = account.Id;
-            this.exceptionService.showError(this.translate.instant('TAX.ACCOUNT_MISSING_POSTAL_CODE'));
-          }
-        } else if (account?.BillingPostalCode) {
-          // Clear error tracking when any account with valid postal code is selected
-          this.lastAccountWithShownError = null;
-        }
+        // New order reference so apt-output-field (OnPush) re-renders the Bill To value
+        this.order = clone(this.order);
+        this.cdr.detectChanges();
       });
     }
   }
@@ -749,46 +744,54 @@ export class CartComponent implements OnInit, OnDestroy {
       ).pipe(shareReplay(1));
     this.isButtonDisabled();
 
-    // For logged-in users: Always use shipping address for tax calculation (ignore shippingEqualsBilling flag)
-    // For guest users: Only use shipping address if shippingEqualsBilling checkbox is unchecked
+    // Hydrate the full Ship To account for its quick-view display. Tax is derived from the
+    // selected shipping location (see onShippingLocationChange), not the account address.
     if (this.shipToAccount$ && this.isLoggedIn) {
       this.shipToAccount$.pipe(take(1)).subscribe(account => {
         this.order.ShipToAccount = account;
-
-        if (account) {
-          const postalCode = account.ShippingPostalCode;
-          
-          if (postalCode) {
-            this.taxAddress = {
-              Line1: account.ShippingStreet || '',
-              Line2: '',
-              City: account.ShippingCity || '',
-              Region: account.ShippingState || '',
-              Country: account.ShippingCountry || '',
-              PostalCode: postalCode.toString()
-            };
-            // Clear error tracking when any account with valid postal code is selected
-            this.lastAccountWithShownError = null;
-          } else {
-            // Account exists but missing postal code - show error
-            this.taxAddress = null;
-            this.cdr.detectChanges();
-            
-            // Only show error once per account to prevent duplicates from same selection
-            const isSameAccountAsLast = (this.lastAccountWithShownError === account.Id);
-            
-            if (!isSameAccountAsLast) {
-              this.lastAccountWithShownError = account.Id;
-              this.exceptionService.showError(this.translate.instant('TAX.ACCOUNT_MISSING_POSTAL_CODE'));
-            }
-          }
-        } else {
-          // Clear tax address to disable Calculate Tax button when account is null
-          this.taxAddress = null;
-          this.cdr.detectChanges();
-        }
-      })
+        // New order reference so apt-output-field (OnPush) re-renders the Ship To value
+        this.order = clone(this.order);
+        this.cdr.detectChanges();
+      });
     }
+  }
+
+  onShippingLocationChange() {
+    // Shipping Location is required; re-evaluate the checkout button on every change.
+    this.isButtonDisabled();
+    if (!this.order.Location?.Id) {
+      this.taxAddress = null;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const accountLocation = this.order.Location;
+    const location = accountLocation.Location;
+
+    if (!location?.Id) {
+      this.taxAddress = null;
+      this.cdr.detectChanges();
+      this.exceptionService.showError(this.translate.instant('TAX.LOCATION_MISSING_POSTAL_CODE'));
+      return;
+    }
+
+    const postalCode = location.PostalCode;
+    
+    if (postalCode) {
+      this.taxAddress = {
+        Line1: location.Street || '',
+        Line2: location.AddressLine || '',
+        City: location.City || '',
+        Region: location.State || '',
+        Country: location.Country || '',
+        PostalCode: postalCode.toString()
+      };
+    } else {
+      this.taxAddress = null;
+      this.exceptionService.showError(this.translate.instant('TAX.LOCATION_MISSING_POSTAL_CODE'));
+    }
+    
+    this.cdr.detectChanges();
   }
 
   convertCartToOrder(order: Order, primaryContact: Contact, cart?: Cart, selectedAccount?: AccountInfo, acceptOrder?: boolean) {
@@ -812,7 +815,9 @@ export class CartComponent implements OnInit, OnDestroy {
     }
 
     this.isOrderConversionStarted = true;
-    this.orderService.convertCartToOrder(order, primaryContact).pipe(
+    // Include Location in the payload only when a location has been selected.
+    const orderToCreate = get(order.Location, 'Id') ? order : omit(order, 'Location') as Order;
+    this.orderService.convertCartToOrder(orderToCreate, primaryContact).pipe(
       take(1)
     ).subscribe(orderResponse => {
       this.orderConfirmation = orderResponse;

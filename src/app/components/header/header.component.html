@@ -109,7 +109,7 @@
               <!-- Show account name in DSR mode and collaborative mode -->
               @if (cartView$ | async; as cartView) {
               <div class="text-nowrap px-3 d-flex">
-                <!-- Clickable account in normal mode -->
+                <!-- Clickable account in normal mode (external users can view details but not change the account) -->
                 @if (isNormalMode$ | async) {
                 <div class="cursor-pointer account-section" (click)="loadAccountDetails()">
                   <b>{{ 'COMMON.ACCOUNT' | translate }}:</b>
@@ -203,19 +203,25 @@
               uppercase }}</a>
             }
             @if (cartView$ | async; as cartView) {
-              <div class="dropdown-body align-items-end mt-2 pt-4">
-                <apt-input-field [showLabel]="false" [valueClass]="'mb-0'" [entity]="cartView" [field]="'Account'"
-                  [(ngModel)]="cartView.Account" [allowClearableLookups]="false" [spinnerSize]="'small'"
-                  (ngModelChange)="updateAccountInfo($event)">
-                </apt-input-field>
+              <!-- pt-4 reserves space for the absolutely-positioned BACK link, even when the account lookup is hidden -->
+              <div class="pt-4">
+                <!-- Hide the change-account lookup for external users; they can view details but not switch accounts -->
+                @if (canEditAccount$ | async) {
+                <div class="dropdown-body align-items-end mt-2">
+                  <apt-input-field [showLabel]="false" [valueClass]="'mb-0'" [entity]="cartView" [field]="'Account'"
+                    [(ngModel)]="cartView.Account" [allowClearableLookups]="false" [spinnerSize]="'small'"
+                    (ngModelChange)="updateAccountInfo($event)">
+                  </apt-input-field>
+                </div>
+                }
+                @if (myAccount$ | async; as soldTo) {
+                  <apt-output-field [record]="cartView" field="Account" layout="inline" [showQuickView]="true"
+                    [showQuickViewFormat]="'normal'" [valueOnly]="true">
+                  </apt-output-field>
+                } @else {
+                  <ng-container *ngTemplateOutlet="showLoader"></ng-container>
+                }
               </div>
-              @if (myAccount$ | async; as soldTo) {
-                <apt-output-field [record]="cartView" field="Account" layout="inline" [showQuickView]="true"
-                  [showQuickViewFormat]="'normal'" [valueOnly]="true">
-                </apt-output-field>
-              } @else {
-                <ng-container *ngTemplateOutlet="showLoader"></ng-container>
-              }
             }
           </div>
         </div>

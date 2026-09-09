@@ -24,30 +24,13 @@
           <!-- Shipping Address Card -->
           <div class="card mb-3">
             <div class="card-header border-bottom py-2">
-              <h5 class="card-title m-0">{{ 'CHECKOUT.SHIPPING_ADDRESS' | translate }}</h5>
+              <h5 class="card-title m-0">{{ 'CART.SHIPPING_LOCATION_ADDRESS' | translate }}</h5>
             </div>
             <div class="card-body text-muted">
               <!-- For logged-in users -->
-              @if (isLoggedIn) {
-                @if (order?.ShipToAccount) {
-                <div>
-                  <p class="mb-2 fw-bold text-dark">{{ order.ShipToAccount.Name }}</p>
-                  <address class="mb-0">
-                    @if (order.ShipToAccount.ShippingStreet) {
-                    <span>{{ order.ShipToAccount.ShippingStreet }}<br></span>
-                    }
-                    @if (order.ShipToAccount.ShippingCity || order.ShipToAccount.ShippingState || order.ShipToAccount.ShippingPostalCode) {
-                    <span>
-                      {{ order.ShipToAccount.ShippingCity }}@if (order.ShipToAccount.ShippingCity && (order.ShipToAccount.ShippingState || order.ShipToAccount.ShippingPostalCode)) {<ng-container>, </ng-container>}
-                      {{ order.ShipToAccount.ShippingState }} {{ order.ShipToAccount.ShippingPostalCode }}<br>
-                    </span>
-                    }
-                    @if (order.ShipToAccount.ShippingCountry) {
-                    <span>{{ order.ShipToAccount.ShippingCountry }}</span>
-                    }
-                  </address>
-                </div>
-                }
+              @if (isLoggedIn && order?.Location) {
+                <apt-address [value]="order.Location" [readonly]="true" [showLabel]="false"
+                  [layout]="'Block'"></apt-address>
               }
               <!-- For guest users -->
               @if (!isLoggedIn && primaryContact) {

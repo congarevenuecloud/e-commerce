@@ -55,7 +55,7 @@ export class CreateQuoteComponent implements OnInit {
 
   onUpdate($event: Quote) {
     this.quoteRequestObj = $event;
-    this.disableSubmit = this.isLoggedIn ? isEmpty(this.quoteRequestObj.PrimaryContact && this.quoteRequestObj.ProposalName) : (!get(this.form?.form,'valid') || get(this.form?.form,'pristine') || isNil(get(this.quoteRequestObj.PrimaryContact,'FirstName')) || isNil(get(this.quoteRequestObj.PrimaryContact,'LastName')) || isNil(get(this.quoteRequestObj.PrimaryContact,'Email')));
+    this.disableSubmit = this.isLoggedIn ? (isEmpty(this.quoteRequestObj.PrimaryContact && this.quoteRequestObj.ProposalName) || !get(this.quoteRequestObj.Location, 'Id')) : (!get(this.form?.form,'valid') || get(this.form?.form,'pristine') || isNil(get(this.quoteRequestObj.PrimaryContact,'FirstName')) || isNil(get(this.quoteRequestObj.PrimaryContact,'LastName')) || isNil(get(this.quoteRequestObj.PrimaryContact,'Email')));
   }
 
   loadCaptcha() {

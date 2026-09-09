@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, BehaviorSubject, of, combineLatest } from 'rxjs';
-import { switchMap, take, catchError, map } from 'rxjs/operators';
+import { switchMap, take, catchError, map, tap, filter } from 'rxjs/operators';
 import moment from 'moment';
-import { get, sumBy, mapValues, groupBy, omit } from 'lodash';
+import { get, sumBy, mapValues, groupBy, omit, isNil } from 'lodash';
 import { Operator, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
-import { Quote, QuoteService, LocalCurrencyPipe, AccountService, FieldFilter, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
-import { TableOptions, CustomFilterView, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
+import { Quote, QuoteService, LocalCurrencyPipe, AccountService, FieldFilter, DateFormatPipe, GroupByAggregateResponse, AggregateFields, UserService, ContactService, Contact } from '@congarevenuecloud/ecommerce';
+import { TableOptions, CustomFilterView, FilterOptions, ExceptionService, QuickAddField } from '@congarevenuecloud/elements';
 
 @Component({
     selector: 'app-quote-list',
@@ -72,20 +72,36 @@ export class QuoteListComponent implements OnInit {
       }
     }
   ];
-  quoteFields: string[];
+  quoteFields: Array<string | QuickAddField>;
+  isExternalUser: boolean = false;
+  quickAddPresetFields: Record<string, any> = { SourceChannel: 'E-Commerce' };
 
-  constructor(private quoteService: QuoteService, private currencyPipe: LocalCurrencyPipe, private dateFormatPipe: DateFormatPipe, private accountService: AccountService, private exceptionService: ExceptionService) { }
+  constructor(private quoteService: QuoteService, private currencyPipe: LocalCurrencyPipe, private dateFormatPipe: DateFormatPipe, private accountService: AccountService, private exceptionService: ExceptionService, private userService: UserService, private contactService: ContactService) { }
 
   ngOnInit() {
     this.loadView();
-    this.quoteFields = ['Description', 'BillToAccount', 'ShipToAccount', 'SourceChannel'];
+    // External (Contact) users have a single contact; preset it read-only on the quick add form (parity with checkout).
+    this.userService.isExternalUser().pipe(
+      tap(isExternal => this.isExternalUser = isExternal),
+      filter(isExternal => isExternal),
+      switchMap(() => this.userService.getUserContactMapping()),
+      filter(mapping => get(mapping, 'ContactObjectName') === 'Contact' && !isNil(get(mapping, 'ContactObjectId'))),
+      map(mapping => get(mapping, 'ContactObjectId')),
+      switchMap(contactId => this.contactService.getContactById(contactId)),
+      take(1)
+    ).subscribe((contact: Contact) => {
+      this.quickAddPresetFields = { ...this.quickAddPresetFields, PrimaryContact: contact };
+    });
   }
 
   loadView() {
     let tableOptions = {} as QuoteListView;
     this.view$ = this.accountService.getCurrentAccount()
       .pipe(
-        switchMap(() => {
+        switchMap((account) => {
+          // Scope the Primary Contact lookup to the current account (parity with checkout).
+          this.quoteFields = ['Description', 'BillToAccount', 'ShipToAccount', 'SourceChannel',
+            { field: 'PrimaryContact', required: true, lookupOptions: { primaryTextField: 'Name', filters: [{ field: 'Account.Id', value: get(account, 'Id'), filterOperator: FilterOperator.EQUAL }] } }];
           tableOptions = {
             tableOptions: {
               columns: [

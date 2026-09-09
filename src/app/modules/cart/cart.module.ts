@@ -21,7 +21,8 @@ import {
   FileUploaderModule,
   PaymentIntegrationModule,
   WizardModule,
-  TaxBreakupModule
+  TaxBreakupModule,
+  LocationPickerModule
 } from '@congarevenuecloud/elements';
 
 import { ComponentModule } from '../../components/component.module';
@@ -63,7 +64,8 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     WizardModule,
     TaxBreakupModule,
     BSPopoverModule,
-    PaginationModule
+    PaginationModule,
+    LocationPickerModule
   ],
   declarations: [CartComponent, SecureCheckoutComponent, SummaryComponent],
   exports : [SummaryComponent]

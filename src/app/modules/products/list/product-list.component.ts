@@ -3,11 +3,11 @@ import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, of, BehaviorSubject, Subscription, combineLatest } from 'rxjs';
-import { mergeMap, map } from 'rxjs/operators';
+import { mergeMap, map, tap, filter, switchMap, take } from 'rxjs/operators';
 import { get, isNil, isEmpty, toString, toNumber, set, isEqual } from 'lodash';
 import { FilterOperator, PlatformConstants, ConfigurationService } from '@congarevenuecloud/core';
-import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, FavoriteService, Product, FacetFilter, FacetFilterPayload, Quote, CartService, StorefrontService, FavoriteResult, Favorite } from '@congarevenuecloud/ecommerce';
-import { BatchSelectionService, ExceptionService } from '@congarevenuecloud/elements';
+import { Category, ProductService, ProductResult, PreviousState, FieldFilter, AccountService, CategoryService, FavoriteService, Product, FacetFilter, FacetFilterPayload, Quote, CartService, StorefrontService, FavoriteResult, Favorite, UserService, ContactService, Contact } from '@congarevenuecloud/ecommerce';
+import { BatchSelectionService, ExceptionService, QuickAddField } from '@congarevenuecloud/elements';
 import { DsrService } from '../../../services/dsr.service';
 /**
  * Product list component shows all the products in a list for user selection.
@@ -93,8 +93,11 @@ export class ProductListComponent implements OnInit, OnDestroy {
   };
   fields: string[];
   object: any;
-  quoteFields: string[];
-  orderFields: string[];
+  quoteFields: Array<string | QuickAddField>;
+  orderFields: Array<string | QuickAddField>;
+  currentAccountId: string;
+  isExternalUser: boolean = false;
+  quickAddPresetFields: Record<string, any> = { SourceChannel: 'E-Commerce' };
   selectedCount: number = 0;
   /**
    * Array of product families associated with the list of assets.
@@ -108,7 +111,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     private router: Router, private categoryService: CategoryService, public batchSelectionService: BatchSelectionService,
     public productService: ProductService, private translateService: TranslateService, private accountService: AccountService, private cartService: CartService,
     private storefrontService: StorefrontService, private favoriteService: FavoriteService, private exceptionService: ExceptionService, private configurationService: ConfigurationService,
-    private dsrService: DsrService) { }
+    private dsrService: DsrService, private userService: UserService, private contactService: ContactService) { }
 
 
   ngOnInit() {
@@ -133,8 +136,22 @@ export class ProductListComponent implements OnInit, OnDestroy {
     }
 
     // we need to listen to account change to refresh the product list
-    this.accountService.getCurrentAccount().subscribe(() => {
+    this.accountService.getCurrentAccount().subscribe((account) => {
+      this.currentAccountId = get(account, 'Id');
       this.getResults(this.isFavoriteCatalog ? 'favorite' : 'product')
+    });
+
+    // External (Contact) users have a single contact; preset it read-only on the quick add form (parity with checkout).
+    this.userService.isExternalUser().pipe(
+      tap(isExternal => this.isExternalUser = isExternal),
+      filter(isExternal => isExternal),
+      switchMap(() => this.userService.getUserContactMapping()),
+      filter(mapping => get(mapping, 'ContactObjectName') === 'Contact' && !isNil(get(mapping, 'ContactObjectId'))),
+      map(mapping => get(mapping, 'ContactObjectId')),
+      switchMap(contactId => this.contactService.getContactById(contactId)),
+      take(1)
+    ).subscribe((contact: Contact) => {
+      this.quickAddPresetFields = { ...this.quickAddPresetFields, PrimaryContact: contact };
     });
 
     
@@ -220,8 +237,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
         })
       );
       this.fields = ['AdjustmentType', 'AdjustmentAmount', 'StartDate', 'EndDate'];
-      this.quoteFields = ['Description', 'BillToAccount', 'configurationSyncDate', 'SourceChannel'];
-      this.orderFields = ['Description', 'BillToAccount', 'configurationSyncDate', 'SourceChannel', 'PONumber', 'AutoActivateOrder'];
+      // Scope the Primary Contact lookup to the current account (parity with checkout).
+      const primaryContact: QuickAddField = { field: 'PrimaryContact', required: true, lookupOptions: { primaryTextField: 'Name', filters: [{ field: 'Account.Id', value: this.currentAccountId, filterOperator: FilterOperator.EQUAL }] } };
+      this.quoteFields = ['Description', 'BillToAccount', 'configurationSyncDate', 'SourceChannel', primaryContact];
+      this.orderFields = ['Description', 'BillToAccount', 'configurationSyncDate', 'SourceChannel', 'PONumber', 'AutoActivateOrder', primaryContact];
       this.object = new Quote();
       this.subscriptions.push(
         this.batchSelectionService.getSelectedProducts().subscribe((data) => {

@@ -628,15 +628,14 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   }
 
   openRequestChangesModal() {
-    this.showReqChangesModal = false;
-
-    setTimeout(() => {
+    // Re-enter Angular's zone (native BS5 dropdown clicks fire outside it) so the @if renders the modal component.
+    this.ngZone.run(() => {
       this.showReqChangesModal = true;
-    }, 10);
+    });
   }
 
   handleRequestChangesAction(event: any) {
-    if (event && event.action === 'close') {
+    if (event && (event.action === 'close' || event.action === 'cancel')) {
       this.showReqChangesModal = false;
     }
     if (event && event.action === 'submit') {

@@ -101,32 +101,60 @@
                     </div>
                     } @else {
                     <div>
-                        <!-- Primary Contact Field - Now Above Bill To -->
-                        <apt-input-field name="primaryContact" [labelClass]="'fw-normal'" [entity]="order"
-                          (ngModelChange)="onPrimaryContactChange($event)" [field]="'PrimaryContact'"
-                          [(ngModel)]="order.PrimaryContact" [lookupOptions]="lookupOptions" [required]="true"
-                          [errorMsg]="errMessages.requiredPrimaryContact">
-                        </apt-input-field>
-
-                        <!-- Ship To and Bill To side by side -->
-                        <div class="row pt-3">
+                        <!-- Row 1: Primary Contact | Ship To Account -->
+                        <div class="row">
                           <div class="col-md-6">
-                            <apt-input-field name="shipTo" [labelClass]="'fw-normal'" [entity]="order"
-                              [field]="'ShipToAccount'" [(ngModel)]="order.ShipToAccount"
-                              (ngModelChange)="onShipToChange()" [required]="true"
-                              [errorMsg]="errMessages.requiredShipToAcc">
+                            @if (isExternalUser) {
+                            <apt-output-field [record]="order" field="PrimaryContact"
+                              [labelClass]="'fw-normal'" [editable]="false" [showQuickView]="true">
+                            </apt-output-field>
+                            } @else {
+                            <apt-input-field name="primaryContact" [labelClass]="'fw-normal'" [entity]="order"
+                              (ngModelChange)="onPrimaryContactChange($event)" [field]="'PrimaryContact'"
+                              [(ngModel)]="order.PrimaryContact" [lookupOptions]="primaryContactLookupOptions" [required]="true"
+                              [errorMsg]="errMessages.requiredPrimaryContact">
                             </apt-input-field>
-                            @if (shipToAccount$ | async; as shipAccount) {
-                            <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"></apt-address>
                             }
                           </div>
                           <div class="col-md-6">
-                            <apt-input-field name="billTo" [labelClass]="'fw-normal'" [entity]="order"
-                              [field]="'BillToAccount'" [(ngModel)]="order.BillToAccount"
-                              (ngModelChange)="onBillToChange()">
-                            </apt-input-field>
-                            @if (billToAccount$ | async; as billAccount) {
-                            <apt-address [value]="billAccount" [type]="'Billing'" [readonly]="true"></apt-address>
+                            <apt-output-field [record]="order" field="ShipToAccount"
+                              [labelClass]="'fw-normal'" [editable]="false" [showQuickView]="true">
+                            </apt-output-field>
+                          </div>
+                        </div>
+
+                        <!-- Row 2: Shipping Location | Bill To Account -->
+                        <div class="row pt-3">
+                          <div class="col-md-6 mb-3 mb-md-0">
+                            <apt-location-picker name="location" [(ngModel)]="order.Location"
+                              (locationChange)="onShippingLocationChange()" [required]="true"
+                              [accountId]="order.ShipToAccount?.Id"
+                              [label]="'CART.SHIPPING_LOCATION' | translate">
+                            </apt-location-picker>
+                          </div>
+                          <div class="col-md-6">
+                            <apt-output-field [record]="order" field="BillToAccount"
+                              [labelClass]="'fw-normal'" [editable]="false" [showQuickView]="true">
+                            </apt-output-field>
+                          </div>
+                        </div>
+
+                        <!-- Row 3: Shipping Location Address | Billing Address -->
+                        <div class="row pt-3">
+                          <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="mutedLabels d-block">{{'CART.SHIPPING_LOCATION_ADDRESS' | translate}}</label>
+                            @if (order.Location) {
+                            <apt-address [value]="order.Location" [readonly]="true" [showLabel]="false"
+                              [layout]="'Block'">
+                            </apt-address>
+                            }
+                          </div>
+                          <div class="col-md-6">
+                            @if (order.BillToAccount) {
+                            <label class="mutedLabels d-block">{{'CART.BILLING_ADDRESS' | translate}}</label>
+                            <apt-address [value]="order.BillToAccount" [type]="'Billing'" [readonly]="true"
+                              [showLabel]="false" [layout]="'Block'">
+                            </apt-address>
                             }
                           </div>
                         </div>
@@ -283,14 +311,26 @@
                   <div class="card-body">
                     <!-- Logged-in users: show account-based addresses -->
                     @if (isLoggedIn) {
-                      @if (billToAccount$ | async; as billAccount) {
-                      <div class="text-muted mb-3">
-                        <apt-address [value]="billAccount" [type]="'Billing'" [readonly]="true"></apt-address>
-                      </div>
+                      @if (isExternalUser) {
+                        @if (order.BillToAccount) {
+                        <div class="text-muted mb-3">
+                          <apt-address [value]="order.BillToAccount" [type]="'Billing'" [readonly]="true"
+                            [showLabel]="true" [label]="'CART.BILLING_ADDRESS' | translate" [layout]="'Block'">
+                          </apt-address>
+                        </div>
+                        }
+                      } @else {
+                        @if (billToAccount$ | async; as billAccount) {
+                        <div class="text-muted mb-3">
+                          <apt-address [value]="billAccount" [type]="'Billing'" [readonly]="true"></apt-address>
+                        </div>
+                        }
                       }
-                      @if (shipToAccount$ | async; as shipAccount) {
+                      @if (order.Location) {
                       <div class="text-muted">
-                        <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"></apt-address>
+                        <apt-address [value]="order.Location" [readonly]="true" [showLabel]="true"
+                          [label]="'CART.SHIPPING_LOCATION_ADDRESS' | translate" [layout]="'Block'">
+                        </apt-address>
                       </div>
                       }
                     }
@@ -336,18 +376,13 @@
             <!-- Shipping Address Card -->
             <div class="card mb-3">
               <div class="card-header border-bottom py-2">
-                <h5 class="card-title m-0">{{ 'CHECKOUT.SHIPPING_ADDRESS' | translate }}</h5>
+                <h5 class="card-title m-0">{{ 'CART.SHIPPING_LOCATION_ADDRESS' | translate }}</h5>
               </div>
               <div class="card-body text-muted">
                 <!-- For logged-in users -->
-                @if (isLoggedIn) {
-                  @if (shipToAccount$ | async; as shipAccount) {
-                  <div>
-                    <p class="mb-2 fw-bold text-dark">{{ shipAccount.Name }}</p>
-                    <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"
-                      [showLabel]="false"></apt-address>
-                  </div>
-                  }
+                @if (isLoggedIn && order.Location) {
+                  <apt-address [value]="order.Location" [readonly]="true" [showLabel]="false"
+                    [layout]="'Block'"></apt-address>
                 }
                 <!-- For guest users -->
                 @if (!isLoggedIn && primaryContact) {
@@ -578,9 +613,10 @@
                       <apt-address [value]="billAccount" [type]="'Billing'" [readonly]="true"></apt-address>
                     </div>
                     }
-                    @if (shipToAccount$ | async; as shipAccount) {
+                    @if (order.Location) {
                     <div class="text-muted">
-                      <apt-address [value]="shipAccount" [type]="'Shipping'" [readonly]="true"></apt-address>
+                      <apt-address [value]="order.Location" [readonly]="true" [showLabel]="true"
+                        [label]="'CART.SHIPPING_LOCATION_ADDRESS' | translate" [layout]="'Block'"></apt-address>
                     </div>
                     }
                   }

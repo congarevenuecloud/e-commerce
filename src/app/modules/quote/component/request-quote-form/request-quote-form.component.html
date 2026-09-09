@@ -20,11 +20,16 @@
     <div class="row">
       <div class="col-12 col-md-6">
         <div class="mb-3">
-          <apt-input-field placeholder="{{'CREATE_QUOTE.SEARCH_CONTACTS' | translate }}" [entity]="quote"
-            [field]="'PrimaryContact'" [lookupOptions]="lookupOptions" [required]="true"
-            [(ngModel)]="quote.PrimaryContact" (ngModelChange)="primaryContactChange()"
-            [errorMsg]="errMessages.requiredPrimaryContact">
-          </apt-input-field>
+          @if (isExternalUser) {
+            <apt-output-field [record]="quote" field="PrimaryContact" [labelClass]="'fw-normal'"
+              [editable]="false" [showQuickView]="true"></apt-output-field>
+          } @else {
+            <apt-input-field placeholder="{{'CREATE_QUOTE.SEARCH_CONTACTS' | translate }}" [entity]="quote"
+              [field]="'PrimaryContact'" [lookupOptions]="primaryContactLookupOptions" [required]="true"
+              [(ngModel)]="quote.PrimaryContact" (ngModelChange)="primaryContactChange()"
+              [errorMsg]="errMessages.requiredPrimaryContact">
+            </apt-input-field>
+          }
         </div>
       </div>
       <div class="col-12 col-md-6">
@@ -35,39 +40,57 @@
         </div>
       </div>
     </div>
-    <!-- Row 3: Ship To | Bill To -->
-    <div class="row">
-      <div class="col-12 col-md-6">
-        <div class="mb-3">
-          <apt-input-field [entity]="quote" [field]="'ShipToAccount'" [(ngModel)]="quote.ShipToAccount"
-            (ngModelChange)="shipToChange()"></apt-input-field>
-          @if (shipToAccount$ | async; as shipToAccount) {
-            <small class="px-1 fst-italic d-block">
-              <apt-address [ngModel]="quote?.ShipToAccount" [readonly]="true" type="Shipping" [showLabel]="false">
-              </apt-address>
-            </small>
-          }
-        </div>
-      </div>
-      <div class="col-12 col-md-6">
-        <div class="mb-3">
-          <apt-input-field [entity]="quote" [field]="'BillToAccount'" [(ngModel)]="quote.BillToAccount"
-            (ngModelChange)="billToChange()"></apt-input-field>
-          @if (billToAccount$ | async; as billToAccount) {
-            <small class="px-1 fst-italic d-block">
-              <apt-address [ngModel]="quote?.BillToAccount" [readonly]="true" type="Billing" [showLabel]="false">
-              </apt-address>
-            </small>
-          }
-        </div>
-      </div>
-    </div>
-    <!-- Row 4: Source Channel -->
+    <!-- Row 3: Source Channel | Ship To -->
     <div class="row">
       <div class="col-12 col-md-6">
         <div class="mb-3">
           <apt-output-field [record]="quote" field="SourceChannel" [label]="'COMMON.SOURCE_CHANNEL' | translate"
             [editable]="false"></apt-output-field>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="mb-3">
+          <apt-output-field [record]="quote" field="ShipToAccount" [labelClass]="'fw-normal'"
+            [editable]="false" [showQuickView]="true"></apt-output-field>
+        </div>
+      </div>
+    </div>
+    <!-- Row 4: Shipping Location | Bill To -->
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <div class="mb-3">
+          <apt-location-picker name="location" [(ngModel)]="quote.Location"
+            (locationChange)="onShippingLocationChange()" [accountId]="quote.ShipToAccount?.Id"
+            [required]="true" [label]="'CART.SHIPPING_LOCATION' | translate">
+          </apt-location-picker>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="mb-3">
+          <apt-output-field [record]="quote" field="BillToAccount" [labelClass]="'fw-normal'"
+            [editable]="false" [showQuickView]="true"></apt-output-field>
+        </div>
+      </div>
+    </div>
+    <!-- Row 5: Shipping Location Address | Billing Address (read-only) -->
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <div class="mb-3">
+          <label class="mutedLabels d-block">{{'CART.SHIPPING_LOCATION_ADDRESS' | translate}}</label>
+          @if (quote.Location) {
+            <apt-address [value]="quote.Location" [readonly]="true" [showLabel]="false" [layout]="'Block'">
+            </apt-address>
+          }
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="mb-3">
+          @if (quote.BillToAccount) {
+            <label class="mutedLabels d-block">{{'CART.BILLING_ADDRESS' | translate}}</label>
+            <apt-address [value]="quote.BillToAccount" [type]="'Billing'" [readonly]="true" [showLabel]="false"
+              [layout]="'Block'">
+            </apt-address>
+          }
         </div>
       </div>
     </div>

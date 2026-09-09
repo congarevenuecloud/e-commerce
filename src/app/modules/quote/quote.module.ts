@@ -12,7 +12,8 @@ import { CongaModule } from '@congarevenuecloud/core';
 import { PricingModule } from '@congarevenuecloud/ecommerce';
 import {
   PriceModule, BreadcrumbModule, InputFieldModule, AddressModule, IconModule, LineItemTableRowModule,
-  PriceSummaryModule, ButtonModule, CaptchaModule, OutputFieldModule, FileUploaderModule, CommentsModule
+  PriceSummaryModule, ButtonModule, CaptchaModule, OutputFieldModule, FileUploaderModule, CommentsModule,
+  LocationPickerModule
 } from '@congarevenuecloud/elements';
 
 import { DetailsModule } from '../details/details.module';
@@ -49,7 +50,8 @@ import { ComponentModule } from '../../components/component.module';
     ButtonModule,
     FileUploaderModule,
     ComponentModule,
-    CommentsModule
+    CommentsModule,
+    LocationPickerModule
   ],
   declarations: [CreateQuoteComponent, RequestQuoteFormComponent, QuoteDetailsComponent]
 })

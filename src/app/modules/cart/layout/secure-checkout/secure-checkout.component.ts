@@ -102,7 +102,11 @@ export class SecureCheckoutComponent implements OnInit, OnDestroy {
 
     // Get order data
     if (get(savedState, 'order')) {
-      this.order = get(savedState, 'order');
+      // Router navigation state structured-clones the order, stripping class prototypes.
+      // Rehydrate it into an Order instance so nested class-typed properties (Location,
+      // ShipToAccount, BillToAccount) are real instances again; apt-address only renders
+      // values that are instanceof AccountLocation/Account/Contact.
+      this.order = plainToClass(Order, get(savedState, 'order'));
       
       // Check if this is an existing order payment (coming from order details page)
       if (get(this.order, 'Id')) {

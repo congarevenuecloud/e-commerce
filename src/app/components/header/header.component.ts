@@ -52,6 +52,8 @@ export class HeaderComponent implements OnInit {
   
   isRestrictedMode$: Observable<boolean>; // true when in DSR or readonly collaboration mode
   isNormalMode$: Observable<boolean>; // true when NOT in DSR or readonly collaboration mode
+  isExternalUser$: Observable<boolean>; // true when the logged in user is an external (Contact) user
+  canEditAccount$: Observable<boolean>; // true when the account can be changed (normal mode and not an external user)
 
   constructor(
     private userService: UserService,
@@ -154,6 +156,21 @@ export class HeaderComponent implements OnInit {
 
     this.isNormalMode$ = this.isRestrictedMode$.pipe(
       map(isRestricted => !isRestricted),
+      distinctUntilChanged(),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    this.isExternalUser$ = this.userService.isExternalUser().pipe(
+      distinctUntilChanged(),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    // Account can only be changed for internal users in normal mode; external users are tied to a single account.
+    this.canEditAccount$ = combineLatest([
+      this.isNormalMode$,
+      this.isExternalUser$
+    ]).pipe(
+      map(([isNormalMode, isExternalUser]) => isNormalMode && !isExternalUser),
       distinctUntilChanged(),
       shareReplay({ bufferSize: 1, refCount: true })
     );
@@ -280,6 +297,8 @@ export class HeaderComponent implements OnInit {
   loadAccountDetails(): void {
     this.showAccountInfo = true;
     this.showAccountHome = false;
+    // Load the account details so they render even when the change-account lookup is hidden (external users).
+    this.updateAccountInfo();
   }
 
   navigateToAccountHome(): void {

@@ -3,10 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { plainToClass } from 'class-transformer';
 import { Observable, combineLatest, of, Subscription, BehaviorSubject, throwError } from 'rxjs';
-import { switchMap, take, map, catchError } from 'rxjs/operators';
+import { switchMap, take, map, catchError, tap } from 'rxjs/operators';
 import { get, filter, find, isNil, isEqual, set, isNull, forEach, lowerCase, pick } from 'lodash';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import { Cart, CartItem, CartService, ConstraintRuleService, ItemGroup, LineItemService, QuoteService, Quote, Order, OrderService, ItemRequest, IntegrationService, TaxAddress, AccountService } from '@congarevenuecloud/ecommerce';
+import { Cart, CartItem, CartService, ConstraintRuleService, ItemGroup, LineItemService, QuoteService, Quote, Order, OrderService, ItemRequest, IntegrationService, TaxAddress, AccountLocationManagementService } from '@congarevenuecloud/ecommerce';
 import { BatchActionService, RevalidateCartService, ExceptionService, ButtonAction, BatchSelectionService } from '@congarevenuecloud/elements';
 import { DsrService } from '../../../services/dsr.service';
 
@@ -69,7 +69,7 @@ export class ManageCartComponent implements OnInit {
     public batchSelectionService: BatchSelectionService,
     private dsrService: DsrService,
     private integrationService: IntegrationService,
-    private accountService: AccountService,
+    private accountLocationService: AccountLocationManagementService,
     private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
@@ -114,24 +114,24 @@ export class ManageCartComponent implements OnInit {
           this.primaryLI = filter((get(cart, 'LineItems')), (i) => i.IsPrimaryLine && i.LineType === 'Product/Service');
           const businessObjectId = get(cart, 'BusinessObjectId');
           const isProposal = isEqual(get(cart, 'BusinessObjectType'), 'Proposal');
-          const businessObject = isProposal ? get(cart, 'Proposald') : get(cart, 'Order');
-          if (this.isCartFinalized || (!isNil(businessObjectId) && isNil(businessObject))) {
-            this.businessObject$ = isEqual(get(cart, 'BusinessObjectType'), 'Proposal') ?
-              this.quoteService.getQuoteById(get(cart, 'BusinessObjectId'), false) : this.orderService.getOrder(get(cart, 'BusinessObjectId'), null);
-          } else {
+          const fetchedBusinessObject = get(this.view$.value, 'orderOrQuote');
+          // Fetch the full order/quote once; reuse the already-fetched record on later re-emits (no refetch).
+          if (isNil(businessObjectId)) {
             this.businessObject$ = of(null);
+          } else if (isEqual(get(fetchedBusinessObject, 'Id'), businessObjectId)) {
+            this.businessObject$ = of(fetchedBusinessObject);
+          } else {
+            this.businessObject$ = isProposal
+              ? this.quoteService.getQuoteById(businessObjectId, false)
+              : this.orderService.getOrder(businessObjectId, null);
           }
           return combineLatest([of(this.cart), this.businessObject$, of(products)]);
         }),
         switchMap(([cartInfo, businessObjectInfo, productsInfo]) => {
           const businessObjectType = get(cartInfo, 'BusinessObjectType');
-          const proposalId = get(cartInfo, 'Proposald');
-          const orderId = get(cartInfo, 'Order');
-          if (isEqual(businessObjectType, 'Proposal')) {
-            if (isNil(proposalId) || this.isCartFinalized) set(cartInfo, 'Proposald', businessObjectInfo);
-          }
-          else if (isNil(orderId) || this.isCartFinalized) {
-            set(cartInfo, 'Order', businessObjectInfo);
+          // Overwrite the lightweight embedded record (Id/Name only) with the fetched full order/quote.
+          if (!isNil(businessObjectInfo)) {
+            set(cartInfo, isEqual(businessObjectType, 'Proposal') ? 'Proposald' : 'Order', businessObjectInfo);
           }
           return of({
             cart: cartInfo,
@@ -313,43 +313,48 @@ export class ManageCartComponent implements OnInit {
     this.taxState = 'idle';
     if (get(err, 'missingPostalCode')) {
       if (options.showMissingPostalCodeError) {
-        this.exceptionService.showError('TAX.ACCOUNT_MISSING_POSTAL_CODE');
+        this.exceptionService.showError('TAX.LOCATION_MISSING_POSTAL_CODE');
       }
     } else {
       this.exceptionService.showError(err);
     }
   }
 
-  // Resolves the ship-to account address and calls the tax API, then reprices the cart.
+  // Derives the tax address from the selected shipping location and calls the tax API, then reprices the cart.
   private doCalculateTax(): Observable<Cart> {
     const view = this.view$.value;
     const businessObject = view?.orderOrQuote;
     const cart = view?.cart;
 
-    // Resolve ship-to account: prefer cart's ShipToAccount, fall back to
-    // order/quote account fields, then the cart's own Account.
-    const shipToAccountId = get(cart, 'ShipToAccount.Id') || get(businessObject, 'ShipToAccount.Id')
-      || get(businessObject, 'SoldToAccount.Id') || get(businessObject, 'BillToAccount.Id')
-      || get(cart, 'Account.Id');
-
-    if (!shipToAccountId) {
-      this.taxState = 'idle';
-      return of(null);
+    // Tax is derived from the selected shipping location, not the ship-to account.
+    const accountLocationId = get(businessObject, 'Location.Id');
+    if (!accountLocationId) {
+      // No shipping location resolved — surface as an error so tax is never marked calculated.
+      return throwError(() => ({ missingPostalCode: true }));
     }
 
-    return this.accountService.getAccount(shipToAccountId).pipe(
-      take(1),
-      switchMap((account) => {
-        const postalCode = (get(account, 'ShippingPostalCode', '') || '').toString();
+    // The nested Location may be Id/Name only; fetch the full address when the postal code is absent
+    // and cache it back on the order/quote so repeated tax calculations don't refetch it.
+    const nestedLocation = get(businessObject, 'Location.Location');
+    const location$ = get(nestedLocation, 'PostalCode')
+      ? of(nestedLocation)
+      : this.accountLocationService.getAccountLocationById(accountLocationId).pipe(
+          map(al => get(al, 'Location')),
+          tap(location => set(businessObject, 'Location.Location', location))
+        );
+
+    return location$.pipe(
+      switchMap((location) => {
+        const postalCode = (get(location, 'PostalCode', '') || '').toString();
         if (!postalCode) {
           return throwError(() => ({ missingPostalCode: true }));
         }
         const address: TaxAddress = {
-          Line1: get(account, 'ShippingStreet', ''),
-          Line2: '',
-          City: get(account, 'ShippingCity', ''),
-          Region: get(account, 'ShippingState', ''),
-          Country: get(account, 'ShippingCountry', ''),
+          Line1: get(location, 'Street', ''),
+          Line2: get(location, 'AddressLine', ''),
+          City: get(location, 'City', ''),
+          Region: get(location, 'State', ''),
+          Country: get(location, 'Country', ''),
           PostalCode: postalCode
         };
         return this.integrationService.calculateTax(cart.Id, this.businessObjectType, address);

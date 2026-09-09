@@ -3,8 +3,9 @@ import { NgForm } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
 import { Observable, of, combineLatest, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { get, lowerCase } from 'lodash';
+import { take, map, switchMap, tap, filter } from 'rxjs/operators';
+import { get, lowerCase, clone, isNil } from 'lodash';
+import { FilterOperator } from '@congarevenuecloud/core';
 import {
   AccountService, ContactService, UserService, Quote, QuoteService, PriceListService, Cart,
   Account, Contact, PriceList, StorefrontService
@@ -35,10 +36,15 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
   shipToAccount$: Observable<Account>;
   billToAccount$: Observable<Account>;
   priceList$: Observable<PriceList>;
-  lookupOptions: LookupOptions = {
+  /**
+   * Lookup config for the internal-user Primary Contact dropdown. Restricts results to contacts
+   * belonging to the app-level (current) account; the account id is set once resolved in ngOnInit.
+   */
+  primaryContactLookupOptions: LookupOptions = {
     primaryTextField: 'Name',
     secondaryTextField: 'Email',
-    fieldList: ['Id', 'Name', 'Email']
+    fieldList: ['Id', 'Name', 'Email'],
+    filters: [{ field: 'Account.Id', value: null, filterOperator: FilterOperator.EQUAL }]
   };
 
   /**
@@ -56,7 +62,12 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
 
   contact: string;
   isGuest: boolean = false;
-  private lastProcessedContactId: string = null;
+  /**
+   * True when the logged in user is an external (Contact) user. External users have a single
+   * contact and a fixed account, so Primary Contact / Ship To / Bill To are defaulted and shown
+   * read-only instead of as lookups.
+   */
+  isExternalUser: boolean = false;
 
   constructor(public quoteService: QuoteService,
     private accountService: AccountService,
@@ -68,31 +79,51 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.quote.Name = 'Test';
-    combineLatest(this.accountService.getCurrentAccount(),
+    combineLatest([
+      this.accountService.getCurrentAccount(),
       this.userService.me(),
       (this.cart.Proposald ? this.quoteService.getQuoteById(get(this.cart, 'Proposald.Id')) : of(null)),
-      this.storefrontService.getStorefront())
-      .pipe(take(1)).subscribe(([account, user, quote, storefront]) => {
-        this.isGuest = lowerCase(user.Alias) === 'guest';
-        this.primaryContact = new Contact();
-        this.billToAccount$ = of(null);
-        this.shipToAccount$ = of(null);
-        this.quote.ProposalName = 'New Quote';
-        this.quote.Account = get(this.cart, 'Account');
-        this.quote.PrimaryContact = this.isGuest ? this.primaryContact : get(user, 'Contact');
-        this.contact = this.cart.Proposald ? get(quote[0], 'PrimaryContact.Id') : get(user, 'Contact.Id');
-        if (this.isGuest) {
-          this.quote.BillToAccount = account;
-          this.quote.ShipToAccount = account;
-        }
-        if (get(this.cart, 'Proposald.Id')) {
-          this.quote = get(this.cart, 'Proposald');
-          this.quote.ProposalName = quote.Name;
-        };
-        this.quote.SourceChannel = get(storefront, 'ChannelType');
-        this.quoteChange();
-        this.getPriceList();
-      });
+      this.storefrontService.getStorefront()
+    ]).pipe(take(1)).subscribe(([account, user, quote, storefront]) => {
+      this.isGuest = lowerCase(user.Alias) === 'guest';
+      // Scope the internal-user Primary Contact lookup to the app-level (current) account.
+      this.primaryContactLookupOptions.filters = [{ field: 'Account.Id', value: get(account, 'Id'), filterOperator: FilterOperator.EQUAL }];
+      this.primaryContact = new Contact();
+      this.billToAccount$ = of(null);
+      this.shipToAccount$ = of(null);
+      this.quote.ProposalName = 'New Quote';
+      this.quote.Account = get(this.cart, 'Account');
+      this.quote.PrimaryContact = this.isGuest ? this.primaryContact : get(user, 'Contact');
+      this.contact = this.cart.Proposald ? get(quote[0], 'PrimaryContact.Id') : get(user, 'Contact.Id');
+      // Contacts are filtered to the app-level account, so Ship To / Bill To are always that account.
+      this.quote.BillToAccount = account;
+      this.quote.ShipToAccount = account;
+      if (get(this.cart, 'Proposald.Id')) {
+        this.quote = get(this.cart, 'Proposald');
+        this.quote.ProposalName = quote.Name;
+      };
+      this.quote.SourceChannel = get(storefront, 'ChannelType');
+      this.emitQuote();
+      this.getPriceList();
+    });
+
+    // External (Contact) users have a single contact; default the read-only Primary Contact to it,
+    // resolved via the user-contact mapping. Ship To / Bill To are already set to the current account above.
+    this.subscriptions.push(
+      this.userService.isExternalUser().pipe(
+        tap(isExternal => this.isExternalUser = isExternal),
+        filter(isExternal => isExternal),
+        switchMap(() => this.userService.getUserContactMapping()),
+        // Only proceed when the mapping resolves to a Contact record with an id.
+        filter(mapping => get(mapping, 'ContactObjectName') === 'Contact' && !isNil(get(mapping, 'ContactObjectId'))),
+        map(mapping => get(mapping, 'ContactObjectId')),
+        switchMap(contactId => this.contactService.getContactById(contactId)),
+        take(1)
+      ).subscribe((contact: Contact) => {
+        this.quote.PrimaryContact = contact;
+        this.emitQuote();
+      })
+    );
 
     this.subscriptions.push(
       combineLatest([
@@ -128,29 +159,14 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
     this.onQuoteUpdate.emit(this.quote);
   }
 
-  shipToChange() {
-    if (!get(this.quote.ShipToAccount, 'Id')) {
-      this.shipToAccount$ = of(null);
-      return;
-    }
-    this.shipToAccount$ = this.accountService.getAccount(get(this.quote.ShipToAccount, 'Id'));
-    this.shipToAccount$.pipe(take(1)).subscribe((newShippingAccount) => {
-      this.quote.ShipToAccount = newShippingAccount;
-      this.onQuoteUpdate.emit(this.quote);
-    });
+  /** Emits the quote as a new reference so the OnPush read-only fields (apt-output-field) re-render. */
+  private emitQuote() {
+    this.quote = clone(this.quote);
+    this.onQuoteUpdate.emit(this.quote);
   }
 
-  billToChange() {
-    if (!get(this.quote.BillToAccount, 'Id')) {
-      this.billToAccount$ = of(null);
-      return;
-    }
-    this.billToAccount$ = this.accountService.getAccount(get(this.quote.BillToAccount, 'Id'));
-    this.billToAccount$.pipe(take(1)).subscribe((newBillingAccount) => {
-      this.quote.BillToAccount = newBillingAccount;
-      this.onQuoteUpdate.emit(this.quote);
-    });
-
+  onShippingLocationChange() {
+    this.emitQuote();
   }
 
   getPriceList() {
@@ -162,44 +178,11 @@ export class RequestQuoteFormComponent implements OnInit, OnDestroy {
   }
   /**
     * Event handler for when the primary contact input changes.
-    * Populates Ship To and Bill To accounts based on the contact's associated account.
-    * @param event The event that was fired.
+    * Ship To / Bill To are fixed to the app-level account (contacts are already filtered to it),
+    * so we only re-emit the quote for the selected contact.
     */
   primaryContactChange() {
-    const contactId = get(this.quote.PrimaryContact, 'Id');
-    if (!contactId) {
-      // Primary Contact cleared - reset Ship To and Bill To
-      this.lastProcessedContactId = null;
-      this.quote.PrimaryContact = null;
-      this.quote.ShipToAccount = null;
-      this.quote.BillToAccount = null;
-      this.shipToAccount$ = of(null);
-      this.billToAccount$ = of(null);
-      this.onQuoteUpdate.emit(this.quote);
-      return;
-    }
-    if (contactId === this.lastProcessedContactId) {
-      return;
-    }
-    this.lastProcessedContactId = contactId;
-    this.contactService.getContactById(contactId)
-      .pipe(take(1))
-      .subscribe((newPrimaryContact: Contact) => {
-        this.quote.PrimaryContact = newPrimaryContact;
-        const contactAccount: Account = get(newPrimaryContact, 'Account');
-        if (contactAccount && contactAccount.Id) {
-          this.quote.ShipToAccount = contactAccount;
-          this.quote.BillToAccount = contactAccount;
-          this.shipToChange();
-          this.billToChange();
-        } else {
-          this.quote.ShipToAccount = null;
-          this.quote.BillToAccount = null;
-          this.shipToAccount$ = of(null);
-          this.billToAccount$ = of(null);
-        }
-        this.onQuoteUpdate.emit(this.quote);
-      });
+    this.emitQuote();
   }
 
 }

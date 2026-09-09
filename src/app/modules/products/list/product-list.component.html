@@ -5,7 +5,7 @@
   @if (!isDsrMode) {
     <div class="px-3 d-flex align-items-center">
       <app-quick-add [layout]="'modal'" [fields]="fields" [productFieldType]="'lookup'"
-        [quoteFields]="quoteFields" [orderFields]="orderFields" [presetFields]="{ SourceChannel: 'E-Commerce' }" [btnClass]="'btn-custom-secondary border-0'"></app-quick-add>
+        [quoteFields]="quoteFields" [orderFields]="orderFields" [enableShippingLocation]="true" [presetFields]="quickAddPresetFields" [btnClass]="'btn-custom-secondary border-0'"></app-quick-add>
     </div>
   }
 </div>
