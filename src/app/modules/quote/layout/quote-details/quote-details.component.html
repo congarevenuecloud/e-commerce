@@ -32,74 +32,67 @@
       <!-- ==================== DESKTOP BUTTON LAYOUT ==================== -->
       <!-- Desktop buttons show only primary actions. Secondary actions go in kebab menu. -->
       @if (!showPresentTemplate) {
-        <div class="align-items-center d-lg-flex d-md-flex d-sm-none d-none">
+        <div class="align-items-center ms-auto d-lg-flex d-md-flex d-sm-none d-none">
         
-          <!-- ============= LOGGED-IN USER ACTIONS ============= -->
-          @if (isLoggedIn) {
-            <!-- Draft Stage: Only show Generate button (no collaboration active) -->
-            @if (quote.ApprovalStage === 'Draft' && !collaborationRequest) {
-              <apt-generate-document
-                [record]="quote" class="ms-auto" (onStatusUpdate)="onGenerateQuote()">
-              </apt-generate-document>
-            }
+          <!-- Actions are driven by the storefront displayActions configuration, ordered by Sequence. -->
+          @for (action of actions.inArea(actionArea.Main); track action.Name) {
+            @switch (action.ActionName) {
 
-            <!-- Generated Stage: Show both Generate and Present buttons (no collaboration active) -->
-            @if (quote.ApprovalStage === 'Generated' && !collaborationRequest) {
-              <apt-generate-document [record]="quote" class="ms-auto me-3" (onStatusUpdate)="onGenerateQuote()">
-              </apt-generate-document>
-              <button type="button" class="btn btn-primary btn-raised px-3" (click)="showPresentTemplateFun()">
-                {{'DETAILS.PRESENT_QUOTE' | translate}}
-              </button>
-            }
-
-            <!-- Presented Stage: Show Accept/Reject when: -->
-            <!-- 1. No collaboration active, OR -->
-            <!-- 2. In DSR mode with collaboration (user is actively collaborating) -->
-            @if (quote.ApprovalStage === 'Presented' && canShowCollaborationActions && (!collaborationRequest || (isDsrMode))) {
-              <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary me-3 ms-auto" data-style="zoom-in"
-                (click)="rejectQuote(quote?.Id)">
-                {{'COMMON.REJECT' | translate}}
-              </button>
-              @if (quote?.Items?.length > 0) {
-                <button type="button" class="btn btn-primary btn-raised me-3"
-                  [ladda]="acceptLoader" data-style="zoom-in" (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
-                  {{'COMMON.ACCEPT_QUOTE' | translate}}
-                </button>
+              @case ('Generate') {
+                @if (!collaborationRequest) {
+                  <apt-generate-document [record]="quote" [label]="action.ActionLabelName" class="ms-2" (onStatusUpdate)="onGenerateQuote()">
+                  </apt-generate-document>
+                }
               }
-            }
-          }
 
-          <!-- ============= GUEST USER ACTIONS ============= -->
-          <!-- Guest users in DSR mode with collaboration: Show Accept/Reject as primary actions -->
-          <!-- (Request Changes goes in kebab menu) -->
-          @if (!isLoggedIn && quote.ApprovalStage === 'Presented' && (isDsrMode) && canShowCollaborationActions) {
-            <button type="button" [ladda]="rejectLoader" class="btn btn-outline-primary me-3 ms-auto" data-style="zoom-in"
-              (click)="rejectQuote(quote?.Id)">
-              {{'COMMON.REJECT' | translate}}
-            </button>
-            @if (quote?.Items?.length > 0) {
-              <button type="button" class="btn btn-primary btn-raised me-3"
-                [ladda]="acceptLoader" data-style="zoom-in" (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
-                {{'COMMON.ACCEPT_QUOTE' | translate}}
-              </button>
-            }
-          }
+              @case ('Present') {
+                @if (!collaborationRequest) {
+                  <button type="button" class="btn btn-raised px-3 ms-2"
+                    [ngClass]="action.IsPrimaryAction ? 'btn-primary' : 'btn-outline-primary'"
+                    [disabled]="!action.IsEnabled"
+                    (click)="showPresentTemplateFun()">
+                    {{action.ActionLabelName | translate}}
+                  </button>
+                }
+              }
 
-          <!-- Guest users NOT in DSR mode: Only Request Changes button -->
-          <!-- (No accept/reject - they need to use collaboration link) -->
-          @if (!isLoggedIn && quote.ApprovalStage === 'Presented' && !(isDsrMode)) {
-            <button type="button" class="btn btn-outline-primary btn-raised ms-auto" (click)="openRequestChangesModal()">
-              {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-            </button>
+              @case ('Reject') {
+                @if (canActOnQuote) {
+                  <button type="button" [ladda]="rejectLoader" class="btn px-3 ms-2" data-style="zoom-in"
+                    [ngClass]="action.IsPrimaryAction ? 'btn-primary btn-raised' : 'btn-outline-primary'"
+                    [disabled]="!action.IsEnabled"
+                    (click)="rejectQuote(quote?.Id)">
+                    {{action.ActionLabelName | translate}}
+                  </button>
+                }
+              }
+
+              @case ('AcceptQuote') {
+                @if (canActOnQuote && quote?.Items?.length > 0) {
+                  <button type="button" class="btn btn-raised px-3 ms-2" [ladda]="acceptLoader" data-style="zoom-in"
+                    [ngClass]="action.IsPrimaryAction ? 'btn-primary' : 'btn-outline-primary'"
+                    [disabled]="!action.IsEnabled"
+                    (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+                    {{action.ActionLabelName | translate}}
+                  </button>
+                }
+              }
+
+              @case ('RequestChanges') {
+                @if (!isLoggedIn && !isDsrMode) {
+                <button type="button" class="btn btn-outline-primary btn-raised px-3 ms-2"
+                  [disabled]="!action.IsEnabled"
+                  (click)="openRequestChangesModal()">
+                  {{action.ActionLabelName | translate}}
+                </button>
+                }
+              }
+
+            }
           }
 
           <!-- ============= KEBAB MENU FOR SECONDARY ACTIONS ============= -->
-          <!-- Show kebab menu when: -->
-          <!-- 1. Logged-in user with no collaboration OR in DSR mode, OR -->
-          <!-- 2. Guest user IN DSR mode (not shown for guest in normal mode - they have primary buttons) -->
-          @if (quote?.ApprovalStage === 'Presented' && 
-                   ((isLoggedIn && canShowCollaborationActions && (!collaborationRequest || (isDsrMode))) ||
-                    (!isLoggedIn && (isDsrMode)))) {
+          @if (actions.hasAnyIn(actionArea.Kebab) && canShowKebabToggle) {
             <div class="dropdown ms-3 d-lg-block d-md-block d-sm-none d-none">
               <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="desktopDropdownMenuLink"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -112,13 +105,8 @@
         </div>
       }
       <!-- ==================== MOBILE KEBAB MENU ==================== -->
-      <!-- Mobile view shows ALL actions in kebab menu. Show menu when: -->
-      <!-- 1. Logged-in: Draft/Generated/Approved with no collaboration, OR -->
-      <!-- 2. Logged-in: Presented with no collaboration OR in DSR mode, OR -->
-      <!-- 3. Guest: Presented (any state) -->
-      @if ((isLoggedIn && (['Draft','Generated','Approved'].includes(quote?.ApprovalStage) && !collaborationRequest)) ||
-               (isLoggedIn && quote?.ApprovalStage === 'Presented' && canShowCollaborationActions && (!collaborationRequest || (isDsrMode))) ||
-               (!isLoggedIn && quote?.ApprovalStage === 'Presented')) {
+      <!-- Mobile view shows ALL configured actions in the kebab menu. -->
+      @if (!showPresentTemplate && actions.hasAnyIn(actionArea.Main, actionArea.Kebab) && canShowMenuActions) {
         <div class="d-sm-block d-block ms-auto d-md-none d-lg-none pt-2">
           <div class="dropdown pe-4">
             <a class="fa fa-ellipsis-v dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
@@ -175,6 +163,30 @@
               <h5>{{'DETAILS.QUOTE_SUMMARY' | translate}}</h5>
             </div>
             <div class="card-body">
+              <!-- Summary fields come from the displayColumns API; the built-in layout is used when it returns none. -->
+              @if (proposalColumns.length) {
+              <div class="row">
+                <ng-container *ngFor="let col of (isExpanded ? proposalColumns : proposalColumns.slice(0, 6)); trackBy: trackByFieldName">
+                  <div class="flex-shrink-1 col-md-4 mb-2">
+                    <apt-output-field [record]="recordForColumn(quote, col.FieldName)" [field]="fieldForColumn(col.FieldName)"
+                      [label]="col.Label"
+                      [displayValue]="col.DisplayValue"
+                      [showQuickView]="col.ShowQuickView"
+                      [editable]="isLoggedIn && col.IsEditable && (quote?.ApprovalStage === 'Draft' || quote?.ApprovalStage === 'Approved' || quote?.ApprovalStage === 'Generated' || quote?.ApprovalStage === 'Presented') && canEditQuoteFields"
+                      (onChange)="refreshQuote(summaryFieldValue($event, col.FieldName), quote, col.FieldName)">
+                    </apt-output-field>
+                  </div>
+                </ng-container>
+              </div>
+              <div class="d-flex justify-content-start" *ngIf="proposalColumns.length > 6">
+                <a href="javascript:void(0)" (click)="isExpanded = !isExpanded" class="text-decoration-none">
+                  <span>
+                    {{ isExpanded ? ('COMMON.SHOW_LESS' | translate) : ('COMMON.SHOW_MORE' | translate) }}
+                    <i class="fas" [ngClass]="isExpanded ? 'fa-angle-double-up' : 'fa-angle-double-down'"></i>
+                  </span>
+                </a>
+              </div>
+              } @else {
               <div class="row">
                 <div class="flex-shrink-1 col-md-4 mb-2">
                   <apt-output-field [record]="quote" field="ProposalNumber" [editable]="false">
@@ -265,6 +277,7 @@
                   </span>
                 </a>
               </div>
+              }
             </div>
           </div>
         </div>
@@ -298,7 +311,8 @@
                   <tbody>
                     @for (item of quoteLineItems; track item.MainLine?.Id ?? $index; let i = $index) {
                       <apt-line-item-table-row [cart]="cartRecord" [index]="i" [parent]="item.MainLine"
-                        [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false">
+                        [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false" [lineItemColumns]="quoteLineItemColumns"
+                        [priceColumns]="priceColumns">
                       </apt-line-item-table-row>
                     }
                   </tbody>
@@ -434,8 +448,7 @@
       <app-detail-section [title]="'COMMENTS.COMMENTS' | translate" class="mt-3">
         <div class="card">
           <div class="card-header border-bottom py-2">
-            <h5> {{ 'COMMENTS.COMMENTS' |
-              translate }}</h5>
+            <h5> {{ 'COMMENTS.COMMENTS' | translate }}</h5>
           </div>
           <div class="card-body">
             <div class="row d-flex justify-content-between">
@@ -490,33 +503,52 @@
 <!-- ==================== DESKTOP KEBAB MENU BUTTON TEMPLATES ==================== -->
 
 <ng-template #desktopKebabButtons>
-  <!-- ============= GUEST USER KEBAB ACTIONS ============= -->
-  <!-- Guest users: Only Request Changes in kebab menu -->
-  <!-- (Accept/Reject are shown as primary buttons in DSR mode, or user can't act without DSR link) -->
-  @if (!isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate) {
-    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
-      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-    </button>
-  }
+  @if (!showPresentTemplate) {
+    @for (action of actions.inArea(actionArea.Kebab); track action.Name) {
+      @switch (action.ActionName) {
 
-  <!-- ============= LOGGED-IN USER KEBAB ACTIONS ============= -->
-  <!-- Logged-in without collaboration: Show all secondary actions (Request Changes, Generate, Present) -->
-  @if (isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && !collaborationRequest) {
-    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
-      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-    </button>
-    <apt-generate-document [record]="quote" [buttonClasses]="'dropdown-item'" (onStatusUpdate)="onGenerateQuote()">
-    </apt-generate-document>
-    <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
-      {{'DETAILS.PRESENT_QUOTE' | translate}}
-    </button>
-  }
-  
-  <!-- Logged-in in DSR mode: Only Request Changes in kebab (Accept/Reject are primary buttons) -->
-  @if (isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && (isDsrMode) && canShowCollaborationActions) {
-    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
-      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-    </button>
+        @case ('Generate') {
+          @if (!collaborationRequest) {
+            <apt-generate-document [record]="quote" [label]="action.ActionLabelName" [buttonClasses]="'dropdown-item'" (onStatusUpdate)="onGenerateQuote()">
+            </apt-generate-document>
+          }
+        }
+
+        @case ('Present') {
+          @if (!collaborationRequest) {
+            <button type="button" class="dropdown-item" [disabled]="!action.IsEnabled" (click)="showPresentTemplateFun()">
+              {{ action.ActionLabelName | translate }}
+            </button>
+          }
+        }
+
+        @case ('Reject') {
+          @if (canActOnQuote) {
+            <button type="button" [ladda]="rejectLoader" class="dropdown-item" [disabled]="!action.IsEnabled" (click)="rejectQuote(quote?.Id)">
+              {{ action.ActionLabelName | translate }}
+            </button>
+          }
+        }
+
+        @case ('AcceptQuote') {
+          @if (canActOnQuote && quote?.Items?.length > 0) {
+            <button type="button" [ladda]="acceptLoader" class="dropdown-item" [disabled]="!action.IsEnabled"
+              (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+              {{ action.ActionLabelName | translate }}
+            </button>
+          }
+        }
+
+        @case ('RequestChanges') {
+          @if ((isLoggedIn && !collaborationRequest) || (isDsrMode && canShowCollaborationActions)) {
+            <button type="button" class="dropdown-item" [disabled]="!action.IsEnabled" (click)="openRequestChangesModal()">
+              {{ action.ActionLabelName | translate }}
+            </button>
+          }
+        }
+
+      }
+    }
   }
 </ng-template>
 
@@ -524,95 +556,61 @@
 <!-- Mobile view: ALL actions go in kebab menu (nothing shown as primary buttons) -->
 
 <ng-template #mobileActionButtons>
-  <!-- ============= LOGGED-IN USER MOBILE ACTIONS ============= -->
-  
-  <!-- Draft Stage: Only Generate button (no collaboration active) -->
-  @if (isLoggedIn && quote.ApprovalStage === 'Draft' && !showPresentTemplate && !collaborationRequest) {
-    <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
-    </apt-generate-document>
-  }
+  @if (!showPresentTemplate) {
+    @for (action of actions.inAreas(actionArea.Main, actionArea.Kebab); track action.Name) {
+      @switch (action.ActionName) {
 
-  <!-- Generated Stage: Show Generate + Present (no collaboration active) -->
-  @if (isLoggedIn && quote.ApprovalStage === 'Generated' && !showPresentTemplate && !collaborationRequest) {
-    <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
-    </apt-generate-document>
-    <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
-      {{'DETAILS.PRESENT_QUOTE' | translate}}
-    </button>
-  }
+        @case ('Generate') {
+          @if (!collaborationRequest) {
+            <apt-generate-document [record]="quote" [label]="action.ActionLabelName" (onStatusUpdate)="onGenerateQuote()">
+            </apt-generate-document>
+          }
+        }
 
-  <!-- Presented Stage: All actions - no collaboration active -->
-  @if (isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && !collaborationRequest) {
-    <apt-generate-document [record]="quote" (onStatusUpdate)="onGenerateQuote()">
-    </apt-generate-document>
-    <button type="button" class="dropdown-item" (click)="showPresentTemplateFun()">
-      {{'DETAILS.PRESENT_QUOTE' | translate}}
-    </button>
-    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
-      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-    </button>
-    <button type="button" [ladda]="rejectLoader" class="dropdown-item" (click)="rejectQuote(quote?.Id)">
-      {{'COMMON.REJECT' | translate}}
-    </button>
-    @if (quote?.Items?.length > 0) {
-      <button type="button" [ladda]="acceptLoader" class="dropdown-item"
-        (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
-        {{'COMMON.ACCEPT_QUOTE' | translate}}
-      </button>
+        @case ('Present') {
+          @if (!collaborationRequest) {
+            <button type="button" class="dropdown-item" [disabled]="!action.IsEnabled" (click)="showPresentTemplateFun()">
+              {{ action.ActionLabelName | translate }}
+            </button>
+          }
+        }
+
+        @case ('RequestChanges') {
+          @if (!isLoggedIn || !collaborationRequest || (isDsrMode && canShowCollaborationActions)) {
+            <button type="button" class="dropdown-item" [disabled]="!action.IsEnabled" (click)="openRequestChangesModal()">
+              {{ action.ActionLabelName | translate }}
+            </button>
+          }
+        }
+
+        @case ('Reject') {
+          @if (canActOnQuote) {
+            <button type="button" [ladda]="rejectLoader" class="dropdown-item" [disabled]="!action.IsEnabled" (click)="rejectQuote(quote?.Id)">
+              {{ action.ActionLabelName | translate }}
+            </button>
+          }
+        }
+
+        @case ('AcceptQuote') {
+          @if (canActOnQuote && quote?.Items?.length > 0) {
+            <button type="button" [ladda]="acceptLoader" class="dropdown-item" [disabled]="!action.IsEnabled"
+              (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
+              {{ action.ActionLabelName | translate }}
+            </button>
+          }
+        }
+
+      }
     }
   }
-
-  <!-- Presented Stage: All actions when in DSR mode with collaboration -->
-  @if (isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && (isDsrMode) && canShowCollaborationActions) {
-    <!-- Show Request Changes, Accept, and Reject -->
-    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
-      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-    </button>
-    <button type="button" [ladda]="rejectLoader" class="dropdown-item" (click)="rejectQuote(quote?.Id)">
-      {{'COMMON.REJECT' | translate}}
-    </button>
-    @if (quote?.Items?.length > 0) {
-      <button type="button" [ladda]="acceptLoader" class="dropdown-item"
-        (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
-        {{'COMMON.ACCEPT_QUOTE' | translate}}
-      </button>
-    }
-  }
-
-  <!-- ============= GUEST USER MOBILE ACTIONS ============= -->
-  
-  <!-- Guest in DSR mode with collaboration: Show all actions (Request Changes, Accept, Reject) -->
-  @if (!isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && (isDsrMode) && canShowCollaborationActions) {
-    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
-      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-    </button>
-    <button type="button" [ladda]="rejectLoader" class="dropdown-item" (click)="rejectQuote(quote?.Id)">
-      {{'COMMON.REJECT' | translate}}
-    </button>
-    @if (quote?.Items?.length > 0) {
-      <button type="button" [ladda]="acceptLoader" class="dropdown-item"
-        (click)="acceptQuote(quote?.Id, quote?.PrimaryContact?.Id)">
-        {{'COMMON.ACCEPT_QUOTE' | translate}}
-      </button>
-    }
-  }
-
-  <!-- Guest NOT in DSR mode: Only Request Changes (can't accept/reject without collaboration link) -->
-  @if (!isLoggedIn && quote.ApprovalStage === 'Presented' && !showPresentTemplate && !(isDsrMode)) {
-    <button type="button" class="dropdown-item" (click)="openRequestChangesModal()">
-      {{ 'COMMENTS.REQUEST_CHANGES' | translate }}
-    </button>
-  }
-
 </ng-template>
 
 <ng-template #addAttachments>
-  @if (quote?.ApprovalStage !== 'Denied') {
-    <apt-file-uploader
-      [fileUploadLabel]="'COMMON.ATTACHMENT_DETAILS.TITLE' | translate" [supportedFileTypes]="supportedFileTypes"
-      [maxFileSize]="maxFileSizeLimit" (onFileUpload)="uploadAttachments($event)">
-    </apt-file-uploader>
-  }
+  <apt-file-uploader
+    [fileUploadLabel]="'COMMON.ATTACHMENT_DETAILS.TITLE' | translate"
+    [supportedFileTypes]="supportedFileTypes"
+    [maxFileSize]="maxFileSizeLimit" (onFileUpload)="uploadAttachments($event)">
+  </apt-file-uploader>
 </ng-template>
 
 <!-- View Comments Component -->

@@ -207,7 +207,7 @@ export class CollaborativeCartComponent {
     if (this.cartName) {
       this.cart.Name = this.cartName
     }
-    this.cartService.cloneCart(this.cart.Id, pick(this.cart, ['Name']) as Cart, true, true).pipe(take(1)).subscribe(
+    this.cartService.cloneCart(this.cart.Id, pick(this.cart, ['Name']) as Cart, false, true).pipe(take(1)).subscribe(
       res => {
         this.loading = false;
         this.modalRef.hide();

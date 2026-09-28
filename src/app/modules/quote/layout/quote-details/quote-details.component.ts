@@ -7,14 +7,15 @@ import { get, set, first, map as _map, isEmpty, join, split, trim, isNil } from 
 import { Observable, of, BehaviorSubject, Subscription, combineLatest, forkJoin } from 'rxjs';
 import { BsModalService, ModalOptions } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import { FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
+import { FilterOperator, PlatformConstants, AObject } from '@congarevenuecloud/core';
 import {
   UserService, QuoteService, Quote, Order, OrderService, AttachmentService,
   AttachmentDetails, ProductInformationService, ItemGroup, EmailService, LineItemService, EmailRequestPayload,
-  CartService, Cart, DateFormat, FieldFilter, ContactService, CollaborationRequestService, CollaborationRequest, CollaborationAccessType, CollaborationAuthenticationType, CollaborationStatus, StorefrontService
+  CartService, Cart, DateFormat, FieldFilter, ContactService, CollaborationRequestService, CollaborationRequest, CollaborationAccessType, CollaborationAuthenticationType, CollaborationStatus, StorefrontService, DetailActionArea, DetailActionSection, DetailActionSet, DetailAction, DisplayColumn, DisplayColumnSection
 } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, LookupOptions, ToasterPosition, FileOutput, AddCommentsConfig, ViewCommentsConfig } from '@congarevenuecloud/elements';
+import { ExceptionService, LookupOptions, ToasterPosition, FileOutput, AddCommentsConfig, ViewCommentsConfig, CartItemView, DisplayColumnService } from '@congarevenuecloud/elements';
 import { DsrService } from '../../../../services/dsr.service';
+import { DEFAULT_DETAIL_ACTIONS } from '../../../../services/detail-actions.config';
 
 @Component({
     selector: 'app-quote-details',
@@ -52,6 +53,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   attachemntSubscription: Subscription;
 
   quoteSubscription: Subscription[] = [];
+
+  private displayConfigSubscription: Subscription;
 
   @ViewChild('viewCommentsRef') viewCommentsRef: any;
 
@@ -122,6 +125,18 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
   quoteStatusStepsLabels: Array<string> = [];
   acceptQuoteEmailTemplateName = 'DC Accept Quote Default email template';
   rejectQuoteEmailTemplateName = 'DC Reject Quote Default email template';
+  // Quote summary fields from the displayColumns API; empty keeps the built-in layout.
+  proposalColumns: Array<DisplayColumn> = [];
+  priceColumns: Array<DisplayColumn> = null;
+  // Quote line item fields from the displayColumns API; null keeps the user's Edit Layout selection.
+  quoteLineItemColumns: Array<CartItemView> = null;
+  // Action configuration from the displayActions API, falling back to the built-in defaults.
+  actions: DetailActionSet = new DetailActionSet(DetailActionSection.Quote, DEFAULT_DETAIL_ACTIONS, () => ({
+    stage: get(this.quote, 'ApprovalStage'),
+    isLoggedIn: this.isLoggedIn
+  }));
+  // Placement buckets exposed to the template.
+  readonly actionArea = DetailActionArea;
 
   constructor(private activatedRoute: ActivatedRoute,
     private quoteService: QuoteService,
@@ -142,7 +157,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     private collaborationService: CollaborationRequestService,
     private contactService: ContactService,
     private dsrService: DsrService,
-    private storefrontService: StorefrontService
+    private storefrontService: StorefrontService,
+    private displayColumnService: DisplayColumnService
   ) { }
 
   ngOnInit() {
@@ -157,6 +173,8 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     
     this.initializeTranslationsComments();
     this.getQuote();
+    this.loadProposalDisplayColumns();
+    // Note: loadQuoteLineItemView is called from within loadProposalDisplayColumns after fetching columns
     this.quoteSubscription.push(this.userService.isLoggedIn().pipe(switchMap((value: boolean) => {
       this.isLoggedIn = value;
       if (this.isLoggedIn)
@@ -177,6 +195,77 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
         })
     );
     this.translateQuoteStatusLabels(this.quoteStatusMap);
+  }
+
+  private loadProposalDisplayColumns(): void {
+    this.displayConfigSubscription = this.storefrontService.getStorefront().pipe(
+      take(1),
+      switchMap((storefront) => {
+        const flow = get(storefront, 'DefaultFlow') || 'system';
+        return combineLatest([
+          this.storefrontService.getStorefrontDisplayColumns(flow, get(storefront, 'Id')).pipe(catchError(() => of([]))),
+          this.storefrontService.getStorefrontDisplayActions(flow, get(storefront, 'Id')).pipe(catchError(() => of([]))),
+          this.userService.isGuest().pipe(take(1), catchError(() => of(false)))
+        ]);
+      }),
+      catchError(() => of<[Array<DisplayColumn>, Array<DetailAction>, boolean]>([[], [], false]))
+    ).subscribe(([columnsResponse, actionsResponse, isGuest]) => {
+      // Guests only lose the fields explicitly marked ShowForGuest false; a field that says nothing
+      // about guests stays visible, so a storefront without guest configuration is unaffected.
+      const allCols: Array<DisplayColumn> = (columnsResponse ?? [])
+        .filter((c: DisplayColumn) => !isGuest || c.ShowForGuest !== false);
+
+      const proposalCols = this.displayColumnService.columnsForSection(allCols, DisplayColumnSection.QuoteSummary);
+      if (proposalCols.length > 0) this.proposalColumns = proposalCols;
+
+      // Populate quote line item view from the same response — no second API call
+      const quoteLineCols = this.displayColumnService.columnsForSection(allCols, DisplayColumnSection.QuoteLineItem);
+      if (quoteLineCols.length > 0) {
+        this.quoteLineItemColumns = quoteLineCols.map((c: DisplayColumn) => ({
+          fieldName: c.FieldName,
+          label: c.Label,
+          sequence: c.Sequence ?? 0,
+          isSelected: true,
+          isEditable: c.IsEditable ?? false
+        }));
+      }
+
+      const priceCols = this.displayColumnService.columnsForSection(allCols, DisplayColumnSection.LineItemPrice);
+      if (priceCols.length > 0) this.priceColumns = priceCols;
+
+      this.actions.applyOverrides(actionsResponse);
+      this.cdr.detectChanges();
+    });
+  }
+
+  trackByFieldName(_index: number, col: DisplayColumn): string {
+    return col.FieldName;
+  }
+
+  // Template-callable wrapper over DisplayColumnService.recordForColumn.
+  recordForColumn(record: AObject, fieldName: string): AObject {
+    return this.displayColumnService.recordForColumn(record, fieldName);
+  }
+
+  // Template-callable wrapper over DisplayColumnService.fieldForColumn.
+  fieldForColumn(fieldName: string): string {
+    return this.displayColumnService.fieldForColumn(fieldName);
+  }
+
+  summaryFieldValue(emitted: AObject, fieldName: string): any {
+    return this.displayColumnService.summaryFieldValue(emitted, fieldName);
+  }
+
+  get canShowMenuActions(): boolean {
+    return !this.isLoggedIn || !this.collaborationRequest || (this.isDsrMode && this.canShowCollaborationActions);
+  }
+
+  get canShowKebabToggle(): boolean {
+    return (this.isLoggedIn && !this.collaborationRequest) || (this.isDsrMode && this.canShowCollaborationActions);
+  }
+
+  get canActOnQuote(): boolean {
+    return this.canShowCollaborationActions && (!this.collaborationRequest || this.isDsrMode) && (this.isLoggedIn || !!this.collaborationRequest);
   }
 
   private initializeTranslationsComments(): void {
@@ -735,6 +824,7 @@ export class QuoteDetailsComponent implements OnInit, OnDestroy {
     if (this.attachemntSubscription)
       this.attachemntSubscription.unsubscribe();
     this.quoteSubscription.forEach(subscription => subscription.unsubscribe());
+    if (this.displayConfigSubscription) this.displayConfigSubscription.unsubscribe();
 
     if (this.intimationModal) {
       this.intimationModal.hide();
