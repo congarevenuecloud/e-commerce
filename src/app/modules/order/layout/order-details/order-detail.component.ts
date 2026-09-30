@@ -2,14 +2,15 @@ import { Component, OnInit, ViewEncapsulation, OnDestroy, ChangeDetectorRef, Aft
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { filter, map, switchMap, mergeMap, take, catchError } from 'rxjs/operators';
-import { get, set, indexOf, sum, cloneDeep, first, isNil, map as _map, join, split, trim } from 'lodash';
+import { get, set, indexOf, sum, cloneDeep, first, isNil, map as _map, join, split, trim, values } from 'lodash';
+import { AObject } from '@congarevenuecloud/core';
 import {
   Order, OrderLineItem, OrderService, UserService,
   ItemGroup, LineItemService, EmailService, AccountService,
   Cart, AttachmentService, ProductInformationService, AttachmentDetails, StorefrontService,
-  IntegrationService
+  IntegrationService, DisplayColumn, DisplayColumnSection
 } from '@congarevenuecloud/ecommerce';
-import { ExceptionService, LookupOptions, FileOutput } from '@congarevenuecloud/elements';
+import { ExceptionService, LookupOptions, FileOutput, DisplayColumnService, CartItemView } from '@congarevenuecloud/elements';
 @Component({
     selector: 'app-order-detail',
     templateUrl: './order-detail.component.html',
@@ -87,6 +88,12 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
   isExpanded: boolean = false;
   // Flag to check if payment integration is enabled
   isPaymentEnabled: boolean = false;
+  // Order summary fields from the displayColumns API; empty keeps the built-in summary layout.
+  orderColumns: Array<DisplayColumn> = [];
+  // Line item price rows from the displayColumns API; null keeps the built-in price rows.
+  priceColumns: Array<DisplayColumn> = null;
+  // Order line item fields from the displayColumns API; null keeps the built-in view.
+  orderLineItemColumns: Array<CartItemView> = null;
 
   constructor(private activatedRoute: ActivatedRoute,
     private orderService: OrderService,
@@ -100,11 +107,14 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
     private attachmentService: AttachmentService,
     private productInformationService: ProductInformationService,
     private storefrontService: StorefrontService,
-    private integrationService: IntegrationService
+    private integrationService: IntegrationService,
+    private displayColumnService: DisplayColumnService
   ) { }
 
   ngOnInit() {
     this.getOrder();
+    this.loadAttachmentConfig();
+    // Note: loadOrderLineItemView is called from within loadAttachmentConfig after fetching columns
     this.subscriptions.push(this.accountService.getCurrentAccount().subscribe(account => {
       this.lookupOptions.expressionOperator = 'AND';
       this.lookupOptions.filters = null;
@@ -161,6 +171,73 @@ export class OrderDetailComponent implements OnInit, OnDestroy, AfterViewChecked
       this.updateOrder(order)
     });
     this.getAttachments();
+  }
+
+  private loadAttachmentConfig(): void {
+    this.subscriptions.push(
+      this.storefrontService.getStorefront().pipe(
+        take(1),
+        switchMap((storefront) => {
+          const flow = get(storefront, 'DefaultFlow') || 'system';
+          return combineLatest([
+            this.storefrontService.getStorefrontDisplayColumns(flow, get(storefront, 'Id')).pipe(catchError(() => of([]))),
+            this.userService.isGuest().pipe(take(1), catchError(() => of(false)))
+          ]);
+        }),
+        catchError(() => of<[Array<DisplayColumn>, boolean]>([[], false]))
+      ).subscribe(([columnsResponse, isGuest]) => {
+        // Guests only lose the fields explicitly marked ShowForGuest false; a field that says nothing
+        // about guests stays visible, so a storefront without guest configuration is unaffected.
+        const allCols: Array<DisplayColumn> = (columnsResponse ?? [])
+          .filter((c: DisplayColumn) => !isGuest || c.ShowForGuest !== false);
+
+        const orderCols = this.displayColumnService.columnsForSection(allCols, DisplayColumnSection.OrderSummary);
+        if (orderCols.length > 0) this.orderColumns = orderCols;
+
+        // Populate order line item view from the same response — no second API call
+        const orderLineCols = this.displayColumnService.columnsForSection(allCols, DisplayColumnSection.OrderLineItem);
+        if (orderLineCols.length > 0) {
+          this.orderLineItemColumns = orderLineCols.map((c: DisplayColumn) => ({
+            fieldName: c.FieldName,
+            label: c.Label,
+            sequence: c.Sequence ?? 0,
+            isSelected: true,
+            isEditable: c.IsEditable ?? false
+          }));
+        }
+
+        const priceCols = this.displayColumnService.columnsForSection(allCols, DisplayColumnSection.LineItemPrice);
+        if (priceCols.length > 0) this.priceColumns = priceCols;
+
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  trackByFieldName(_index: number, col: DisplayColumn): string {
+    return col.FieldName;
+  }
+
+  // Template-callable wrapper over DisplayColumnService.recordForColumn.
+  recordForColumn(order: Order, fieldName: string): AObject {
+    return this.displayColumnService.recordForColumn(order, fieldName);
+  }
+
+  // Returns the leaf field name for a possibly dotted configured FieldName.
+  fieldForColumn(fieldName: string): string {
+    return this.displayColumnService.fieldForColumn(fieldName);
+  }
+
+  summaryFieldValue(emitted: AObject, fieldName: string): any {
+    return this.displayColumnService.summaryFieldValue(emitted, fieldName);
+  }
+
+  // Mirrors the per-field stage rules the built-in summary applies to editable fields.
+  isOrderEditable(): boolean {
+    const stage = this.orderStatusMap[get(this.order, 'Status')];
+    return this.isLoggedIn
+      && ['Draft', 'Generated', 'Presented'].indexOf(stage) > -1
+      && get(this.order, 'PaymentStatus') !== 'Processed';
   }
 
   refreshOrder(fieldValue, order, fieldName) {

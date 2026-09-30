@@ -3,8 +3,8 @@ import { of, Observable, Subscription, BehaviorSubject, combineLatest } from 'rx
 import { switchMap, take, map, catchError } from 'rxjs/operators';
 import { get, groupBy, omit, sumBy, mapValues } from 'lodash';
 import { Operator, FilterOperator, PlatformConstants } from '@congarevenuecloud/core';
-import { OrderService, Order, AccountService, FieldFilter, DateFormatPipe, GroupByAggregateResponse, AggregateFields } from '@congarevenuecloud/ecommerce';
-import { TableOptions, FilterOptions, ExceptionService } from '@congarevenuecloud/elements';
+import { OrderService, Order, AccountService, FieldFilter, DateFormatPipe, GroupByAggregateResponse, AggregateFields, LocalCurrencyPipe, StorefrontService, DisplayColumn, DisplayColumnSection } from '@congarevenuecloud/ecommerce';
+import { TableOptions, TableColumn, FilterOptions, ExceptionService, DisplayColumnService } from '@congarevenuecloud/elements';
 @Component({
     selector: 'app-order-list',
     templateUrl: './order-list.component.html',
@@ -22,6 +22,11 @@ export class OrderListComponent implements OnInit, OnDestroy {
   ordersByStatus$: Observable<GroupByAggregateResponse>;
   orderAmountByStatus$: Observable<GroupByAggregateResponse>;
   colorPalette = ['#D22233', '#F2A515', '#6610f2', '#008000', '#17a2b8', '#0079CC', '#CD853F', '#6f42c1', '#20c997', '#fd7e14'];
+
+  // Columns rendered in the order list, from the 'Order List' section of the displayColumns API;
+  // empty means the storefront has no configuration, so the built-in columns are used.
+  private configuredColumns: Array<DisplayColumn> = [];
+
   aggregateFields: Array<AggregateFields> = [
     {
       AggregateFunction: 'count',
@@ -50,10 +55,70 @@ export class OrderListComponent implements OnInit, OnDestroy {
     ]
   };
 
-  constructor(private orderService: OrderService, private accountService: AccountService, private exceptionService: ExceptionService, private dateFormatPipe: DateFormatPipe) { }
+  constructor(private orderService: OrderService, private accountService: AccountService, private exceptionService: ExceptionService, private dateFormatPipe: DateFormatPipe, private currencyPipe: LocalCurrencyPipe, private storefrontService: StorefrontService, private displayColumnService: DisplayColumnService) { }
 
   ngOnInit() {
-    this.loadView();
+    this.loadColumnConfig();
+  }
+
+  /**
+   * Loads the configured order list columns, then renders the view. The view is built either way,
+   * so a storefront without configuration still gets the built-in columns.
+   */
+  private loadColumnConfig(): void {
+    this.storefrontService.getStorefront().pipe(
+      take(1),
+      switchMap((storefront) => {
+        const flow = get(storefront, 'DefaultFlow') || 'system';
+        return this.storefrontService.getStorefrontDisplayColumns(flow, get(storefront, 'Id'));
+      }),
+      catchError(() => of<Array<DisplayColumn>>([]))
+    ).subscribe((response) => {
+      this.configuredColumns = this.displayColumnService.columnsForSection(response, DisplayColumnSection.OrderList);
+      this.loadView();
+    });
+  }
+
+  // The built-in order list columns, used when the storefront has no configuration.
+  private getDefaultColumns(): Array<TableColumn> {
+    return [
+      {
+        prop: 'OrderNumber',
+        enableRouteLink: true
+      },
+      {
+        prop: 'Name',
+        label: 'COMMON.NAME'
+      },
+      {
+        prop: 'Status'
+      },
+      {
+        prop: 'PriceList',
+        sortable: false
+      },
+      {
+        prop: 'BillToAccount',
+        label: 'CUSTOM_LABELS.BILL_TO',
+        sortable: false
+      },
+      {
+        prop: 'ShipToAccount',
+        label: 'CUSTOM_LABELS.SHIP_TO',
+        sortable: false
+      },
+      {
+        prop: 'OrderAmount'
+      },
+      {
+        prop: 'CreatedDate',
+        value: (record: Order) => this.getDateFormat(record, 'CreatedDate')
+      },
+      {
+        prop: 'ActivatedDate',
+        value: (record: Order) => this.getDateFormat(record, 'ActivatedDate')
+      }
+    ];
   }
 
   loadView() {
@@ -63,44 +128,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
         switchMap(() => {
           tableOptions = {
             tableOptions: {
-              columns: [
-                {
-                  prop: 'OrderNumber',
-                  enableRouteLink: true
-                },
-                {
-                  prop: 'Name',
-                  label: 'COMMON.NAME'
-                },
-                {
-                  prop: 'Status'
-                },
-                {
-                  prop: 'PriceList',
-                  sortable: false
-                },
-                {
-                  prop: 'BillToAccount',
-                  label: 'CUSTOM_LABELS.BILL_TO',
-                  sortable: false
-                },
-                {
-                  prop: 'ShipToAccount',
-                  label: 'CUSTOM_LABELS.SHIP_TO',
-                  sortable: false
-                },
-                {
-                  prop: 'OrderAmount'
-                },
-                {
-                  prop: 'CreatedDate',
-                  value: (record: Order) => this.getDateFormat(record, 'CreatedDate')
-                },
-                {
-                  prop: 'ActivatedDate',
-                  value: (record: Order) => this.getDateFormat(record, 'ActivatedDate')
-                }
-              ],
+              columns: this.displayColumnService.toTableColumns(this.configuredColumns, this.getDefaultColumns(), (column) => this.displayColumnService.formatColumnValue(column)),
               fields: [
                 'Description',
                 'Status',
@@ -179,7 +207,8 @@ export class OrderListComponent implements OnInit, OnDestroy {
     return this.orderService.updateOrderValue(order, {
       fetchQuote: false,
       fetchContact: false,
-      fetchSoldToAccount: false
+      fetchSoldToAccount: false,
+      fetchLocation: false
     }).pipe(
       take(1),
       map((updatedOrder: Order) => {

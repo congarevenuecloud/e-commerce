@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { finalize, Observable, of, Subscription, switchMap, take } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
@@ -32,7 +32,7 @@ export class FooterComponent implements OnInit {
   showFavorites$: Observable<boolean>;
 
 
-  constructor(private storefrontService: StorefrontService, private translateService: TranslateService, private emailService: EmailService, private exceptionService: ExceptionService) { }
+  constructor(private storefrontService: StorefrontService, private translateService: TranslateService, private emailService: EmailService, private exceptionService: ExceptionService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.storefront$ = this.storefrontService.getStorefront();
@@ -99,6 +99,7 @@ export class FooterComponent implements OnInit {
       }),
       finalize(() => {
         this.contactFormLoading = false;
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: () => {

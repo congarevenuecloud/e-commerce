@@ -38,6 +38,42 @@
             </h5>
           </div>
           <div class="card-body">
+            <!-- Summary fields come from the displayColumns API; the built-in layout is used when it returns none. -->
+            @if (orderColumns.length) {
+            <div class="row">
+              @for (col of (isExpanded ? orderColumns : orderColumns.slice(0, 6)); track trackByFieldName($index, col)) {
+                <div class="flex-shrink-1 col-md-4 mb-2">
+                  @if (col.FieldName === 'PaymentStatus') {
+                    <div class="d-flex align-items-end">
+                      <apt-output-field [record]="order" field="PaymentStatus" [label]="col.Label" [editable]="false"></apt-output-field>
+                      @if (isLoggedIn && order?.PaymentStatus === 'Pending') {
+                      <button class="btn btn-primary btn-sm ms-2"
+                              (click)="navigateToPayment(order)">
+                        {{ 'CHECKOUT.PAY_NOW' | translate }}
+                      </button>
+                      }
+                    </div>
+                  } @else {
+                    <apt-output-field [record]="recordForColumn(order, col.FieldName)" [field]="fieldForColumn(col.FieldName)"
+                      [label]="col.Label" [displayValue]="col.DisplayValue" [showQuickView]="col.ShowQuickView"
+                      [editable]="col.IsEditable && isOrderEditable()"
+                      (onChange)="refreshOrder(summaryFieldValue($event, col.FieldName), order, col.FieldName)">
+                    </apt-output-field>
+                  }
+                </div>
+              }
+            </div>
+            @if (orderColumns.length > 6) {
+            <div class="d-flex justify-content-start">
+              <a href="javascript:void(0)" (click)="isExpanded = !isExpanded" class="text-decoration-none">
+                <span>
+                  {{ isExpanded ? ('COMMON.SHOW_LESS' | translate) : ('COMMON.SHOW_MORE' | translate) }}
+                  <i class="fas" [ngClass]="isExpanded ? 'fa-angle-double-up' : 'fa-angle-double-down'"></i>
+                </span>
+              </a>
+            </div>
+            }
+            } @else {
             <div class="row">
               <div class="flex-shrink-1 col-md-4 mb-2">
                 <apt-output-field [record]="order" field="OrderNumber" [editable]="false">
@@ -122,6 +158,7 @@
                 </span>
               </a>
             </div>
+            }
           </div>
         </div>
       </div>
@@ -155,7 +192,8 @@
                 <tbody>
                   @for (item of orderLineItems; track item.MainLine?.Id; let i = $index) {
                   <apt-line-item-table-row [cart]="cartRecord" [index]="i" [parent]="item.MainLine"
-                    [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false">
+                    [options]="item.Flat" [children]="item.SecondaryLines" [editableFields]="false"
+                    [lineItemColumns]="orderLineItemColumns" [priceColumns]="priceColumns">
                   </apt-line-item-table-row>
                   }
                 </tbody>
